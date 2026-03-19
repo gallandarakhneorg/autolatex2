@@ -1,0 +1,5 @@
+usr/share/python3/runtime.d/autolatex-libreoffice.rtupdate
+usr/lib/python3/dist-packages/autolatex2/translators/libreoffice/__init__.py
+usr/lib/python3/dist-packages/autolatex2/translators/libreoffice/ppt2pdf_libreoffice.transdef2
+usr/lib/python3/dist-packages/autolatex2/translators/libreoffice/odg2pdf.transdef2
+

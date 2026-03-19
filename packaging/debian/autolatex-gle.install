@@ -1,0 +1,4 @@
+usr/share/python3/runtime.d/autolatex-gle.rtupdate
+usr/lib/python3/dist-packages/autolatex2/translators/gle/__init__.py
+usr/lib/python3/dist-packages/autolatex2/translators/gle/gle2pdf.transdef2
+usr/lib/python3/dist-packages/autolatex2/translators/gle/gle2png.transdef2

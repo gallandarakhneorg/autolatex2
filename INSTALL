@@ -1,0 +1,109 @@
+----------------
+1. PREREQUISITES
+----------------
+
+To install AutoLaTeX, you need to have Python 3 installed on your operating system.
+
+The installation script setup.py use the following Python modules.
+They must be installed prior to any call to the installation script.
+
+    * datetime
+    * gzip
+    * platform
+    * os
+    * re
+    * shutil
+    * subprocess
+    * sys
+    * typing
+
+Additionally, the installation script calls the external tool "pod2man" for generating the manual page of AutoLaTeX.
+
+
+After installation, AutoLaTeX needs the following Python modules to be run:
+
+	* abc
+	* argparse
+	* collections
+	* configparser
+	* dataclasses
+	* enum
+	* fnmatch
+	* gettext
+	* glob
+	* gzip
+	* hashlib
+	* importlib
+	* inspect
+	* io
+	* json
+	* logging
+	* os
+	* packaging
+	* pathlib
+	* platform
+	* pprint
+	* re
+	* shlex
+	* shutil
+	* sortedcontainers
+	* subprocess
+	* sys
+	* textwrap
+	* typing
+	* xml.etree
+	* yaml
+
+
+---------------------
+2. BUILDING AUTOLATEX
+---------------------
+
+If you want to build all the modules provided by AutoLaTeX, type on a command line:
+
+$ ./setup.py build
+
+
+-----------------------
+3. INSTALLING AUTOLATEX
+-----------------------
+
+If you want to install all the modules provided by AutoLaTeX, type on a command line:
+
+$ ./setup.py install
+
+or:
+
+$ ./setup.py install --prefix=<usr_path>
+
+where <usr_path> is the path to the 'usr' root directory, eg. '/usr' or '/usr/local'
+on Unix platforms, where AutoLaTeX should be installed.
+
+The previous command install all the files required for running AutoLaTeX, including the binary files for
+your operating system.
+
+The installation script setup.py provides many useful options for configuring your installation.
+You could see them by typing:
+
+$ ./setup.py --help
+
+
+-----------
+4. CLEANING
+-----------
+
+To remove the temprary files and the generated files, you must type:
+
+$ ./setup.py clean
+
+
+------------------------
+5. UPDATING TEX DATABASE
+------------------------
+
+At this point, all the files where copied.
+If you have installed the STY file provided by AutoLaTeX, you
+must update the TeX database with the following commands:
+
+$ mktexlsr
+$ update-updmap --quiet

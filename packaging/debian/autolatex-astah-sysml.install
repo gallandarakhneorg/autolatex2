@@ -1,0 +1,4 @@
+usr/share/python3/runtime.d/autolatex-astah-sysml.rtupdate
+usr/lib/python3/dist-packages/autolatex2/translators/astah/__init__.py
+usr/lib/python3/dist-packages/autolatex2/translators/astah/asml2pdf.transdef2
+

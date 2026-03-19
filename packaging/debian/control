@@ -1,0 +1,340 @@
+Source: autolatex
+Section: devel
+Priority: optional
+Build-Depends: debhelper-compat (= 13),
+               dh-python,
+               python3-all,
+               python3-setuptools
+Maintainer: Stephane Galland <galland@arakhne.org>
+Standards-Version: 3.9.6
+Homepage: https://github.com/gallandarakhneorg/tex-templates
+
+Package: autolatex-full
+Architecture: all
+Depends: autolatex-recommended (= ${source:Version}), autolatex-astah (= ${source:Version}), autolatex-astah-sysml (= ${source:Version}), autolatex-asymptote (= ${source:Version}), autolatex-texify (= ${source:Version}), autolatex-dia (= ${source:Version}), autolatex-fig2dev (= ${source:Version}), autolatex-gle (= ${source:Version}), autolatex-octave (= ${source:Version}), autolatex-umbrello (= ${source:Version})
+Description: AutoLaTeX: metapackage pulling in all components of AutoLaTeX
+ AutoLaTeX is a tool for managing small to large sized LaTeX documents.
+ The user can easily perform all required steps to do such tasks as: preview 
+ the document, or produce a PDF file. AutoLaTeX will keep track of files 
+ that have changed and how to run the various programs that are needed 
+ to produce the output. One of the best feature of AutoLaTeX is to provide 
+ translator rules (aka. translators) to automatically generate the figures 
+ which will be included into the PDF.
+ .
+ This is a metapackage package that permits to install all the components
+ of AutoLaTeX.
+
+Package: autolatex-recommended
+Architecture: all
+Depends: autolatex-base (= ${source:Version}), autolatex-sty (= ${source:Version}), autolatex-gz (= ${source:Version}), autolatex-inkscape (= ${source:Version}), autolatex-imagemagick (= ${source:Version}), autolatex-graphviz (= ${source:Version}), autolatex-libreoffice (= ${source:Version}), autolatex-gnuplot (= ${source:Version})
+Replaces: autolatex
+Conflicts: autolatex
+Description: AutoLaTeX: metapackage pulling a raisonable set of components of AutoLaTeX
+ AutoLaTeX is a tool for managing small to large sized LaTeX documents.
+ The user can easily perform all required steps to do such tasks as: preview 
+ the document, or produce a PDF file. AutoLaTeX will keep track of files 
+ that have changed and how to run the various programs that are needed 
+ to produce the output. One of the best feature of AutoLaTeX is to provide 
+ translator rules (aka. translators) to automatically generate the figures 
+ which will be included into the PDF.
+ .
+ This is a metapackage package that permits to install a raisonable set
+ of components of Autolatex.
+
+Package: autolatex-base
+Architecture: all
+Pre-Depends: python3 (>= 3.12), debconf, po-debconf
+Depends: texlive, texlive-extra-utils, texlive-latex-base, texlive-font-utils, python3-argcomplete, python3-argparse-manpage, python3-sortedcontainers, python3-yaml
+Replaces: autolatex-core, python3-autolatex
+Conflicts: autolatex-gtk, autolatex-core, python3-autolatex
+Description: Core and CLI tools for AutoLaTeX
+ AutoLaTeX is a tool for managing small to large sized LaTeX documents.
+ The user can easily perform all required steps to do such tasks as: preview 
+ the document, or produce a PDF file. AutoLaTeX will keep track of files 
+ that have changed and how to run the various programs that are needed 
+ to produce the output. One of the best feature of AutoLaTeX is to provide 
+ translator rules (aka. translators) to automatically generate the figures 
+ which will be included into the PDF.
+ .
+ This package provides the core and CLI tool of AutoLaTeX and the EPS to PDF translator.
+
+Package: autolatex-sty
+Architecture: all
+Pre-Depends: python3 (>= 3.12), debconf, po-debconf
+Depends: texlive, texlive-extra-utils, texlive-latex-base
+Recommends: autolatex-base (= ${source:Version})
+Description: LaTeX package for AutoLaTeX
+ This package provides a LaTeX style that provides several useful LaTeX commands
+ such as inclusion of figures with embedded TeX macros.
+ .
+ AutoLaTeX is a tool for managing small to large sized LaTeX documents.
+ The user can easily perform all required steps to do such tasks as: preview 
+ the document, or produce a PDF file. AutoLaTeX will keep track of files 
+ that have changed and how to run the various programs that are needed 
+ to produce the output. One of the best feature of AutoLaTeX is to provide 
+ translator rules (aka. translators) to automatically generate the figures 
+ which will be included into the PDF.
+
+Package: autolatex-gz
+Architecture: all
+Pre-Depends: python3 (>= 3.12), debconf, po-debconf
+Depends: autolatex-base (= ${source:Version}), python3 (>= 3.12)
+Conflicts: autolatex-gzimage
+Replaces: autolatex-gzimage
+Provides: autolatex-translator-gz
+Description: On-the-fly Unzipper for AutoLaTeX
+ This package provides the translator from zipped files to unzipped files.
+ .
+ AutoLaTeX is a tool for managing small to large sized LaTeX documents.
+ The user can easily perform all required steps to do such tasks as: preview 
+ the document, or produce a PDF file. AutoLaTeX will keep track of files 
+ that have changed and how to run the various programs that are needed 
+ to produce the output. One of the best feature of AutoLaTeX is to provide 
+ translator rules (aka. translators) to automatically generate the figures 
+ which will be included into the PDF.
+
+Package: autolatex-inkscape
+Architecture: all
+Pre-Depends: python3 (>= 3.12), debconf, po-debconf
+Depends: autolatex-base (= ${source:Version}), python3 (>= 3.12), inkscape
+Conflicts: autolatex-svg-inkscape
+Replaces: autolatex-svg-inkscape
+Provides: autolatex-translator-svg
+Description: Inkscape Translator for AutoLaTeX
+ This package provides the translator from SVG to PDF by using
+ Inkscape. It also provides a convert from Visio VSD files to PDF.
+ .
+ AutoLaTeX is a tool for managing small to large sized LaTeX documents.
+ The user can easily perform all required steps to do such tasks as: preview 
+ the document, or produce a PDF file. AutoLaTeX will keep track of files 
+ that have changed and how to run the various programs that are needed 
+ to produce the output. One of the best feature of AutoLaTeX is to provide 
+ translator rules (aka. translators) to automatically generate the figures 
+ which will be included into the PDF.
+
+Package: autolatex-imagemagick
+Architecture: all
+Pre-Depends: python3 (>= 3.12), debconf, po-debconf
+Depends: autolatex-base (= ${source:Version}), imagemagick
+Replaces: autolatex-gimp
+Conflicts: autolatex-gimp
+Provides: autolatex-translator-gimp
+Description: Gimp Translator for AutoLaTeX
+ This package provides the translator from XCF (Gimp format) to PDF by using
+ ImageMagick.
+ .
+ AutoLaTeX is a tool for managing small to large sized LaTeX documents.
+ The user can easily perform all required steps to do such tasks as: preview 
+ the document, or produce a PDF file. AutoLaTeX will keep track of files 
+ that have changed and how to run the various programs that are needed 
+ to produce the output. One of the best feature of AutoLaTeX is to provide 
+ translator rules (aka. translators) to automatically generate the figures 
+ which will be included into the PDF.
+
+Package: autolatex-graphviz
+Architecture: all
+Pre-Depends: python3 (>= 3.12), debconf, po-debconf
+Depends: autolatex-base (= ${source:Version}), graphviz (>= 2), dot2tex (>= 2.11), autolatex-inkscape (= ${source:Version})
+Conflicts: autolatex-dot, autolatex-gxl
+Replaces: autolatex-dot, autolatex-gxl
+Provides: autolatex-translator-dot
+Description: Graphviz Translator for AutoLaTeX
+ This package provides the translator from Graphviz .dot file and
+ GXL files to PDF.
+ .
+ AutoLaTeX is a tool for managing small to large sized LaTeX documents.
+ The user can easily perform all required steps to do such tasks as: preview 
+ the document, or produce a PDF file. AutoLaTeX will keep track of files 
+ that have changed and how to run the various programs that are needed 
+ to produce the output. One of the best feature of AutoLaTeX is to provide 
+ translator rules (aka. translators) to automatically generate the figures 
+ which will be included into the PDF.
+
+Package: autolatex-libreoffice
+Architecture: all
+Pre-Depends: python3 (>= 3.12), debconf, po-debconf
+Depends: autolatex-base (= ${source:Version}), libreoffice
+Provides: autolatex-translator-odg, autolatex-translator-ppt
+Description: Libre Office Draw Translator for AutoLaTeX
+ This package provides the translator from Libre/Open Office Draw
+ to PDF.
+ .
+ AutoLaTeX is a tool for managing small to large sized LaTeX documents.
+ The user can easily perform all required steps to do such tasks as: preview 
+ the document, or produce a PDF file. AutoLaTeX will keep track of files 
+ that have changed and how to run the various programs that are needed 
+ to produce the output. One of the best feature of AutoLaTeX is to provide 
+ translator rules (aka. translators) to automatically generate the figures 
+ which will be included into the PDF.
+
+Package: autolatex-gnuplot
+Architecture: all
+Pre-Depends: python3 (>= 3.12), debconf, po-debconf
+Depends: autolatex-base (= ${source:Version}), gnuplot-nox | gnuplot
+Provides: autolatex-translator-gnuplot
+Description: GNU Plot Translator for AutoLaTeX
+ This package provides the translator from GNU plot file to PDF.
+ .
+ AutoLaTeX is a tool for managing small to large sized LaTeX documents.
+ The user can easily perform all required steps to do such tasks as: preview 
+ the document, or produce a PDF file. AutoLaTeX will keep track of files 
+ that have changed and how to run the various programs that are needed 
+ to produce the output. One of the best feature of AutoLaTeX is to provide 
+ translator rules (aka. translators) to automatically generate the figures 
+ which will be included into the PDF.
+
+Package: autolatex-astah
+Architecture: all
+Pre-Depends: python3 (>= 3.12), debconf, po-debconf
+Depends: autolatex-base (= ${source:Version}), astah-community (>= 10) | astah-professional (>= 10) | astah-uml (>= 10), autolatex-inkscape (= ${source:Version})
+Provides: autolatex-translator-astah
+Description: Astah translator for AutoLaTeX.
+ This package provides the translator from Astah Community document to PDF.
+ .
+ AutoLaTeX is a tool for managing small to large sized LaTeX documents.
+ The user can easily perform all required steps to do such tasks as: preview 
+ the document, or produce a PDF file. AutoLaTeX will keep track of files 
+ that have changed and how to run the various programs that are needed 
+ to produce the output. One of the best feature of AutoLaTeX is to provide 
+ translator rules (aka. translators) to automatically generate the figures 
+ which will be included into the PDF.
+
+Package: autolatex-astah-sysml
+Architecture: all
+Pre-Depends: python3 (>= 3.12), debconf, po-debconf
+Depends: autolatex-base (= ${source:Version}), astah-sysml (>= 1.5), autolatex-inkscape (= ${source:Version})
+Conflicts: autolatex-asml
+Replaces: autolatex-asml
+Description: Astah SysML translator for AutoLaTeX.
+ This package provides the translator from Astah SysML document to PDF.
+ .
+ AutoLaTeX is a tool for managing small to large sized LaTeX documents.
+ The user can easily perform all required steps to do such tasks as: preview 
+ the document, or produce a PDF file. AutoLaTeX will keep track of files 
+ that have changed and how to run the various programs that are needed 
+ to produce the output. One of the best feature of AutoLaTeX is to provide 
+ translator rules (aka. translators) to automatically generate the figures 
+ which will be included into the PDF.
+ 
+Package: autolatex-asymptote
+Architecture: all
+Pre-Depends: python3 (>= 3.12), debconf, po-debconf
+Depends: autolatex-base (= ${source:Version}), asymptote (>= 2.87)
+Provides: autolatex-translator-asymptote
+Description: Asymptote Translator for AutoLaTeX
+ This package provides the translator from Asymptote to PDF.
+ .
+ AutoLaTeX is a tool for managing small to large sized LaTeX documents.
+ The user can easily perform all required steps to do such tasks as: preview 
+ the document, or produce a PDF file. AutoLaTeX will keep track of files 
+ that have changed and how to run the various programs that are needed 
+ to produce the output. One of the best feature of AutoLaTeX is to provide 
+ translator rules (aka. translators) to automatically generate the figures 
+ which will be included into the PDF.
+
+Package: autolatex-texify
+Architecture: all
+Pre-Depends: python3 (>= 3.12), debconf, po-debconf
+Depends: autolatex-base (= ${source:Version}), texify
+Conflicts: autolatex-java-texify, autolatex-lisp-texify, autolatex-matlab-texify, autolatex-ml-texify, autolatex-perl-texify, autolatex-python-texify, autolatex-ruby-texify, autolatex-sql-texify
+Replaces: autolatex-java-texify, autolatex-lisp-texify, autolatex-matlab-texify, autolatex-ml-texify, autolatex-perl-texify, autolatex-python-texify, autolatex-ruby-texify, autolatex-sql-texify
+Provides: autolatex-translator-code
+Description: Source Code Translator for AutoLaTeX
+ This package provides the translator from source code (C/C++, Java...)
+ to TeX code.
+ .
+ AutoLaTeX is a tool for managing small to large sized LaTeX documents.
+ The user can easily perform all required steps to do such tasks as: preview 
+ the document, or produce a PDF file. AutoLaTeX will keep track of files 
+ that have changed and how to run the various programs that are needed 
+ to produce the output. One of the best feature of AutoLaTeX is to provide 
+ translator rules (aka. translators) to automatically generate the figures 
+ which will be included into the PDF.
+
+Package: autolatex-fig2dev
+Architecture: all
+Pre-Depends: python3 (>= 3.12), debconf, po-debconf
+Depends: autolatex-base (= ${source:Version}), fig2dev
+Replaces: autolatex-xfig
+Provides: autolatex-translator-xfig
+Description: (X)Fig Translator for AutoLaTeX
+ This package provides the translator from Xfig/Fig to PDF by using
+ transfig tools.
+ .
+ AutoLaTeX is a tool for managing small to large sized LaTeX documents.
+ The user can easily perform all required steps to do such tasks as: preview 
+ the document, or produce a PDF file. AutoLaTeX will keep track of files 
+ that have changed and how to run the various programs that are needed 
+ to produce the output. One of the best feature of AutoLaTeX is to provide 
+ translator rules (aka. translators) to automatically generate the figures 
+ which will be included into the PDF.
+
+Package: autolatex-dia
+Architecture: all
+Pre-Depends: python3 (>= 3.12), debconf, po-debconf
+Depends: autolatex-base (= ${source:Version}), dia, autolatex-fig2dev (= ${source:Version})
+Provides: autolatex-translator-dia
+Description: Dia Translator for AutoLaTeX
+ This package provides the translator from Dia document to PDF.
+ .
+ AutoLaTeX is a tool for managing small to large sized LaTeX documents.
+ The user can easily perform all required steps to do such tasks as: preview 
+ the document, or produce a PDF file. AutoLaTeX will keep track of files 
+ that have changed and how to run the various programs that are needed 
+ to produce the output. One of the best feature of AutoLaTeX is to provide 
+ translator rules (aka. translators) to automatically generate the figures 
+ which will be included into the PDF.
+
+Package: autolatex-octave
+Architecture: all
+Pre-Depends: python3 (>= 3.12), debconf, po-debconf
+Depends: autolatex-base (= ${source:Version}), octave
+Provides: autolatex-translator-octave
+Description: GNU Octave Translator for AutoLaTeX
+ This package provides the translator from GNU Octave plots
+ to PDF and PNG.
+ .
+ AutoLaTeX is a tool for managing small to large sized LaTeX documents.
+ The user can easily perform all required steps to do such tasks as: preview 
+ the document, or produce a PDF file. AutoLaTeX will keep track of files 
+ that have changed and how to run the various programs that are needed 
+ to produce the output. One of the best feature of AutoLaTeX is to provide 
+ translator rules (aka. translators) to automatically generate the figures 
+ which will be included into the PDF.
+
+Package: autolatex-umbrello
+Architecture: all
+Pre-Depends: python3 (>= 3.12), debconf, po-debconf
+Depends: autolatex-base (= ${source:Version}), umbrello
+Conflicts: autolatex-xmi-umbrello
+Replaces: autolatex-xmi-umbrello
+Provides: autolatex-translator-xmi
+Description: XMI Translator for AutoLaTeX
+ This package provides the translator from XMI to PDF by using
+ the Umbrello editor.
+ .
+ AutoLaTeX is a tool for managing small to large sized LaTeX documents.
+ The user can easily perform all required steps to do such tasks as: preview 
+ the document, or produce a PDF file. AutoLaTeX will keep track of files 
+ that have changed and how to run the various programs that are needed 
+ to produce the output. One of the best feature of AutoLaTeX is to provide 
+ translator rules (aka. translators) to automatically generate the figures 
+ which will be included into the PDF.
+
+Package: autolatex-gle
+Architecture: all
+Pre-Depends: python3 (>= 3.12), debconf, po-debconf
+Depends: autolatex-base (= ${source:Version}), gle-graphics
+Provides: autolatex-translator-gle
+Description: GLE Translator for AutoLaTeX
+ This package provides the translator from Graphics Layout Engine (GLE)
+ format to PDF.
+ .
+ AutoLaTeX is a tool for managing small to large sized LaTeX documents.
+ The user can easily perform all required steps to do such tasks as: preview 
+ the document, or produce a PDF file. AutoLaTeX will keep track of files 
+ that have changed and how to run the various programs that are needed 
+ to produce the output. One of the best feature of AutoLaTeX is to provide 
+ translator rules (aka. translators) to automatically generate the figures 
+ which will be included into the PDF.
+

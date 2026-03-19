@@ -1,0 +1,17 @@
+# Subversion, CVS, and GIT
+.svn/
+.cvs/
+.git/
+**/__pycache__/**
+build/
+dist/
+**/*.egg-info/**
+.eggs
+
+# IDE files
+.idea
+.jedi
+
+# Temp files
+*.bak
+*~

@@ -1,0 +1,5 @@
+usr/share/python3/runtime.d/autolatex-dia.rtupdate
+usr/lib/python3/dist-packages/autolatex2/translators/dia/dia2pdf+tex.transdef2
+usr/lib/python3/dist-packages/autolatex2/translators/dia/__init__.py
+usr/lib/python3/dist-packages/autolatex2/translators/dia/dia2pdf.transdef2
+

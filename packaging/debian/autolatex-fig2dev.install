@@ -1,0 +1,5 @@
+usr/share/python3/runtime.d/autolatex-fig2dev.rtupdate
+usr/lib/python3/dist-packages/autolatex2/translators/xfig/__init__.py
+usr/lib/python3/dist-packages/autolatex2/translators/xfig/fig2pdf+tex.transdef2
+usr/lib/python3/dist-packages/autolatex2/translators/xfig/fig2pdf.transdef2
+

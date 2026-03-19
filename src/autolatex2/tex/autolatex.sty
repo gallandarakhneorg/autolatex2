@@ -1,0 +1,115 @@
+% autolatex - autolatex.sty
+% Copyright (C) 1998-2026  Stephane Galland <galland@arakhne.org>
+%
+% This program is free software; you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation; either version 2 of the License, or
+% (at your option) any later version.
+%
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with this program; see the file COPYING.  If not, write to
+% the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+% Boston, MA 02111-1307, USA.
+%
+% Creation date: 2006-08-23
+% Modifications:
+%
+
+\xdef\autolatex@package@ver{2026/3/20}
+
+\NeedsTeXFormat{LaTeX2e}[1995/12/01]
+\ProvidesPackage{autolatex}[\autolatex@package@ver]
+
+\RequirePackage{graphicx}
+\RequirePackage{xkeyval}
+\RequirePackage{tikz}
+
+%----------------------------------------
+% IMAGES INCLUDING TEX EXPRESSIONS
+%----------------------------------------
+
+\define@key[autolatex]{withtex}{width}{%
+	\gdef\@autolatex@wtfig@width{#1}%
+}
+\define@key[autolatex]{withtex}{height}{%
+	\gdef\@autolatex@wtfig@height{#1}%
+}
+
+%-----
+%\DeclareGraphicsExtensionsWtex{coma separated extensions}
+\providecommand{\DeclareGraphicsExtensionsWtex}[1]{%
+	\xdef\@@wtfig@extensions{\zap@space#1 \@empty}%
+}
+\DeclareGraphicsExtensionsWtex{.pdftex_t,.pstex_t,.pdf_tex,.ps_tex}
+
+\providecommand{\@autolatex@wtfig@searchinpath}[1]{%
+	\IfFileExists{#1}{%
+		\protected@edef\@autolatex@wtfig@tmp{\protect\resizebox{\@autolatex@wtfig@width}{\@autolatex@wtfig@height}{\protect\input{#1}}}%
+	}{%
+		\@for\@autolatex@wtfig@pathtmp:=\Ginput@path\do{%
+			\ifx\@autolatex@wtfig@tmp\relax%
+				\IfFileExists{\@autolatex@wtfig@pathtmp#1}{%
+					\protected@edef\@autolatex@wtfig@tmp{\protect\resizebox{\@autolatex@wtfig@width}{\@autolatex@wtfig@height}{\protect\input{\@autolatex@wtfig@pathtmp#1}}}%
+				}{}%
+			\fi%
+		}%
+	}%
+}
+
+%-----
+%\includefigurewtex[width=xx,height=yy]{filename}
+\providecommand{\includefigurewtex}[2][width=\linewidth]{%
+	\begingroup%
+	\gdef\@autolatex@wtfig@width{!}%
+	\gdef\@autolatex@wtfig@height{!}%
+	\setkeys[autolatex]{withtex}{#1}%
+	%
+	\global\let\@autolatex@wtfig@tmp\relax%
+	\global\let\@autolatex@wtfig@ext\relax%
+	\global\let\@autolatex@wtfig@path\relax%
+	\filename@parse{#2}%
+	\ifx\filename@ext\relax%
+		\@for\@autolatex@wtfig@exttmp:=\@@wtfig@extensions\do{%
+			\expandafter\@autolatex@wtfig@searchinpath{#2\@autolatex@wtfig@exttmp}%
+		}%
+	\else%
+		\expandafter\@autolatex@wtfig@searchinpath{#2}%
+	\fi%
+	%
+	\ifx\@autolatex@wtfig@tmp\relax%
+		\errmessage{Package autolatex: File not found '#2', needed for figure inclusion.}%
+	\else%
+		\@autolatex@wtfig@tmp%
+	\fi%
+	%
+	\endgroup%
+}
+
+\global\let\includegraphicswtex\includefigurewtex
+
+%----------------------------------------
+% IMAGES WITH LAYERS
+%----------------------------------------
+
+%\includeanimatedfigure[width=xx,height=yy]{filename}
+\global\let\includeanimatedfigure\includegraphicswtex
+
+%----------------------------------------
+% IMAGES WITH LAYERS AND COMBINED TEX
+%----------------------------------------
+
+%\includeanimatedfigurewtex[width=xx,height=yy]{filename}
+\global\let\includeanimatedfigurewtex\includegraphicswtex
+
+
+%----------------------------------------
+% VERSION OF ASSOCIATED AUTOLATEX
+%----------------------------------------
+\global\def\autolatexversion{50.0}
+
+\endinput

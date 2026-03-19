@@ -1,0 +1,4 @@
+usr/share/python3/runtime.d/autolatex-asymptote.rtupdate
+usr/lib/python3/dist-packages/autolatex2/translators/asymptote/asy2pdf.transdef2
+usr/lib/python3/dist-packages/autolatex2/translators/asymptote/__init__.py
+

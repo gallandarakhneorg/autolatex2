@@ -1,0 +1,10 @@
+usr/share/python3/runtime.d/autolatex-inkscape.rtupdate
+usr/lib/python3/dist-packages/autolatex2/translators/svg/svg2pdf+layers_inkscape.transdef2
+usr/lib/python3/dist-packages/autolatex2/translators/svg/__init__.py
+usr/lib/python3/dist-packages/autolatex2/translators/svg/svg2pdf_inkscape.transdef2
+usr/lib/python3/dist-packages/autolatex2/translators/svg/svg2pdf+layers+tex_inkscape.transdef2
+usr/lib/python3/dist-packages/autolatex2/translators/svg/svg2png_inkscape.transdef2
+usr/lib/python3/dist-packages/autolatex2/translators/svg/svg2pdf+tex_inkscape.transdef2
+usr/lib/python3/dist-packages/autolatex2/translators/visio/vsd2pdf.transdef2
+usr/lib/python3/dist-packages/autolatex2/translators/visio/__init__.py
+

@@ -1,0 +1,9 @@
+usr/share/python3/runtime.d/autolatex-graphviz.rtupdate
+usr/lib/python3/dist-packages/autolatex2/translators/dot/dot2pdf.transdef2
+usr/lib/python3/dist-packages/autolatex2/translators/dot/dot2png.transdef2
+usr/lib/python3/dist-packages/autolatex2/translators/dot/__init__.py
+usr/lib/python3/dist-packages/autolatex2/translators/dot/dot2tex.transdef2
+usr/lib/python3/dist-packages/autolatex2/translators/gxl/gxl2pdf.transdef2
+usr/lib/python3/dist-packages/autolatex2/translators/gxl/__init__.py
+usr/lib/python3/dist-packages/autolatex2/translators/gxl/gxl2png.transdef2
+

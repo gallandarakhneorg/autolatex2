@@ -1,0 +1,10 @@
+size 10 5
+
+amove 2.5 2.5
+box 2 1
+
+amove 7.5 2.5
+box 2 1
+
+amove 3.5 2.5
+aline 6.5 2.5 arrow end

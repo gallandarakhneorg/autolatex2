@@ -1,0 +1,13 @@
+\documentclass{article}
+\usepackage{glossaries}
+\makeglossaries
+
+\newacronym{ccd}{CCD}{Charge-coupled device}
+\newacronym{abc}{ABC}{the alphabet}
+\newacronym{foo}{foobar}{the mighty Foo}
+
+\begin{document}
+\printglossaries
+\section{Section 1}
+blabla \gls{abc} blabla \gls{foo} blabla \gls{ccd}
+\end{document}

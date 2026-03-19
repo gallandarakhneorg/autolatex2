@@ -1,0 +1,15 @@
+#! /bin/sh
+set -e
+case "$1" in
+    pre-rtupdate)
+        # called before the default interpreter changes
+        ;;
+    rtupdate)
+        # recompile for the new default interpreter
+        py3compile -p autolatex-astah-sysml /usr/lib/python3/dist-packages/autolatex2/translators/astah
+        ;;
+    post-rtupdate)
+        # clean up .pyc files for the old interpreter
+        py3clean -p autolatex-astah-sysml /usr/lib/python3/dist-packages/autolatex2/translators/astah
+        ;;
+esac

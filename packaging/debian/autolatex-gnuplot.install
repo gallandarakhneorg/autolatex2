@@ -1,0 +1,5 @@
+usr/share/python3/runtime.d/autolatex-gnuplot.rtupdate
+usr/lib/python3/dist-packages/autolatex2/translators/gnuplot/plot2pdf+tex.transdef2
+usr/lib/python3/dist-packages/autolatex2/translators/gnuplot/__init__.py
+usr/lib/python3/dist-packages/autolatex2/translators/gnuplot/plot2pdf.transdef2
+

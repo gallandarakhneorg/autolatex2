@@ -1,0 +1,12 @@
+usr/share/python3/runtime.d/autolatex-texify.rtupdate
+usr/lib/python3/dist-packages/autolatex2/translators/code/matlab2tex_texify.transdef2
+usr/lib/python3/dist-packages/autolatex2/translators/code/ruby2tex_texify.transdef2
+usr/lib/python3/dist-packages/autolatex2/translators/code/lisp2tex_texify.transdef2
+usr/lib/python3/dist-packages/autolatex2/translators/code/sql2tex_texify.transdef2
+usr/lib/python3/dist-packages/autolatex2/translators/code/cpp2tex_texify.transdef2
+usr/lib/python3/dist-packages/autolatex2/translators/code/ml2tex_texify.transdef2
+usr/lib/python3/dist-packages/autolatex2/translators/code/__init__.py
+usr/lib/python3/dist-packages/autolatex2/translators/code/perl2tex_texify.transdef2
+usr/lib/python3/dist-packages/autolatex2/translators/code/python2tex_texify.transdef2
+usr/lib/python3/dist-packages/autolatex2/translators/code/java2tex_texify.transdef2
+

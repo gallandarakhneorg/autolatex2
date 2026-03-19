@@ -1,0 +1,5 @@
+usr/share/python3/runtime.d/autolatex-imagemagick.rtupdate
+usr/lib/python3/dist-packages/autolatex2/translators/gimp/xcf2pdf.transdef2
+usr/lib/python3/dist-packages/autolatex2/translators/gimp/xcf2png.transdef2
+usr/lib/python3/dist-packages/autolatex2/translators/gimp/__init__.py
+

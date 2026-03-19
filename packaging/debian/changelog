@@ -1,0 +1,1036 @@
+autolatex (50.0-0arakhne0) noble; urgency=low
+
+  * xenial -> noble
+  * First pubic release of the Python implementation of AutoLATeX
+
+ -- Stephane GALLAND <galland@arakhne.org>  Thu, 19 Mar 2026 20:35:53 +0100
+
+autolatex (41.0-0arakhne0) xenial; urgency=low
+
+  * Add support of the index maker 'texindy'.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Fri, 13 Oct 2017 21:35:04 +0200
+
+autolatex (40.0-0arakhne0) xenial; urgency=low
+
+  * wily -> xenial
+  * Add asml2pdf translator.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Thu, 12 Oct 2017 13:23:21 +0200
+
+autolatex (39.1-0arakhne1) wily; urgency=low
+
+  * trusty -> wily
+  * Depend on GeoGebra 5.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 28 Mar 2016 10:25:06 +0200
+
+autolatex (39.1-0arakhne0) trusty; urgency=low
+
+  * Add the CLI option --postcompilationruns, issue #101.
+  * Add the missed CLI options --gloss and --nogloss, issue #100.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 22 Feb 2016 11:35:57 +0100
+
+autolatex (39.0-0arakhne0) trusty; urgency=low
+
+  * Add glossary support, issue #100.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Sat, 20 Feb 2016 11:05:34 +0100
+
+autolatex (38.3-0arakhne0) trusty; urgency=low
+
+  * Fix issue #99
+
+ -- Stephane GALLAND <galland@arakhne.org>  Wed, 17 Feb 2016 20:13:55 +0100
+
+autolatex (38.2-0arakhne0) trusty; urgency=low
+
+  * Fix issue #98
+  
+ -- Stephane GALLAND <galland@arakhne.org>  Sun, 17 Jan 2016 00:32:27 +0100
+
+autolatex (38.1-0arakhne0) trusty; urgency=low
+
+  * Fix issue on invalid BibTeX dependecy detection..
+  
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 28 Sep 2015 14:45:23 +0200
+
+autolatex (38.0-0arakhne0) trusty; urgency=low
+
+  * Fix issue #96.
+  
+ -- Stephane GALLAND <galland@arakhne.org>  Sat, 26 Sep 2015 21:54:31 +0200
+
+autolatex (37.0-1arakhne2) trusty; urgency=low
+
+  * Fixing the invalid debian dependencies between the pgf package.
+  
+ -- Stephane GALLAND <galland@arakhne.org>  Sat, 26 Sep 2015 19:15:50 +0200
+
+autolatex (37.0-1arakhne1) trusty; urgency=low
+
+  * Fixing the invalid debian dependencies between the astah, inkscape and rsvg packages.
+  
+ -- Stephane GALLAND <galland@arakhne.org>  Sat, 26 Sep 2015 18:49:34 +0200
+
+autolatex (37.0-1arakhne0) trusty; urgency=low
+
+  * Fixing the documentation.
+  
+ -- Stephane GALLAND <galland@arakhne.org>  Sat, 26 Sep 2015 17:43:51 +0200
+
+autolatex (37.0-0arakhne0) trusty; urgency=low
+
+  * Fixing issue #94.
+  
+ -- Stephane GALLAND <galland@arakhne.org>  Sat, 26 Sep 2015 16:48:36 +0200
+
+autolatex (36.0-0arakhne1) trusty; urgency=low
+
+  * Fixing the documentation.
+  
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 29 Jun 2015 22:02:35 +0200
+
+autolatex (36.0-0arakhne0) trusty; urgency=low
+
+  * Fixing issues #92 and #93.
+  
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 29 Jun 2015 21:44:36 +0200
+
+autolatex (35.1-0arakhne0) trusty; urgency=low
+
+  * Minor bug fixes.
+  
+ -- Stephane GALLAND <galland@arakhne.org>  Fri, 26 Jun 2015 10:11:04 +0200
+
+autolatex (35.0-0arakhne0) trusty; urgency=low
+
+  * Major bug fixes.
+  * Add command line option '--directory'.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Thu, 30 Apr 2015 20:18:55 +0200
+
+autolatex (34.0-0arakhne0) trusty; urgency=low
+
+  * Major bug fixes.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Wed, 05 Nov 2014 14:49:57 +0100
+
+autolatex (33.2-0arakhne0) trusty; urgency=low
+
+  * Support the paranoiac configuration of TeX live..
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 03 Nov 2014 13:53:25 +0100
+
+autolatex (33.1-0arakhne0) trusty; urgency=low
+
+  * Fixing the icon search algorithm.
+  * Fixing the launching of the external components.
+  * Force the Python compilation to use the version 3.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 23 Jun 2014 16:03:47 +0200
+
+autolatex (33.0-0arakhne1) trusty; urgency=low
+
+  * Fixing the packaging
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 23 Jun 2014 14:28:38 +0200
+
+autolatex (33.0-0arakhne0) trusty; urgency=low
+
+  * Fixing the issues #75, #77, #78.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 23 Jun 2014 14:28:38 +0200
+
+autolatex (32.0-0arakhne1) trusty; urgency=low
+
+  * Fixing the dependency versions.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Sat, 21 Jun 2014 02:31:26 +0200
+
+autolatex (32.0-0arakhne0) trusty; urgency=low
+
+  * Upgrade to Python 3.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Sat, 21 Jun 2014 02:31:26 +0200
+
+autolatex (31.3-0arakhne0) trusty; urgency=low
+
+  * Fixing the documentation and the manual.
+  * Fixing the localization files.
+  * Put the POD files in the correct directory.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Sun, 04 May 2014 15:27:30 +0200
+
+autolatex (31.2-0arakhne0) trusty; urgency=low
+
+  * Add variable "$inext" for translators.
+  * Check if the version of Inkscape when converting ".vsdx."
+
+ -- Stephane GALLAND <galland@arakhne.org>  Sun, 04 May 2014 14:23:23 +0200
+
+autolatex (31.1-0arakhne0) trusty; urgency=low
+
+  * saucy -> trusty
+  * Add CLI options --stdout and --stderr.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Sat, 03 May 2014 23:58:24 +0200
+
+autolatex (31.0-0arakhne1) saucy; urgency=low
+
+  * Fixing a bug in packaging definition.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Sat, 03 May 2014 19:23:35 +0200
+
+autolatex (31.0-0arakhne0) saucy; urgency=low
+
+  * Add the translator from Gimp file format (xcf) to PDF/PNG.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Sat, 03 May 2014 19:15:36 +0200
+
+autolatex (30.1-0arakhne0) saucy; urgency=low
+
+  * Add the wildcard ".goutputstream*" in the files to clean.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Fri, 11 Apr 2014 09:58:44 +0200
+
+autolatex (30.0-0arakhne0) saucy; urgency=low
+
+  * Add the Visio translator.
+  * Bug fixes.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Tue, 08 Apr 2014 21:57:20 +0200
+
+autolatex (29.0-0arakhne0) saucy; urgency=low
+
+  * Add the GeoGebra translator.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 10 Feb 2014 14:48:29 +0100
+
+autolatex (28.5-0arakhne0) saucy; urgency=low
+
+  * Issue #73.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 03 Feb 2014 10:18:09 +0100
+
+autolatex (28.4-0arakhne0) saucy; urgency=low
+
+  * Issue #72.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 20 Jan 2014 13:17:51 +0100
+
+autolatex (28.3-0arakhne0) saucy; urgency=low
+
+  * Fixing bug in Gedit plugin.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Wed, 15 Jan 2014 15:10:33 +0100
+
+autolatex (28.2-0arakhne0) saucy; urgency=low
+
+  * raring -> saucy
+  * Issues #70, and #71.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Tue, 14 Jan 2014 14:18:44 +0100
+
+autolatex (28.1-0arakhne0) raring; urgency=low
+
+  * Issues #68, and #69.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Tue, 14 Jan 2014 11:05:58 +0100
+
+autolatex (28.0-0arakhne0) raring; urgency=low
+
+  * Issues #61, #67, and #68.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 23 Dec 2013 16:26:47 +0100
+
+autolatex (27.2-0arakhne0) raring; urgency=low
+
+  * Fixing major bugs in Gedit plugin.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Wed, 04 Dec 2013 17:06:04 +0100
+
+autolatex (27.1-0arakhne0) raring; urgency=low
+
+  * Fixing major bugs in svg2pdf translator.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 02 Dec 2013 10:42:43 +0100
+
+autolatex (27.0-0arakhne0) raring; urgency=low
+
+  * Fixing major bugs.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 02 Dec 2013 09:32:18 +0100
+
+autolatex (26.5-0arakhne0) raring; urgency=low
+
+  * Applying the CTAN "as flat as possible" principle.
+  * Issue #65, and #66.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Wed, 13 Nov 2013 12:34:28 +0100
+
+autolatex (26.4-0arakhne0) raring; urgency=low
+
+  * New stable upstream.
+  * Issues #60, #62, #63, and #64.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 11 Nov 2013 17:09:20 +0100
+
+autolatex (26.3-0arakhne0) raring; urgency=low
+
+  * New stable upstream.
+  * Issues #59.
+  * Fixing syntax errors.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 14 Oct 2013 19:25:52 +0200
+
+autolatex (26.2-0arakhne3) raring; urgency=low
+
+  * New stable upstream.
+  * Issues #55, #56, and #57.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Wed, 25 Sep 2013 21:04:18 +0200
+
+autolatex (26.2-0arakhne2.git201309241554) raring; urgency=low
+
+  * Change the version number to expose the "snapshot" state.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Tue, 24 Sep 2013 15:54:00 +0200
+
+autolatex (26.2-0arakhne1) raring; urgency=low
+
+  * SNAPSHOT VERSION
+  * Use --export-area-page in place of --export-area-drawing during SVG translations.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Tue, 24 Sep 2013 15:36:30 +0200
+
+autolatex (26.1-0arakhne0) raring; urgency=low
+
+  * Add the command line option '--search-project-from'.
+  * Update the documentation to specify how to use AutoLaTeX from the editors:
+    TeXworks, TeXmaker, Kile.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 23 Sep 2013 22:16:55 +0200
+
+autolatex (25.5-0arakhne0) raring; urgency=low
+
+  * Issues #50, #51, #52, and #53 are fixed.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Thu, 19 Sep 2013 13:12:33 +0200
+
+autolatex (25.4-0arakhne0) raring; urgency=low
+
+  * Issue #30 is fixed, after its reopening.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Wed, 18 Sep 2013 12:10:42 +0200
+
+autolatex (25.3-0arakhne0) raring; urgency=low
+
+  * In Gedit plugin, add the menu items to show the next/previous messages
+    of error or warning.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 16 Sep 2013 23:47:46 +0200
+
+autolatex (25.2-0arakhne0) raring; urgency=low
+
+  * Issue #50.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 16 Sep 2013 21:15:39 +0200
+
+autolatex (25.1-0arakhne0) raring; urgency=low
+
+  * Issue #46: new plugin for Sublime Text 2.
+  * Issue #30 is fixed, after its reopening.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 16 Sep 2013 16:46:42 +0200
+
+autolatex (24.2-0arakhne0) raring; urgency=low
+
+  * Issue #42, #43, #44, and #45.
+  * Issue #30 is fixed, after its reopening.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Thu, 12 Sep 2013 00:57:30 +0200
+
+autolatex (24.1-0arakhne1) raring; urgency=low
+
+  * Fixing a bug in the package definitions: invalid postinst and prerm scripts.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 09 Sep 2013 12:04:40 +0200
+
+autolatex (24.1-0arakhne0) raring; urgency=low
+
+  * Issue #28 is fixed.
+  * Issue #30 is fixed, after its reopening.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 09 Sep 2013 10:34:01 +0200
+
+autolatex (24.0-0arakhne2) raring; urgency=low
+
+  * Fixing a bug in the package definitions: invalid DebConf scripts.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Sat, 07 Sep 2013 15:20:25 +0200
+
+autolatex (24.0-0arakhne1) raring; urgency=low
+
+  * Fixing a bug in the package definitions: invalid dependency to autolatex-base.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Sat, 07 Sep 2013 15:07:09 +0200
+
+autolatex (24.0-0arakhne0) raring; urgency=low
+
+  * Add a translator for the Graphic Layout Engine (gle)
+  * Add a translator for Asymptote (asy)
+
+ -- Stephane GALLAND <galland@arakhne.org>  Sat, 07 Sep 2013 14:49:56 +0200
+
+autolatex (23.4-0arakhne0) raring; urgency=low
+
+  * Issues #40, and #41 are fixed.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Fri, 06 Sep 2013 21:03:48 +0200
+
+autolatex (23.3-0arakhne0) raring; urgency=low
+
+  * Issues #37, #38, and #39 are fixed.
+  * Issue #30 is fixed, after its reopening.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Wed, 04 Sep 2013 22:50:27 +0200
+
+autolatex (23.2-0arakhne0) raring; urgency=low
+
+  * Issue #36 is fixed.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Tue, 03 Sep 2013 22:15:00 +0200
+
+autolatex (23.1-0arakhne0) raring; urgency=low
+
+  * Issues #30 to #35 are fixed.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Tue, 03 Sep 2013 13:49:02 +0200
+
+autolatex (23.0-0arakhne0) raring; urgency=low
+
+  * Issues #3, #20, and #29 are fixed.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 02 Sep 2013 14:21:22 +0200
+
+autolatex (22.2-0arakhne0) raring; urgency=low
+
+  * Issues #24 and #25 are fixed.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Fri, 30 Aug 2013 00:32:20 +0200
+
+autolatex (22.1-0arakhne0) raring; urgency=low
+
+  * Issues #26 and #27 are fixed.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Wed, 28 Aug 2013 21:27:41 +0200
+
+autolatex (22.0-0arakhne0) raring; urgency=low
+
+  * Make.pm: Major bug fix, avoid compilation error.
+  * Add the support of SyncTeX.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Sun, 25 Aug 2013 00:46:40 +0200
+
+autolatex (21.6-0arakhne0) raring; urgency=low
+
+  * autolatex.pl: Issue #22 is fixed.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Fri, 23 Aug 2013 20:40:10 +0200
+
+autolatex (21.5-0arakhne0) raring; urgency=low
+
+  * gedit-autolatex-plugin: Fixing the plugin's description, French translation.
+  * autolatex.pl: French translation.
+  * autolatex-gtk.pl: French translation.
+  * autolatex-backend.pl: French translation.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Fri, 23 Aug 2013 17:06:33 +0200
+
+autolatex (21.4-0arakhne0) raring; urgency=low
+
+  * gedit-autolatex-plugin: Major bug fix in the support of Gsettings API.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Thu, 22 Aug 2013 19:38:44 +0200
+
+autolatex (21.3-0arakhne0) raring; urgency=low
+
+  * gedit-autolatex-plugin: add a panel with the list of the document's figure.
+  * autolatex-backend: add function to get/set the translation configuration.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Thu, 22 Aug 2013 17:44:19 +0200
+
+autolatex (21.2-0arakhne1) raring; urgency=low
+
+  * autolatex-backend: added into the package because missed.
+  * gedit-autolatex-plugin: automatic compilation of the scripts.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Tue, 20 Aug 2013 22:30:34 +0200
+
+autolatex (21.2-0arakhne0) raring; urgency=low
+
+  * Gedit plugin is updated.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Tue, 20 Aug 2013 19:25:06 +0200
+
+autolatex (21.1-0arakhne0) raring; urgency=low
+
+  * Add, in the Gedit plugin, the panels for configuring the loading of the translators.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Tue, 20 Aug 2013 01:21:58 +0200
+
+autolatex (21.0-0arakhne0) raring; urgency=low
+
+  * Add plugin for Gedit.
+  * Major bug fix.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 19 Aug 2013 00:50:49 +0200
+
+autolatex (20.0-0arakhne0) raring; urgency=low
+
+  * Detect if the TeX document is using biblatex as bibliogaphical system.
+  * Run bibtex or biber according to the detected bibliography management.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Wed, 14 Aug 2013 20:08:54 +0200
+
+autolatex (19.4-0arakhne0) raring; urgency=low
+
+  * autolatex.pl: issue #17 is fixed.
+  * Util.pm: issue #17 is fixed.
+  * Make.pm: issue #17 is fixed.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 12 Aug 2013 14:48:09 +0200
+
+autolatex (19.3-0arakhne0) raring; urgency=low
+
+  * astah2pdf.transdef: The Community edition of Astah is now search for in the path.
+  * astah2png.transdef: The Community edition of Astah is now search for in the path.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Wed, 24 Jul 2013 13:10:58 +0200
+
+autolatex (19.2-0arakhne0) raring; urgency=low
+
+  * Make.pm: Detect multibib use from additional auxiliary files.
+  * autolatex.pod: Fixing the format of the POD to generate well-formated manuals.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Thu, 04 Jul 2013 17:12:32 +0200
+
+autolatex (19.1-0arakhne0) raring; urgency=low
+
+  * Flattener.pm: Issue #16.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Thu, 20 Jun 2013 18:34:00 +0200
+
+autolatex (19.0-0arakhne1) raring; urgency=low
+
+  * control: Fixing the package dependencies to conflicting packages.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Tue, 18 Jun 2013 18:08:14 +0200
+
+autolatex (19.0-0arakhne0) raring; urgency=low
+
+  * svg2pdf+layers.transdef: Add translator that extracts the layers from a SVG to produce a Beamer presentation.
+  * svg2pdf+layers+tex.transdef: Add translator that extracts the layers combined with TeX macros from a SVG to produce a Beamer presentation.
+  * autolatex.sty: Add macro to use the output of the translators svg2pdf+layers and svg2pdf+layers+tex.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Tue, 18 Jun 2013 17:43:41 +0200
+
+autolatex (18.2-0arakhne0) raring; urgency=low
+
+  * autolatex.sty: Remove reset temp variable that is located at the wrong position.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 17 Jun 2013 11:02:28 +0200
+
+autolatex (18.1-0arakhne0) raring; urgency=low
+
+  * Make.pm: Display the first error message from the TeX tool in place of the entire log.
+  * astah2pdf.transdef: Remove the white background generated by Astah Pro in the SVG file.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Sun, 16 Jun 2013 23:07:03 +0200
+
+autolatex (18.0-0arakhne1) raring; urgency=low
+
+  * Fixing documentation.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Tue, 11 Jun 2013 22:09:52 +0200
+
+autolatex (18.0-0arakhne0) raring; urgency=low
+
+  * Add the translator from SVG combined with TeX macros.
+  * Add the translator from Dia combined with TeX macros.
+  * Fixing the macros in autolatex.sty.
+  * Bug fixes.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Wed, 29 May 2013 20:53:15 +0200
+
+autolatex (17.1-0arakhne2) raring; urgency=low
+  * Remove eps2pdf_ps2pdf translator from the package.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Wed, 29 May 2013 20:53:15 +0200
+
+autolatex (17.1-0arakhne1) raring; urgency=low
+  * plot2pdf.trans: replace the included PS figure by a PDF figure, and
+                    remove all the special macros that are related to PS.
+  * Main.pm: Fixing the misspelled internal variable name 'output.ist file'.
+  * Make.pm: Use the MakeIndex style file when launching MakeIndex.
+  * default.ist: Make the index header centered, and add space between sections.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Wed, 29 May 2013 20:29:22 +0200
+
+autolatex (17.1-0arakhne0) raring; urgency=low
+  * Change the default verbose level from 0 to 1.
+  * Add the command line options -q and --quiet
+  * translator.pm: when loading a linked translator, prefer to
+                   link to loaded translators.
+  * translator.pm: be more verbose when loading a translator.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Wed, 29 May 2013 12:16:09 +0200
+
+autolatex (17.0-0arakhne0) raring; urgency=low
+  * Issue 1: the Locale package is included in the UI packages.
+  * Issue 4: the translators oct2pdf and oct2png are added (based on GNU Octave).
+  * Issue 5: DVI and PS output.
+  * Issue 6: support other TeX tools: xelatex, lualatex...
+  * Issue 7: translate images inside more than one directory.
+  * Issue 9: detect the main TeX file according to its content.
+  * Issue 10: translator may produce EPS files.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Sun, 26 May 2013 02:15:21 +0200
+
+autolatex (16.2-0arakhne0) raring; urgency=low
+  * up stream: Bug fixes.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Fri, 24 May 2013 17:51:53 +0200
+
+autolatex (16.0-0arakhne1) raring; urgency=low
+  * ./debian/control: Fixing conflict definitions.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Wed, 22 May 2013 01:44:26 +0200
+
+autolatex (16.0-0arakhne0) raring; urgency=low
+  * Complete rewriting of the source code in Perl. GNU Make is no more used to proceed the LaTeX compilation.
+  * All the translator were refactoring from a GNU Make syntax to a syntax, which is including Perl code.
+  * Add the target 'makeflat' on the commande line.
+  * New translator for translating Open/Libre Office documents to PDF
+
+ -- Stephane GALLAND <galland@arakhne.org>  Tue, 21 May 2013 23:03:31 +0200
+
+autolatex (15.0-0arakhne0) raring; urgency=low
+  * precise -> raring
+  * astah2svg: new script for translating Astah documents to SVG
+  * astah2png: Replace the character ':' by '_' in the filename of
+               the generated files.
+  * astah2png: detect the version of Astah (professional, uml, or community).
+  * astah2png.mk: Replace the character ':' by '_' in the filename of
+                  the generated files.
+  * astah2png.mk: Add support for the project files from Astah Pro.
+  * astah2pdf.mk: new translator from Astah to PDF
+
+ -- Stephane GALLAND <galland@arakhne.org>  Tue, 14 May 2013 21:04:46 +0200
+
+autolatex (14.0-0arakhne0) precise; urgency=low
+  * MainVars.mk: Assume that all files with extension '.aux' ,
+    '.bbl', '.idx', or '.ind' are temp files.
+  * MainRules.mk: Generate the BBL files for the auxiliary files
+    generated by the multibib package.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 01 Apr 2013 22:27:16 +0200
+
+autolatex (13.0-0arakhne0) precise; urgency=low
+  * oneiric -> precise
+  * astah2png: Crop the generated image to remove the "powered by Astah".
+  * INSTALL: Add installation instructions.
+  * perl2tex_texify.mk: Add the translator from Perl to TeX.
+  * lisp2tex_texify.mk: Add the translator from Lisp to TeX.
+  * sql2tex_texify.mk: Add the translator from SQL to TeX.
+  * ml2tex_texify.mk: Add the translator from ML to TeX.
+  * matlab2tex_texify.mk: Add the translator from MatLab to TeX.
+  * python2tex_texify.mk: Add the translator from Python to TeX.
+  * autolatex-astah: image extensions are not put in the filenames
+                     of the generated pictures. Fixed.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Sun, 09 Sep 2012 11:02:13 -0300
+
+autolatex (12.2-0arakhne0) oneiric; urgency=low
+  
+  * autolatex-astah: fixing bash errors in the embedded script.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Tue, 21 Feb 2012 22:06:52 +0100
+
+autolatex (12.1-0arakhne0) oneiric; urgency=low
+  
+  * autolatex-astah: replace file extension ".astah" by ".asta".
+  * autolatex-astah: add file extension ".jude".
+
+ -- Stephane GALLAND <galland@arakhne.org>  Tue, 21 Feb 2012 21:30:38 +0100
+
+autolatex (12.0-0arakhne0) oneiric; urgency=low
+  
+  * autolatex: add astah2png support. Astah Community an a UML
+               modeling editor.
+  * autolatex-dot: Add embedded scripts in the Debian package.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Tue, 21 Feb 2012 20:44:05 +0100
+
+autolatex (11.0-0arakhne0) oneiric; urgency=low
+  
+  * autolatex: add dot2tex support.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Tue, 21 Feb 2012 09:14:06 +0100
+
+autolatex (10.3-0arakhne0) oneiric; urgency=low
+  
+  * maverick -> oneirick
+  * MainVars.mk: clean the *.spl files
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 16 Jan 2012 20:21:57 +0100
+
+autolatex (10.2-0arakhne0) maverick; urgency=low
+  
+  * autolatex: --set command line option on internal variables of
+    translators is not rightly executed. Update the
+    generated Makefile to fix this problem. 
+  * autolatex: translator internal variables are now setable in
+    configuration files.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 13 Dec 2010 21:31:52 +0100
+
+autolatex (10.1-0arakhne0) maverick; urgency=low
+  
+  * autolatex: Add default values for the text width and the tab size
+               used by the translators from source code to tex.
+  * autolatex: Enhance command line to support internal parameters
+               definition for translators.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 13 Dec 2010 13:44:23 +0100
+
+autolatex (10.0-0arakhne1) maverick; urgency=low
+  
+  * Update documentation.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 13 Dec 2010 01:48:00 +0100
+
+autolatex (10.0-0arakhne0) maverick; urgency=low
+  
+  * autolatex: Add translators from source code to TeX via texify tools.
+    Supported languages are Java, C++, C, Ruby.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 13 Dec 2010 01:48:00 +0100
+
+autolatex (9.1-0arakhne0) maverick; urgency=low
+  
+  * autolatex: Add *.vrb in the list of files to clean (generated by beamer)
+  * autolatex-gtk: Add "Clean and Execute" button in tool panel.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Sun, 12 Dec 2010 17:54:07 +0100
+
+autolatex (9.0-0arakhne0) maverick; urgency=low
+  
+  * lucid -> maverick
+  * Add --[no]bibtex command line.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Fri, 10 Dec 2010 18:46:14 +0100
+
+autolatex (8.4-0arakhne0) lucid; urgency=low
+  
+  * Add *.lbl and *.brf in the list of files to clean
+
+ -- Stephane GALLAND <galland@arakhne.org>  Fri, 01 Oct 2010 21:04:46 +0200
+
+autolatex (8.3-0arakhne0) lucid; urgency=low
+  
+  * Bug fix: -f command line option is now correctly parsed.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Fri, 28 May 2010 08:26:50 +0200
+
+autolatex (8.2-0arakhne0) lucid; urgency=low
+
+  * karmic -> lucid
+  * Clean snm and nav files.
+  * Add description of icons in the translator panel of the Gtk interface.
+  * Add *.mlf* and *.mlt* in the list of files to clean
+
+ -- Stephane GALLAND <galland@arakhne.org>  Thu, 20 May 2010 15:39:30 +0200
+
+autolatex (8.0-0arakhne3) karmic; urgency=low
+
+  * Bug fix: remove postinst script for autolatex-core to avoid compilation error due
+    to the fact that Perl libraries are not yet installed.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 07 Dec 2009 11:31:39 +0100
+
+autolatex (8.0-0arakhne2) karmic; urgency=low
+
+  * Bug fix: remove preinst script for autolatex-core to avoid compilation error due
+    to the fact that Perl libraries are not yet installed.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 07 Dec 2009 11:31:39 +0100
+
+autolatex (8.0-0arakhne1) karmic; urgency=low
+
+  * Bug fix: Debian alternatives are updated to avoid installation failure.
+    The manuals are removed fro malternatives.
+  * Bug fix: postrm script of translator packages must not failed if /etc/autolatex/default.cfg
+    does not exist.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 07 Dec 2009 11:11:51 +0100
+
+autolatex (8.0-0arakhne0) karmic; urgency=low
+
+  * jaunty -> karmic
+  * Add converter for .gxl files.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Sun, 29 Nov 2009 21:10:34 +0100
+
+autolatex (7.1-0arakhne0) jaunty; urgency=low
+
+  * Bug fix: MainRules.mk: display a warning message when auto generation
+    was disabled and the user ask for the list of the auto-generated
+    images.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Tue, 06 Oct 2009 17:45:37 +0200
+
+autolatex (7.0-0arakhne0) jaunty; urgency=low
+
+  * Add '.dot' to '.pdf' converter.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Fri, 18 Sep 2009 22:38:23 +0200
+
+autolatex (6.1-0arakhne1) jaunty; urgency=low
+
+  * Removing debugging messages.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Wed, 16 Sep 2009 16:07:21 +0200
+
+autolatex (6.1-0arakhne0) jaunty; urgency=low
+
+  * Several bug are fixed.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Wed, 16 Sep 2009 10:10:31 +0200
+
+autolatex (6.1-0arakhne0) jaunty; urgency=low
+
+  * Several bug are fixed.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Wed, 16 Sep 2009 10:10:31 +0200
+
+autolatex (6.0-0arakhne1) jaunty; urgency=low
+
+  * Update autolatex-gtk.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Thu, 20 Aug 2009 16:29:02 +0200
+
+autolatex (6.0-0arakhne0) jaunty; urgency=low
+
+  * hardy -> jaunty
+  * Add command line option --imgdirectory
+  * Add AUTO_GENERATE_IMAGE_DIRECTORY variable in Makefile scripts.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Thu, 20 Aug 2009 15:28:08 +0200
+
+autolatex (5.5-0arakhne2) hardy; urgency=low
+
+  * autolatex is now depending on texlive instead of tetex.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Thu, 01 May 2008 12:14:37 +0200
+
+autolatex (5.5-0arakhne1) feisty; urgency=low
+
+  * Fixing the Debian package which does not include the new script
+    autolatex_find
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 25 Feb 2008 11:02:20 +0100
+
+autolatex (5.5-0arakhne0) feisty; urgency=low
+
+  * Add translator variante: eps to pdf with ps2pdf tool, which is
+    the new standard on Ubuntu systems due to the replacement
+    of teTeX by TeXlive.
+  * Change the implementation of translator dependency to allow to
+    by dependent of a translator without specifying the variant.
+  * Add temp file support: *.maf
+  * Add platform-independent command autolatex_find
+  * Bug fix in autolatex_has_index
+  * Bug fix: make more robust the launch of shell commands
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 25 Feb 2008 09:58:01 +0100
+
+autolatex (5.4-0arakhne0) feisty; urgency=low
+
+  * Bug fix: In the GTK translator panel, the function that
+             is saving inside the configuration produces
+             a configuration file with invalid syntax. fixed.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Wed, 10 Oct 2007 15:40:48 +0200
+
+autolatex (5.3-0arakhne0) feisty; urgency=low
+
+  * Bug fix: In the GTK interface, the changes inside a panel
+    are not saved when the user switch of panel.
+  * Bug fix: the order in which the Gtk panel save there configuration
+    introduce some loose of values. Mainly, the tool panel
+    does not recover the saved configuration during the
+    next launching of AutoLaTeX.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Sat, 06 Oct 2007 21:41:25 +0200
+
+autolatex (5.2-0arakhne1) feisty; urgency=low
+
+  * Bug fix: the libconfig-simple-perl package is added into dependencies.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Sat, 06 Oct 2007 18:27:10 +0200
+
+autolatex (5.2-0arakhne0) feisty; urgency=low
+
+  * Bug fix: the execution permissions of the script files (in scripts/)
+             are not set.
+  * Localization of DebConf wizards.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Tue, 25 Sep 2007 15:23:52 +0200
+
+autolatex (5.1-0arakhne2) feisty; urgency=low
+
+  * Bug fix: the DebConf configuration script does not properly call the new PM API. FIXED
+
+ -- Stephane GALLAND <galland@arakhne.org>  Sun, 23 Sep 2007 08:42:32 +0200
+
+autolatex (5.1-0arakhne1) feisty; urgency=low
+
+  * Bug fix: the DebConf configuration script generate compilation errors. FIXED
+
+ -- Stephane GALLAND <galland@arakhne.org>  Sun, 23 Sep 2007 07:54:42 +0200
+
+autolatex (5.1-0arakhne0) feisty; urgency=low
+
+  * Bug fix: the options --fixconfig, --createist --createmakefile...
+    should not crash when AutoLaTeX was called outside a project
+    directory.
+  * Bug fix: do not remove the {__private__} element form configuration
+             inside AutoLaTeX::Config::writeConfigFile.
+  * Bug fix: in Debian scripts, the exit() bash function could not be used
+             after the || operator; because the scripts are ran by sh.
+  * Bug fix: rewrite Debian scripts to use the AutoLaTeX Perl modules for
+             reading/writing configurations.
+  * Localization of the manual: French.
+  * Localization of the AutoLaTeX messages: French.
+  * Localization of DebConf wizard: French.
+  * Add a installation script called Makefile.PL.
+  * Update the Debian installation scripts.
+  * Update the documentation
+
+ -- Stephane GALLAND <galland@arakhne.org>  Sun, 23 Sep 2007 00:09:05 +0200
+
+autolatex (5.0-0arakhne0) feisty; urgency=low
+
+  * Add a GTK interface that permits to easily configure and launch
+    AutoLaTeX process.
+  * Bug fix: when the BibTeX database files has changed, the
+    LaTeX compilation was launched but not the BibTeX compilation. Fixed
+  * The project will be recompiled if a style (.sty) or a class
+    (.cls) file changed inside the project's directory.
+  * Cleaning the source code and split it into Perl modules (.pm).
+  * Replace the old configuration reading functions by calls
+    to the Perl Config::Simple library. It implies several
+    minor changes into the syntax of the configuration files.
+  * Remove the command line options --ist and --noist which are ambigus.
+  * Add the command line options --index --noindex --defaultist.
+  * Add the command line option -v for verbosing.
+  * Add the command line option --fixconfig
+  * Add the command line option -I and the configuration directive
+    "generation.translator include path"
+  * Update the documentation
+
+ -- Stephane GALLAND <galland@arakhne.org>  Tue, 18 Sep 2007 16:02:46 +0200
+
+autolatex (4.1-0arakhne1) feisty; urgency=low
+
+  * Add DebConf page for configuration of the makeindex style.
+  * Update the installation scripts
+
+ -- Stephane GALLAND <galland@arakhne.org>  Wed, 29 Aug 2007 16:52:08 +0200
+
+autolatex (4.1-0arakhne0) feisty; urgency=low
+
+  * When cleaning, remove the .aux files associated to the TeX
+    files that are included.
+  * Launch the compilation when the .ist file has changed.
+  * Update the command line option --ist to accepted an optionnal
+    value (against a mandatory value). If the value is not
+    specified, the default system .ist file will be used.
+  * Add portable version of the Unix shell command echo.
+  * Add configuration attribute "makefile style"
+  * Update documentation
+
+ -- Stephane GALLAND <galland@arakhne.org>  Tue, 28 Aug 2007 15:42:29 +0200
+
+autolatex (4.0-0arakhne1) feisty; urgency=low
+
+  * Add DebConf pages when installing autolatex-core.
+  * Move the configuration files into /etc/autolatex.
+  * Add prerm scripts for removing translator entries from
+    the configuration files.
+  * Add Pre-Dependencies on Perl and debconf for autolatex-core.
+  * Clean preinst, postinst, prerm and postrm scripts.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Tue, 28 Aug 2007 08:42:36 +0200
+
+autolatex (4.0-0arakhne0) feisty; urgency=low
+
+  * Bug fix: the detection of the citations in the document
+             did not work fine is several cases. The citation
+             detection script is fixed to detect the commands
+             \citation, \bibdata or \bibstyle.
+  * Bug fix: the reading of the translators that has a name
+             containing the character '_' was not parsed. Fixed
+  * Bug fix: the reading of the configuration file did not
+             detect the "image generation" attribute.
+  * Add translators xmi2pdf_xmi2svg and xmi2pdf_uml2svg.
+  * Rename the translator xmi2pdf xmi2pdf_umbrello.
+  * Detect conflicts when two translators started from
+    the same type of file are loaded.
+  * Add internal functions to know which translator is loaded
+    and to load a translator.
+  * Add temp files to remove when cleaning: *.mtc* *.bmt *.thlodef
+  * Update the documentation.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 27 Aug 2007 21:35:56 +0200
+
+autolatex (3.0-0arakhne0) feisty; urgency=low
+
+  * New upstream:
+    - Add the support of the makeindex tool.
+    - Add script autolatex_has_index which detects if a project use makeindex
+    - Add target makeindex
+    - Add command line option --ist and --noistdetect
+    - Add command line options --help and -?
+    - Update the documentation
+  * Update the autolatex alternative to provide the right man pages
+
+ -- Stephane GALLAND <galland@arakhne.org>  Sat, 25 Aug 2007 10:45:04 +0200
+
+autolatex (2.0-0arakhne0) feisty; urgency=low
+
+  * New upstream:
+    - Automatic detection of the main TeX file if only one TeX file
+      exists in the project's directory.
+    - The script does not overwrite existing Makefile which was not
+      generated by AutoLaTeX. If a Makefile not generated by
+      AutoLaTeX was found, AutoLaTeX use the file Makefile.autolatex
+    - Add the DIA to PDF translator.
+    - Add --noview command line option.
+    - Add the support of project's configuation by reading the file
+      path/to/project/.autolatex_project.cfg
+    - Add script autolatex_has_bibtex_citation which detect if the 
+      project use a bibliography, thus if bibtex must be call.
+    - Update the documentation.
+  * Add the package autolatex-dia.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Thu, 23 Aug 2007 21:48:20 +0200
+
+autolatex (1.0-0arakhne1) feisty; urgency=low
+
+  * First public release
+
+ -- Stephane GALLAND <galland@arakhne.org>  Thu, 23 Aug 2007 16:40:50 +0200

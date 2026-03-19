@@ -1,0 +1,31 @@
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 0 0 200 100
+%%Title: Hello World EPS
+%%Creator: Manuel
+%%EndComments
+
+% Définir la police et la taille
+/Times-Roman findfont
+24 scalefont
+setfont
+
+% Définir la position du texte (centré)
+100 50 moveto
+
+% Définir la couleur (noir par défaut)
+0 0 0 setrgbcolor
+
+% Écrire le texte
+(Hello, World!) dup stringwidth pop 2 div neg 0 rmoveto show
+
+% Dessiner un cadre (optionnel)
+newpath
+10 10 moveto
+190 10 lineto
+190 90 lineto
+10 90 lineto
+closepath
+0.8 setgray
+stroke
+
+%%EOF

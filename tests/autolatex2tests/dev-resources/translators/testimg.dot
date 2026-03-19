@@ -1,0 +1,5 @@
+digraph HelloWorld {
+    // This is a comment
+    label="Hello, World!";
+    Hello -> World;
+}

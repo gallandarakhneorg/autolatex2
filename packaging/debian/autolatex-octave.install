@@ -1,0 +1,5 @@
+usr/share/python3/runtime.d/autolatex-octave.rtupdate
+usr/lib/python3/dist-packages/autolatex2/translators/octave/__init__.py
+usr/lib/python3/dist-packages/autolatex2/translators/octave/oct2pdf.transdef2
+usr/lib/python3/dist-packages/autolatex2/translators/octave/oct2png.transdef2
+
