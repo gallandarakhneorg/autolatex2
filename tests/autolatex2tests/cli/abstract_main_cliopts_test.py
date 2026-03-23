@@ -50,10 +50,14 @@ class TestAbstractMain(AbstractBaseTest):
 		self.__resource_file = os.path.normpath(os.path.join(self.__resource_directory,  'test1.tex'))
 		self.__ist_file = os.path.normpath(os.path.join(os.path.dirname(__file__),  '..', '..', '..', 'src', 'autolatex2', 'default.ist'))
 		self.__sty_file = os.path.normpath(os.path.join(os.path.dirname(__file__),  '..', '..', '..', 'src', 'autolatex2', 'tex', 'autolatex.sty'))
+		self.__beamer_file = os.path.normpath(os.path.join(os.path.dirname(__file__),  '..', '..', '..', 'src', 'autolatex2', 'tex', 'autolatex-beamer.sty'))
 		self.__obj = TestAbstractMain.InternalMainMock()
 
 	def test_get_system_sty_file(self):
 		self.assertEqual(self.__sty_file, self.__obj.configuration.get_system_sty_file())
+
+	def test_get_system_beamer_sty_file(self):
+		self.assertEqual(self.__beamer_file, self.__obj.configuration.get_system_beamer_sty_file())
 
 	def test_directory(self):
 		self.assertIsNone(self.__obj.configuration.document_directory)

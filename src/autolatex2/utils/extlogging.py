@@ -119,12 +119,18 @@ class LogLevel(IntEnum):
 			return '[CRITICAL] %(message)s'
 		elif level >= LogLevel.ERROR:
 			return '[ERROR] %(message)s'
-		elif level >= LogLevel.FINE_WARNING:
+		elif level >= LogLevel.WARNING:
 			return '[WARNING] %(message)s'
-		elif level >= LogLevel.FINE_INFO:
+		elif level >= LogLevel.FINE_WARNING:
+			return '[WARNING] - %(message)s'
+		elif level >= LogLevel.INFO:
 			return '[INFO] %(message)s'
-		else:
+		elif level >= LogLevel.FINE_INFO:
+			return '[INFO] - %(message)s'
+		elif level >= LogLevel.DEBUG:
 			return '[DEBUG] %(message)s'
+		else:
+			return '[DEBUG] - %(message)s'
 
 
 class DynamicLogLevelFormatter(logging.Formatter):

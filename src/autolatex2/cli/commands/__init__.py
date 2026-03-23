@@ -23,6 +23,7 @@ __all__ = [
 	'biblio',
 	'clean',
 	'cleanall',
+	'createbeamer',
 	'createconfig',
 	'createist',
 	'createsty',

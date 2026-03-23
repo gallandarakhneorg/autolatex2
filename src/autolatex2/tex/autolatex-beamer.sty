@@ -1,0 +1,172 @@
+% autolatex - autolatex.sty
+% Copyright (C) 1998-2026  Stephane Galland <galland@arakhne.org>
+%
+% This program is free software; you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation; either version 2 of the License, or
+% (at your option) any later version.
+%
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with this program; see the file COPYING.  If not, write to
+% the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+% Boston, MA 02111-1307, USA.
+%
+% Creation date: 2006-08-23
+% Modifications:
+%
+
+\xdef\autolatexbeamer@package@ver{2026/3/24}
+
+\NeedsTeXFormat{LaTeX2e}[1995/12/01]
+\ProvidesPackage{autolatex-beamer}[\autolatexbeamer@package@ver]
+
+\RequirePackage{autolatex}
+\RequirePackage{keyval}
+
+\newsavebox{\beamer@autolatex@animatedfigureslide@savedbox}
+\newlength{\beamer@autolatex@animatedfigureslide@savedbox@width}
+\newlength{\beamer@autolatex@animatedfigureslide@savedbox@height}
+\newlength{\beamer@autolatex@animatedfigureslide@slide@width}
+\newlength{\beamer@autolatex@animatedfigureslide@slide@height}
+\newif\ifbeamer@autolatex@animatedfigureslide@dynamic@width
+\newif\ifbeamer@autolatex@animatedfigureslide@dynamic@height
+\newif\ifbeamer@autolatex@animatedfigureslide@haslabel
+\newif\ifbeamer@autolatex@animatedfigureslide@hassubtitle
+
+\define@key{beamerautolatexanimatedfigureslide}{width}{%
+	\def\beamer@autolatex@animatedfigureslide@widtht{width=#1}%
+	\beamer@autolatex@animatedfigureslide@dynamic@widthfalse%
+}
+\define@key{beamerautolatexanimatedfigureslide}{height}{%
+	\def\beamer@autolatex@animatedfigureslide@heightt{height=#1}%
+	\beamer@autolatex@animatedfigureslide@dynamic@heightfalse%
+}
+\define@key{beamerautolatexanimatedfigureslide}{label}{%
+	\def\beamer@autolatex@animatedfigureslide@label{#1}%
+	\beamer@autolatex@animatedfigureslide@haslabeltrue%
+}
+\define@key{beamerautolatexanimatedfigureslide}{subtitle}{%
+	\def\beamer@autolatex@animatedfigureslide@subtitle{#1}%
+	\beamer@autolatex@animatedfigureslide@hassubtitletrue%
+}
+
+% Show a Bemer slide that contains only an animated figure from the file with the given name.
+%
+% \animatedfigureslide<#1>[#2]{#3}{#4}
+% #1 = frame spec (optional)
+% #2 = options (optional)
+% #3 = title
+% #4 = filename
+\def\animatedfigureslide{%
+	\@ifnextchar<\beamer@autolatex@animatedfigureslide@framespec\beamer@autolatex@animatedfigureslide@noframespec%
+}
+
+\def\beamer@autolatex@animatedfigureslide@framespec<#1>{%
+	\@ifnextchar[{\beamer@autolatex@animatedfigureslide{<#1>}}{\beamer@autolatex@animatedfigureslide{<#1>}[]}%
+}
+
+\def\beamer@autolatex@animatedfigureslide@noframespec{%
+	\@ifnextchar[{\beamer@autolatex@animatedfigureslide{}}{\beamer@autolatex@animatedfigureslide{}[]}%
+}
+
+\newcommand{\autolatexsettoslidecontentwidth}[1]{
+	\setlength{#1}{\linewidth}%
+}
+
+\newcommand{\autolatexsettoslidecontentheight}[1]{
+	\setlength{#1}{\beamer@paperheight}%
+	\addtolength{#1}{-0.5cm}% Bottom line height
+	\addtolength{#1}{-1cm}% Top margin
+	\addtolength{#1}{-0.3cm}% Head sep
+}
+
+% #1 = frame spec with the enclosing symbols, or nothing
+% #2 = options (may be empty)
+% #3 = title
+% #4 = filename
+\def\beamer@autolatex@animatedfigureslide#1[#2]#3#4{%
+	\bgroup%
+	\beamer@autolatex@animatedfigureslide@dynamic@widthtrue%
+	\def\beamer@autolatex@animatedfigureslide@widtht{}%
+	\def\beamer@autolatex@animatedfigureslide@heightt{}%
+	\beamer@autolatex@animatedfigureslide@dynamic@heighttrue%
+	\beamer@autolatex@animatedfigureslide@haslabelfalse%
+	\beamer@autolatex@animatedfigureslide@hassubtitlefalse%
+	\edef\beamer@autolatex@animatedfigureslide@label{frame\the\c@framenumber}%
+	\def\beamer@autolatex@animatedfigureslide@subtitle{}%
+	\setkeys{beamerautolatexanimatedfigureslide}{#2}%
+	% Compute the width and height to pass to \includeanimatedfigure
+	%
+	\ifbeamer@autolatex@animatedfigureslide@dynamic@width\ifbeamer@autolatex@animatedfigureslide@dynamic@height%
+		\savebox{\beamer@autolatex@animatedfigureslide@savedbox}{\includeanimatedfigure{#4}}%
+		\settowidth{\beamer@autolatex@animatedfigureslide@savedbox@width}{\usebox{\beamer@autolatex@animatedfigureslide@savedbox}}%
+		\settoheight{\beamer@autolatex@animatedfigureslide@savedbox@height}{\usebox{\beamer@autolatex@animatedfigureslide@savedbox}}%
+		\pgfmathsetmacro{\beamer@autolatex@animatedfigureslide@savedbox@ratio}{\strip@pt\beamer@autolatex@animatedfigureslide@savedbox@width / \strip@pt\beamer@autolatex@animatedfigureslide@savedbox@height}%
+		\ifboolexpr{%
+			test {\ifdimequal{\beamer@autolatex@animatedfigureslide@savedbox@ratio pt}{0pt}}%
+			or test {\ifdimless{\beamer@autolatex@animatedfigureslide@savedbox@ratio pt}{0pt}}%
+		}{%
+			\def\beamer@autolatex@animatedfigureslide@widtht{width=\linewidth}%
+			\def\beamer@autolatex@animatedfigureslide@heightt{}%
+		}{%
+			\autolatexsettoslidecontentwidth{\beamer@autolatex@animatedfigureslide@slide@width}%
+			\autolatexsettoslidecontentheight{\beamer@autolatex@animatedfigureslide@slide@height}%
+			\pgfmathsetmacro{\beamer@autolatex@animatedfigureslide@slide@ratio}{\strip@pt\beamer@autolatex@animatedfigureslide@slide@width / \strip@pt\beamer@autolatex@animatedfigureslide@slide@height}%
+			\ifboolexpr{%
+				%test {\ifdimless{\beamer@autolatex@animatedfigureslide@savedbox@ratio pt}{1pt}}% Test image ratio only
+				test {\ifdimless{\beamer@autolatex@animatedfigureslide@slide@ratio pt}{\beamer@autolatex@animatedfigureslide@savedbox@ratio pt}}% Test image ratio vs. slide ratio
+			}{%
+				% Scale on width
+				\pgfmathsetmacro{\beamer@autolatex@animatedfigureslide@savedbox@ratio}{\strip@pt\beamer@autolatex@animatedfigureslide@slide@width / \strip@pt\beamer@autolatex@animatedfigureslide@savedbox@width}%
+				\pgfmathsetmacro{\beamer@autolatex@animatedfigureslide@savedbox@newwidth}{\strip@pt\beamer@autolatex@animatedfigureslide@savedbox@width * \beamer@autolatex@animatedfigureslide@savedbox@ratio}%
+				\def\beamer@autolatex@animatedfigureslide@widtht{width=\beamer@autolatex@animatedfigureslide@savedbox@newwidth pt}%
+				%\def\beamer@autolatex@animatedfigureslide@subtitle{Scale on width}%
+				%\beamer@autolatex@animatedfigureslide@hassubtitletrue%
+			}{%
+				% Scale on height
+				\pgfmathsetmacro{\beamer@autolatex@animatedfigureslide@savedbox@ratio}{\strip@pt\beamer@autolatex@animatedfigureslide@slide@height / \strip@pt\beamer@autolatex@animatedfigureslide@savedbox@height}%
+				\pgfmathsetmacro{\beamer@autolatex@animatedfigureslide@savedbox@newheight}{\strip@pt\beamer@autolatex@animatedfigureslide@savedbox@height * \beamer@autolatex@animatedfigureslide@savedbox@ratio}%
+				\def\beamer@autolatex@animatedfigureslide@heightt{height=\beamer@autolatex@animatedfigureslide@savedbox@newheight pt}%
+				%\def\beamer@autolatex@animatedfigureslide@subtitle{Scale on height}%
+				%\beamer@autolatex@animatedfigureslide@hassubtitletrue%
+			}%
+		}%
+	\else\fi\else\fi%
+	%
+	\edef\beamer@autolatex@animatedfigureslide@imageoptions{\beamer@autolatex@animatedfigureslide@widtht,\beamer@autolatex@animatedfigureslide@heightt}%
+	\beamer@autolatex@animatedfigureslide@frame%
+		{#1}%
+		{\beamer@autolatex@animatedfigureslide@imageoptions}%
+		{c,label={\beamer@autolatex@animatedfigureslide@label}}%
+		{#3}%
+		{\beamer@autolatex@animatedfigureslide@subtitle}%
+		{#4}%
+	\egroup
+}
+
+% #1 = frame spec with the enclosing symbols, or nothing
+% #2 = image options (may be empty)
+% #3 = frame options (may be empty)
+% #4 = title
+% #5 = subtitle (may be empty)
+% #6 = filename
+\def\beamer@autolatex@animatedfigureslide@frame#1#2#3#4#5#6{%
+	% Start the implicit frame
+	\begin{frame}#1[#3]{#4}%
+		% Subtitle
+		\ifbeamer@autolatex@animatedfigureslide@hassubtitle%
+			\framesubtitle{#5}%
+		\else\fi%
+		% Content
+		\protected@edef\beamer@autolatex@animatedfigureslide@renderedfigure{\protect\includeanimatedfigure[#2]{#6}}%
+		\vspace{-.25cm}%
+		\centering\beamer@autolatex@animatedfigureslide@renderedfigure%
+	\end{frame}%
+}
+
+\endinput

@@ -599,6 +599,14 @@ class Config:
 		"""
 		return os.path.join(self.installation_directory, 'tex', 'autolatex.sty')
 
+	def get_system_beamer_sty_file(self) -> str:
+		"""
+		Replies the system Beamer STY file.
+		:return: the STY filename.
+		:rtype: str
+		"""
+		return os.path.join(self.installation_directory, 'tex', 'autolatex-beamer.sty')
+
 	@property
 	def clean(self) -> CleanConfig:
 		"""
