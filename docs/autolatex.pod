@@ -120,6 +120,11 @@ Performs all processing required to generate the index (makeindex). This command
 
 Creates an empty LaTeX document in the current directory following a standard folder structure supported by AutoLaTeX.
 
+=item B<latex>
+
+Run one time the (La)TeX text processing to produce the F<.pdf>, F<.dvi>, or F<.ps> file for the document. This command is
+also known as B<tex> or B<maketex>.
+
 =item B<makeflat>
 
 Creates a version of the document in a specific folder (default: F<./flat_version/>) with a single LaTeX or TeX file
@@ -543,6 +548,20 @@ Overwrites all generated files and folders if they exist.
 =item B<--out F<directory>>
 
 Specifies the directory where the generated document structure will be written.
+
+=back
+
+=item I<latex>
+
+=over 12
+
+=item B<--nochdir>
+
+Prevents AutoLaTeX from changing the current directory to the document's root directory before starting the build process.
+
+=item B<--showneedloop>
+
+Show if another run of the (La)TeX text processing is detected as needed for producing the .pdf, .dvi, .ps file.
 
 =back
 

@@ -33,6 +33,7 @@ __all__ = [
 	'images',
 	'index',
 	'init',
+	'latex',
 	'makeflat',
 	'showconfig',
 	'showconfigfiles',

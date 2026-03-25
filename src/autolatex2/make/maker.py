@@ -40,6 +40,7 @@ from autolatex2.tex.citationanalyzer import BiblatexCitationAnalyzer
 from autolatex2.tex.dependencyanalyzer import DependencyAnalyzer
 import autolatex2.tex.utils as texutils
 from autolatex2.tex.indexanalyzer import IndexAnalyzer
+from autolatex2.tex.utils import TeXWarnings
 from autolatex2.translator.translatorrepository import TranslatorRepository
 from autolatex2.translator.translatorrunner import TranslatorRunner
 import autolatex2.utils.extlogging as extlogging
@@ -452,7 +453,7 @@ class AutoLaTeXMaker(Runner):
 		"""
 		Reset the lists of warnings.
 		"""
-		self.__standards_warnings = set()
+		self.__standards_warnings : set[TeXWarnings] = set()
 		self.__detailled_warnings = list()
 
 	@property
@@ -570,7 +571,7 @@ class AutoLaTeXMaker(Runner):
 		return self.__files
 
 	@property
-	def standard_warnings(self) -> set[str]:
+	def standard_warnings(self) -> set[TeXWarnings]:
 		"""
 		The standard LaTeX warnings that are discovered during the lastest compilation process.
 		:rtype: set[str]
@@ -590,7 +591,7 @@ class AutoLaTeXMaker(Runner):
 		Parse the TeX log in order to extract warnings and replies if another TeX compilation is needed.
 		:param log_file: The filename of the log file that is used for detecting the compilation loop.
 		:type log_file: str
-		:param loop: Indicate if the compilation loop is enable.
+		:param loop: Indicate if the compilation loop is enabled.
 		:type loop: bool
 		:return: True if another compilation is needed; Otherwise returns False
 		:rtype: bool

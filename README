@@ -117,6 +117,11 @@ COMMANDS
         Creates an empty LaTeX document in the current directory following a
         standard folder structure supported by AutoLaTeX.
 
+    latex
+        Run one time the (La)TeX text processing to produce the .pdf, .dvi,
+        or .ps file for the document. This command is also known as tex or
+        maketex.
+
     makeflat
         Creates a version of the document in a specific folder (default:
         ./flat_version/) with a single LaTeX or TeX file and all other files
@@ -458,6 +463,17 @@ OPTIONS FOR COMMANDS
         --out directory
                     Specifies the directory where the generated document
                     structure will be written.
+
+    *latex*
+
+        --nochdir   Prevents AutoLaTeX from changing the current directory
+                    to the document's root directory before starting the
+                    build process.
+
+        --showneedloop
+                    Show if another run of the (La)TeX text processing is
+                    detected as needed for producing the .pdf, .dvi, .ps
+                    file.
 
     *makeflat*
 
