@@ -22,9 +22,7 @@ from argparse import Namespace
 from typing import override
 
 from autolatex2.cli.abstract_actions import AbstractMakerAction
-
-import gettext
-_T = gettext.gettext
+from autolatex2.utils.i18n import T
 
 # Extends MakerAction from images modules (alias extended_maker_action) in order
 # to inherit the optional command line arguments from this super action.
@@ -34,7 +32,7 @@ class MakerAction(AbstractMakerAction):
 
 	alias : str = 'gen_doc'
 
-	help : str = _T('Performs all processing actions that are required to produce the PDF, DVI or Postscript. The actions set includes LaTeX, BibTeX, Makeindex, Dvips, etc. This action does not includes the generated of images.')
+	help : str = T('Performs all processing actions that are required to produce the PDF, DVI or Postscript. The actions set includes LaTeX, BibTeX, Makeindex, Dvips, etc. This action does not includes the generated of images.')
 
 	@override
 	def _add_command_cli_arguments(self, command_name : str, command_help : str | None,
@@ -50,7 +48,7 @@ class MakerAction(AbstractMakerAction):
 
 		self.parse_cli.add_argument('--nochdir', 
 			action = 'store_true', 
-			help=_T('Don\'t set the current directory of the application to document\'s root directory before the launch of the building process'))
+			help = T('Don\'t set the current directory of the application to document\'s root directory before the launch of the building process'))
 
 	@override
 	def run(self, cli_arguments : Namespace) -> bool:

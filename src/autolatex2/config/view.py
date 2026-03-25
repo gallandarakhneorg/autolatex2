@@ -45,8 +45,8 @@ class ViewerConfig:
 	@property
 	def view(self) -> bool:
 		"""
-		Replies if the viewer is enable.
-		:return: True if the viewer is enable.
+		Replies if the viewer is enabled.
+		:return: True if the viewer is enabled.
 		:rtype: bool
 		"""
 		return self.__view_enable
@@ -54,8 +54,8 @@ class ViewerConfig:
 	@view.setter
 	def view(self,  enable : bool):
 		"""
-		Change if the viewer is enable.
-		:param enable: True if the viewer is enable.
+		Change if the viewer is enabled.
+		:param enable: True if the viewer is enabled.
 		:type enable: bool
 		"""
 		self.__view_enable = enable
@@ -63,8 +63,8 @@ class ViewerConfig:
 	@property
 	def async_view(self) -> bool:
 		"""
-		Replies if the asynchronous view is enable.
-		:return: True if the async view is enable.
+		Replies if the asynchronous view is enabled.
+		:return: True if the async view is enabled.
 		:rtype: bool
 		"""
 		return self.__async_view_enable
@@ -72,8 +72,8 @@ class ViewerConfig:
 	@async_view.setter
 	def async_view(self, enable : bool):
 		"""
-		Change if the asynchronous view is enable.
-		:param enable: True if the async view is enable.
+		Change if the asynchronous view is enabled.
+		:param enable: True if the async view is enabled.
 		:type enable: bool
 		"""
 		self.__async_view_enable = enable

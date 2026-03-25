@@ -27,6 +27,7 @@ from typing import Any
 from autolatex2.utils.runner import Runner
 import autolatex2.utils.utilfunctions as genutils
 
+
 def python_translator_debugger_enable() -> bool:
 	"""
 	Replies if the feature for debugging a Python translator is active.
@@ -61,7 +62,7 @@ def python_translator_debugger_code(runner : Any,  environment : dict[str,Any]):
 	###############################################################
 	###############################################################
 
-	eps_file = genutils.basename2(_in,  _inexts) + '.eps'
+	eps_file = genutils.basename2(_in,  *_inexts) + '.eps'
 	try:
 		sout, serr, sex, retcode = Runner.run_command('asy', '-o', eps_file, _in)
 		Runner.check_runner_status(serr, sex, retcode)

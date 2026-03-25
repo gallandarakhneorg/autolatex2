@@ -23,11 +23,14 @@ import logging
 import os
 import shutil
 from typing import override
+import json
 
 from autolatex2.config.configobj import Config
 from autolatex2.make.filedescription import FileDescription
+from autolatex2.make.make_enums import FileType
 from autolatex2.make.maker import AutoLaTeXMaker
 from autolatex2tests.abstract_base_test import AbstractBaseTest
+from autolatex2.utils.i18n import T
 
 
 class TestBuildListMaker(AbstractBaseTest):
@@ -76,7 +79,7 @@ class TestBuildListMaker(AbstractBaseTest):
 
 		self.__maker = AutoLaTeXMaker.create(self.__config)
 		os.chdir(self.__tmp_folder_name)
-		(pdf_file,  self.__dependencies) = self.__maker.compute_dependencies(self.__root_file, readAuxFile = False)
+		pdf_file,  self.__dependencies = self.__maker.compute_dependencies(self.__root_file, read_aux_file= False)
 
 
 	def ___printlogs(self):
@@ -94,27 +97,28 @@ class TestBuildListMaker(AbstractBaseTest):
 		self.assertEqual(set(expected['dependencies']), set(actual.dependencies))
 
 	def assertBuildingList(self, expected : list, actual : list):
+		expectedlen = len(expected)
 		actuallen = len(actual)
-		i = 0
-		for expectedItem in expected:
-			if i < actuallen:
+		if expectedlen != actuallen:
+			self.fail("Not same number of elements, %i are expected, %i are provided" % (expectedlen, actuallen))
+		else:
+			i = 0
+			for expectedItem in expected:
 				actualItem = actual[i]
 				self.__assertBuildingList(i, expectedItem, actualItem)
-			else:
-				self.fail("Expecting element at index " + i + ": " + str(expectedItem))
-			i = i + 1
+				i = i + 1
 
 
 
 
 	def test_compute_build_internal_execution_list_wo_forceChanges(self):
-		build_list = self.__maker.build_internal_execution_list(self.__root_file, self.__pdf_file, self.__dependencies, forceChanges = False)
+		build_list = self.__maker.build_internal_execution_list(self.__root_file, self.__pdf_file, self.__dependencies, force_changes= False)
 		#self.___printlogs()
-		expectedList = list([
+		expected_list = list([
 				{
 					"output_filename": self.__gls_file,
 					"input_filename": self.__root_file,
-					"type": "gls",
+					"type": FileType.gls,
 					"dependencies": [
 						self.__glo_file
 					]
@@ -122,7 +126,7 @@ class TestBuildListMaker(AbstractBaseTest):
 				{
 					"output_filename": self.__ind_file,
 					"input_filename": self.__idx_file,
-					"type": "ind",
+					"type": FileType.ind,
 					"dependencies": [
 						self.__idx_file
 					]
@@ -130,7 +134,7 @@ class TestBuildListMaker(AbstractBaseTest):
 				{
 					"output_filename": self.__bbl_file,
 					"input_filename": self.__root_file,
-					"type": "bbl",
+					"type": FileType.bbl,
 					"dependencies": [
 						self.__root_file,
 						self.__bib_file
@@ -139,7 +143,7 @@ class TestBuildListMaker(AbstractBaseTest):
 				{
 					"output_filename": self.__pdf_file,
 					"input_filename": self.__root_file,
-					"type": "pdf",
+					"type": FileType.pdf,
 					"dependencies": [
 						self.__gls_file,
 						self.__ind_file,
@@ -151,18 +155,18 @@ class TestBuildListMaker(AbstractBaseTest):
 				}
 		
 			])
-		self.assertBuildingList(expectedList, build_list)
+		self.assertBuildingList(expected_list, build_list)
 
 
 
-	def test_compute_build_internal_execution_list_w_forceChanges(self):
-		build_list = self.__maker.build_internal_execution_list(self.__root_file, self.__pdf_file, self.__dependencies, forceChanges = True)
+	def test_compute_build_internal_execution_list_w_force_changes(self):
+		build_list = self.__maker.build_internal_execution_list(self.__root_file, self.__pdf_file, self.__dependencies, force_changes= True)
 		#self.___printlogs()
-		expectedList = list([
+		expected_list = list([
 				{
 					"output_filename": self.__gls_file,
 					"input_filename": self.__root_file,
-					"type": "gls",
+					"type": FileType.gls,
 					"dependencies": [
 						self.__glo_file
 					]
@@ -170,7 +174,7 @@ class TestBuildListMaker(AbstractBaseTest):
 				{
 					"output_filename": self.__ind_file,
 					"input_filename": self.__idx_file,
-					"type": "ind",
+					"type": FileType.ind,
 					"dependencies": [
 						self.__idx_file
 					]
@@ -178,7 +182,7 @@ class TestBuildListMaker(AbstractBaseTest):
 				{
 					"output_filename": self.__bbl_file,
 					"input_filename": self.__root_file,
-					"type": "bbl",
+					"type": FileType.bbl,
 					"dependencies": [
 						self.__root_file,
 						self.__bib_file
@@ -187,7 +191,7 @@ class TestBuildListMaker(AbstractBaseTest):
 				{
 					"output_filename": self.__pdf_file,
 					"input_filename": self.__root_file,
-					"type": "pdf",
+					"type": FileType.pdf,
 					"dependencies": [
 						self.__gls_file,
 						self.__ind_file,
@@ -199,7 +203,7 @@ class TestBuildListMaker(AbstractBaseTest):
 				}
 		
 			])
-		self.assertBuildingList(expectedList, build_list)
+		self.assertBuildingList(expected_list, build_list)
 
 
 if __name__ == '__main__':

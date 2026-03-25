@@ -22,9 +22,7 @@ from argparse import Namespace
 from typing import override
 
 from autolatex2.cli.commands.clean import MakerAction as CleanMakerAction
-
-import gettext
-_T = gettext.gettext
+from autolatex2.utils.i18n import T
 
 class MakerAction(CleanMakerAction):
 
@@ -32,7 +30,7 @@ class MakerAction(CleanMakerAction):
 	
 	alias : list[str] = ['mrproper']
 
-	help : str = _T('Extend the \'clean\' command by removing the backup files and the automatically generated images')
+	help : str = T('Extend the \'clean\' command by removing the backup files and the automatically generated images')
 
 	@override
 	def run(self, cli_arguments : Namespace) -> bool:

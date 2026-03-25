@@ -100,7 +100,7 @@ class TestDependenciesMaker(AbstractBaseTest):
 
 
 	def test_compute_dependencies_wo_aux(self):
-		(pdf_file,  files) = self.__maker.compute_dependencies(self.__root_file, readAuxFile = False)
+		(pdf_file,  files) = self.__maker.compute_dependencies(self.__root_file, read_aux_file= False)
 		#self.___printlogs()
 		self.assertEqual(self.__pdf_file, pdf_file)
 		self.assertDependencies({
@@ -173,7 +173,7 @@ class TestDependenciesMaker(AbstractBaseTest):
 
 
 	def test_compute_dependencies_w_aux(self):
-		(pdf_file,  files) = self.__maker.compute_dependencies(self.__root_file, readAuxFile = True)
+		(pdf_file,  files) = self.__maker.compute_dependencies(self.__root_file, read_aux_file= True)
 		#self.___printlogs()
 		self.assertEqual(self.__pdf_file, pdf_file)
 		self.assertDependencies({

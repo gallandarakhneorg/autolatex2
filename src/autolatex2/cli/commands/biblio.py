@@ -23,13 +23,8 @@ from argparse import Namespace
 from typing import override
 
 import autolatex2.utils.extlogging as extlogging
-
-import gettext
-
+from autolatex2.utils.i18n import T
 from autolatex2.cli.abstract_actions import AbstractMakerAction
-from autolatex2.make.maker import AutoLaTeXMaker
-
-_T = gettext.gettext
 
 class MakerAction(AbstractMakerAction):
 
@@ -37,7 +32,7 @@ class MakerAction(AbstractMakerAction):
 
 	alias : str = 'makebiblio'
 
-	help : str = _T('Performs all processing that permits to generate the bibliography (bibtex, biber...)')
+	help : str = T('Performs all processing that permits to generate the bibliography (bibtex, biber...)')
 
 	@override
 	def _add_command_cli_arguments(self, command_name : str, command_help : str | None,
@@ -51,7 +46,7 @@ class MakerAction(AbstractMakerAction):
 		"""
 		self.parse_cli.add_argument('--nochdir',
 			action = 'store_true', 
-			help=_T('Don\'t set the current directory of the application to document\'s root directory before the launch of the building process'))
+			help = T('Don\'t set the current directory of the application to document\'s root directory before the launch of the building process'))
 
 	@override
 	def run(self, cli_arguments : Namespace) -> bool:

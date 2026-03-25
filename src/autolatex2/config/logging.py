@@ -23,9 +23,7 @@ Configuration for the logging system.
 """
 
 from autolatex2.utils.extlogging import LogLevel
-
-import gettext
-_T = gettext.gettext
+from autolatex2.utils.i18n import T
 
 class LoggingConfig:
 	"""
@@ -33,7 +31,7 @@ class LoggingConfig:
 	"""
 
 	DEFAULT_LEVEL : int = LogLevel.INFO
-	DEFAULT_LOG_MESSAGE : str = _T('%(levelname)s: %(message)s')
+	DEFAULT_LOG_MESSAGE : str = T('%(levelname)s: %(message)s')
 
 	def __init__(self):
 		self.__message = None

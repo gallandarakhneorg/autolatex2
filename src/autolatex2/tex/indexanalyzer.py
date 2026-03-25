@@ -109,6 +109,7 @@ class IndexAnalyzer(Observer):
 			self.__md5 = md5(bytes('\\'.join(self.indexes), 'UTF-8')).hexdigest()
 		return self.__md5
 
+	# noinspection DuplicatedCode
 	@override
 	def expand(self, parser : Parser, raw_text : str, name : str, *parameter : dict[str,Any]) -> str:
 		"""
@@ -121,7 +122,7 @@ class IndexAnalyzer(Observer):
         :type name: str
         :param parameter: Descriptions of the values passed to the TeX macro.
         :type parameter: dict[str,Any]
-        :return: the result of the expand of the macro, or None to not replace the macro by something (the macro is used as-is)
+        :return: the result of expansion of the macro, or None to not replace the macro by something (the macro is used as-is)
         :rtype: str
         """
 		value = []
@@ -133,6 +134,7 @@ class IndexAnalyzer(Observer):
 			self.__indexes.add('|'.join(value))
 		return ''
 
+	# noinspection DuplicatedCode
 	def run(self):
 		"""
 		Extract the data from the IDX file.

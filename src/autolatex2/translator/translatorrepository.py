@@ -31,9 +31,8 @@ from autolatex2.config .configobj import Config
 from autolatex2.config .translator import TranslatorLevel
 from autolatex2.translator.translatorobj import Translator
 from autolatex2.utils.extlogging import LogLevel
+from autolatex2.utils.i18n import T
 
-import gettext
-_T = gettext.gettext
 
 
 class TranslatorConflictError(Exception):
@@ -148,7 +147,7 @@ class TranslatorRepository:
 								translator.filename = abs_path
 								loaded_translators[script_name] = translator
 		elif warn:
-			logging.log(LogLevel.FINE_INFO, _T("%s is not a directory") % directory)
+			logging.log(LogLevel.FINE_INFO, T("%s is not a directory") % directory)
 
 		return loaded_translators
 
@@ -166,7 +165,7 @@ class TranslatorRepository:
 				return level
 		return None
 
-	def _get_object_for(self, translator_name : str) -> Translator | None:
+	def get_object_for(self, translator_name : str) -> Translator | None:
 		"""
 		Search for the translator in the installed translators.
 		:param translator_name: The name of the translator.
@@ -211,7 +210,7 @@ class TranslatorRepository:
 		# Build the list of the included translators per level
 		translators = self.get_included_translators_with_levels()
 		for (translatorName, activationLevel) in translators.items():
-			translator = self._get_object_for(translatorName)
+			translator = self.get_object_for(translatorName)
 			source = translator.full_source
 			for a_level in (range(activationLevel,len(conflicts))):
 				if source not in conflicts[a_level]:
@@ -227,6 +226,7 @@ class TranslatorRepository:
 				del level_dict[k]
 		return conflicts
 
+	# noinspection DuplicatedCode
 	def sync(self, detect_conflicts : bool = True):
 		"""
 		Synchronize the repository with directories according to the given configuration.
@@ -238,14 +238,14 @@ class TranslatorRepository:
 		# Load distribution/system modules
 		if not self.configuration.translators.ignore_system_translators:
 			dirname = os.path.join(self.configuration.installation_directory, 'translators')
-			logging.debug(_T("Get loadable translators from %s") % dirname)
+			logging.debug(T("Get loadable translators from %s") % dirname)
 			v0 = self._read_directory(directory=dirname, recursive=True, warn=True)
 			self._installed_translators[TranslatorLevel.SYSTEM].update(v0)
 
 		# Load user modules recursively from ~/.autolatex/translators
 		if not self.configuration.translators.ignore_user_translators:
 			dirname = os.path.join(self.configuration.user_config_directory, 'translators')
-			logging.debug(_T("Get loadable translators from %s") % dirname)
+			logging.debug(T("Get loadable translators from %s") % dirname)
 			v1 = self._read_directory(directory = dirname, recursive=True, warn=True)
 			self._installed_translators[TranslatorLevel.USER].update(v1)
 
@@ -253,13 +253,13 @@ class TranslatorRepository:
 		directory = self.configuration.document_directory
 		if not self.configuration.translators.ignore_document_translators:
 			if directory is not None:
-				logging.debug(_T("Get loadable translators from %s") % directory)
+				logging.debug(T("Get loadable translators from %s") % directory)
 				v2 = self._read_directory(directory=directory, recursive=False, warn=True)
 				self._installed_translators[TranslatorLevel.DOCUMENT].update(v2)
 
 		# Load user modules non-recursively the paths specified inside the configurations
 		for path in self.configuration.translators.include_paths:
-			logging.debug(_T("Get loadable translators from %s") % path)
+			logging.debug(T("Get loadable translators from %s") % path)
 			v3 = self._read_directory(directory=path, recursive=True, warn=True)
 			self._installed_translators[TranslatorLevel.DOCUMENT].update(v3)
 
@@ -297,12 +297,12 @@ class TranslatorRepository:
 		"""
 		included = dict()
 		for translatorName in self.get_included_translators_with_levels():
-			translator = self._get_object_for(translatorName)
+			translator = self.get_object_for(translatorName)
 			source = translator.full_source
 			included[source] = translator
 		return included
-		
 
+	# noinspection PyMethodMayBeStatic
 	def _fail_on_conflict(self, conflicts : dict, config_filename : str):
 		"""
 		Fail if a conflict exists between translators.
@@ -324,7 +324,7 @@ class TranslatorRepository:
 					first_translator = translator
 				else:
 					exclude_msg += "[%s]\ninclude module = no\n" % translator.name
-			raise TranslatorConflictError(_T("Several possibilities exist for generating a figure from a %s file:\n%s\n\nYou must specify which to include (resp. exclude) with --include (resp. --exclude).\n\nIt is recommended to update your %s file with the following configuration for each translator to exclude (example on the translator %s):\n\n%s\n" %
+			raise TranslatorConflictError(T("Several possibilities exist for generating a figure from a %s file:\n%s\n\nYou must specify which to include (resp. exclude) with --include (resp. --exclude).\n\nIt is recommended to update your %s file with the following configuration for each translator to exclude (example on the translator %s):\n\n%s\n" %
 							(source,
 							 msg,
 							 config_filename,

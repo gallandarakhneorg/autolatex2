@@ -212,7 +212,7 @@ class TestTranslatorRunner(AbstractBaseTest):
 
 
 	def __assert_gtf(self,  filename : str,  translator_name : str):
-		expected = self.repo._get_object_for(translator_name)
+		expected = self.repo.get_object_for(translator_name)
 		actual = self.runner.get_translator_for(filename)
 		self.assertEqual(expected, actual)
 		

@@ -23,15 +23,14 @@ from typing import override
 
 from autolatex2.cli.abstract_actions import AbstractMakerAction
 from autolatex2.utils.extprint import epprint
+from autolatex2.utils.i18n import T
 
-import gettext
-_T = gettext.gettext
 
 class MakerAction(AbstractMakerAction):
 
 	id : str = 'showconfig'
 
-	help : str = _T('Display the configuration definition that is read from the configuration files')
+	help : str = T('Display the configuration definition that is read from the configuration files')
 
 	@override
 	def run(self, cli_arguments : Namespace) -> bool:

@@ -33,9 +33,8 @@ from autolatex2.make.maker import AutoLaTeXMaker
 import autolatex2.utils.utilfunctions as genutils
 import autolatex2.tex.utils as texutils
 from autolatex2.utils.runner import Runner
+from autolatex2.utils.i18n import T
 
-import gettext
-_T = gettext.gettext
 
 class AbstractMakerAction(ABC):
 	"""
@@ -75,7 +74,7 @@ class AbstractMakerAction(ABC):
 		"""
 		pass
 
-	def register_command(self,  sub_parsers : argparse.ArgumentParser, command_name : str,
+	def register_command(self,  sub_parsers : argparse._SubParsersAction, command_name : str,
 						 command_help : str | None, command_aliases : list[str] | None, configuration : Config):
 		"""
 		Callback for creating the CLI arguments (positional and optional).
@@ -120,12 +119,13 @@ class AbstractMakerAction(ABC):
 		return AutoLaTeXMaker.create(self.configuration)
 
 
+	# noinspection PyMethodMayBeStatic
 	def _internal_run_images(self,  maker : AutoLaTeXMaker,  cli_arguments : Namespace) -> dict[str,str]:
 		"""
 		Run the internal behavior of the 'images' command.
 		:param maker: the AutoLaTeX maker.
-		:param args: the arguments.
-		:type args: Namespace
+		:param cli_arguments: the arguments.
+		:type cli_arguments: Namespace
 		:return: the dictionary that maps the source image's filename to the generated image's filename.
 		:rtype: dict[str,str]
 		"""
@@ -160,12 +160,12 @@ class AbstractMakerAction(ABC):
 		"""
 		files = maker.root_files
 		if not files:
-			logging.error(_T("Unable to find the name of the generated file for the viewer"))
+			logging.error(T("Unable to find the name of the generated file for the viewer"))
 			return False
 
 		for input_file in files:
 			if not input_file:
-				logging.error(_T("Unable to find the name of the generated file for the viewer"))
+				logging.error(T("Unable to find the name of the generated file for the viewer"))
 				return False
 
 			out_file = genutils.basename2(input_file, *texutils.get_tex_file_extensions())
@@ -173,12 +173,11 @@ class AbstractMakerAction(ABC):
 				out_file += '.pdf'
 			else:
 				out_file += '.ps'
-			logging.debug(_T("VIEWER: %s") % out_file)
+			logging.debug(T("VIEWER: %s") % out_file)
 
 			cli = self.configuration.view.viewer_cli
 			if not cli:
-				logging.error(
-					_T("Unable to find the command-line for the viewing action. Did you set the configuration?"))
+				logging.error(T("Unable to find the command-line for the viewing action. Did you set the configuration?"))
 				return False
 
 			cmd = list(cli)

@@ -26,15 +26,13 @@ from typing import override
 from autolatex2.cli.abstract_actions import AbstractMakerAction
 from autolatex2.config.configwriter import OldStyleConfigWriter
 import autolatex2.utils.utilfunctions as genutils
-
-import gettext
-_T = gettext.gettext
+from autolatex2.utils.i18n import T
 
 class MakerAction(AbstractMakerAction):
 
 	id : str = 'createconfig'
 
-	help : str = _T('Create a configuration file. The configuration file is \'.autolatex_project.cfg\' on Unix and \'autolatex_project.cfg\' on other platforms. '
+	help : str = T('Create a configuration file. The configuration file is \'.autolatex_project.cfg\' on Unix and \'autolatex_project.cfg\' on other platforms. '
 		'The content of the configuration file depends on the current state of the configuration')
 
 	@override
@@ -49,7 +47,7 @@ class MakerAction(AbstractMakerAction):
 		"""
 		self.parse_cli.add_argument('--force',
 			action = 'store_true', 
-			help=_T('Force to overwrite the configuration file if it exists'))
+			help = T('Force to overwrite the configuration file if it exists'))
 
 
 	@override
@@ -64,11 +62,11 @@ class MakerAction(AbstractMakerAction):
 		out_directory = self.configuration.document_directory
 		out_file = self.configuration.make_document_config_filename(out_directory)
 		if os.path.isfile(out_file) and not cli_arguments.force:
-			logging.error(_T("File already exists: %s") % out_file)
+			logging.error(T("File already exists: %s") % out_file)
 			return False
 		writer = OldStyleConfigWriter()
 		try:
-			logging.info(_T("Creating configuration file %s") % out_file)
+			logging.info(T("Creating configuration file %s") % out_file)
 			genutils.unlink(out_file)
 			os.makedirs(out_directory, exist_ok=True)
 			writer.write(out_file, self.configuration)

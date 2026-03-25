@@ -19,7 +19,7 @@
 # 330, Boston, MA 02111-1307, USA.
 
 """
-Javascript implementation of an interpreter for the AutoLaTeX translators.
+JavaScript implementation of an interpreter for the AutoLaTeX translators.
 """
 
 import pprint
@@ -29,17 +29,14 @@ from typing import override, Any
 from autolatex2.translator.interpreters.abstractinterpreter import AbstractTranslatorInterpreter
 from autolatex2.config.configobj import Config
 
-import gettext
-_T = gettext.gettext
-
 class TranslatorInterpreter(AbstractTranslatorInterpreter):
 	"""
-	Definition of a Javascript implementation of an interpreter for the AutoLaTeX translators.
+	Definition of a JavaScript implementation of an interpreter for the AutoLaTeX translators.
 	"""
 
 	def __init__(self,  configuration : Config):
 		"""
-		Construct an translator interpreter.
+		Construct a translator interpreter.
 		:param configuration: The general configuration.
 		:type configuration: Config
 		"""
@@ -49,7 +46,7 @@ class TranslatorInterpreter(AbstractTranslatorInterpreter):
 	@override
 	def runnable(self) -> bool:
 		"""
-		Replies if the interpreter is runnable, ie. the underground interpreter can be run.
+		Replies if the interpreter is runnable, i.e., the underground interpreter can be run.
 		:return: True if the interpreter could be run.
 		:rtype: bool
 		"""
@@ -69,10 +66,10 @@ class TranslatorInterpreter(AbstractTranslatorInterpreter):
 
 	def to_javascript(self, value : Any) -> str:
 		"""
-		Convert a value to Javascript code.
+		Convert a value to JavaScript code.
 		:param value: The value to convert.
 		:type value: Any
-		:return: The Javascript expression for the value.
+		:return: The JavaScript expression for the value.
 		:rtype: str
 		"""
 		if isinstance(value, list) or isinstance(value, set):
@@ -82,7 +79,7 @@ class TranslatorInterpreter(AbstractTranslatorInterpreter):
 			pvalue = ', '.join(plist)
 			return "[" + pvalue + "]"
 		elif isinstance(value, dict):
-			raise RuntimeError["dictionary not supported"]
+			raise RuntimeError("dictionary not supported")
 		else:
 			pp = pprint.PrettyPrinter()
 			v = pp.pformat(value)
@@ -103,7 +100,7 @@ class TranslatorInterpreter(AbstractTranslatorInterpreter):
 	def run(self, code : str) -> tuple[str,str,Any,int]:
 		"""
 		Run the interpreter.
-		:param code: The Javascript code to interprete.
+		:param code: The JavaScript code to interprete.
 		:type code: str
 		:return: A quadruplet containing the standard output, the
 				 error output, the exception, the return code.

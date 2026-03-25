@@ -27,7 +27,6 @@ import re
 from typing import override, Any
 
 from autolatex2.tex.texobservers import Observer
-from autolatex2.tex.texparam import Parameter
 from autolatex2.tex.texparsers import Parser
 from autolatex2.tex.texparsers import TeXParser
 from autolatex2.tex import utils
@@ -200,7 +199,7 @@ class DependencyAnalyzer(Observer):
 	def is_xindy_index(self) -> bool:
 		"""
 		Replies if the support for xindy support is enable.
-		This flag is considered only if is_makeindex is enable.
+		This flag is considered only if is_makeindex is enabled.
 		:return: True if the xindy support is enabled.
 		:rtype: bool
 		"""
@@ -210,7 +209,7 @@ class DependencyAnalyzer(Observer):
 	def is_xindy_index(self, enable : bool):
 		"""
 		Set if the support for xindy support is enable.
-		This flag is considered only if is_makeindex is enable.
+		This flag is considered only if is_makeindex is enabled.
 		:param enable: True if the xindy support is enabled.
 		:type enable: bool
 		"""
@@ -328,12 +327,13 @@ class DependencyAnalyzer(Observer):
 			the_set = hash2[bib_type]
 		the_set.add(dependency_file)
 
-	def __parse_bib_reference(self, bib_db : str, *files : Parameter):
+	def __parse_bib_reference(self, bib_db : str, *files : dict[str,Any]):
 		"""
 		Add a dependency to a BibTeX database.
 		:param bib_db: the BibTeX database.
 		:type bib_db: str
 		:param files: the BibTeX files.
+		:type files: dict[str,Any]
 		:type files: str
 		"""
 		for param in files:
@@ -350,6 +350,7 @@ class DependencyAnalyzer(Observer):
 						if os.path.isfile(bib_file):
 							self.__add_bib_dependency('bib', bib_file, bib_db)
 
+	# noinspection DuplicatedCode
 	@override
 	def expand(self, parser : Parser, raw_text : str, name : str, *parameter : dict[str,Any]) -> str:
 		"""
@@ -362,7 +363,7 @@ class DependencyAnalyzer(Observer):
 		:type name: str
 		:param parameter: Descriptions of the values passed to the TeX macro.
 		:type parameter: dict[str,Any]
-		:return: the result of the expand of the macro, or None to not replace the macro by something (the macro is used as-is)
+		:return: the result of expansion of the macro, or None to not replace the macro by something (the macro is used as-is)
 		:rtype: str
 		"""
 		if name == '\\include' or name == '\\input':
@@ -501,7 +502,7 @@ class DependencyAnalyzer(Observer):
 		:type special: bool
 		:param math: Indicates if the math mode is active.
 		:type math: bool
-		:return: the definition of the macro, ie. the macro prototype. See the class documentation for an explanation about the format of the macro prototype.
+		:return: the definition of the macro, i.e., the macro prototype. See the class documentation for an explanation about the format of the macro prototype.
 		:rtype: str
 		"""
 		if not special:
@@ -511,6 +512,7 @@ class DependencyAnalyzer(Observer):
 				return '!{}'
 		return None
 
+	# noinspection DuplicatedCode
 	def run(self):
 		"""
 		Detect the dependencies.

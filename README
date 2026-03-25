@@ -72,6 +72,13 @@ COMMANDS
         generated figures, and the produced PDF. This command is also known
         as mrproper.
 
+    createbeamer
+        Creates a LaTeX package file in the document directory that equips
+        LaTeX Beamer text processor with the control sequences dedicated to
+        AutoLaTeX (slides with animated figures). The package file is named
+        autolatex-beamer.sty. See the command createist for creating a
+        package dedicated to regular LaTeX document.
+
     createconfig
         Creates a standard configuration file in the current directory based
         on the command-line configuration.
@@ -81,15 +88,17 @@ COMMANDS
         named default.ist.
 
     createsty
-        Creates a default LaTeX package file in the document directory that
-        provides standard LaTeX control sequences.AutoLaTeX. The package
-        file is named autolatex.sty.
+        Creates a LaTeX package file in the document directory that equips
+        LaTeX text processor with the control sequences dedicated to
+        AutoLaTeX (animated figures and figures with embedded TeX). The
+        package file is named autolatex.sty. See the command createbeamer
+        for creating a package dedicated to LaTeX Beamer.
 
     commit
         Commits changes to a version control system (GIT, CVS, SVN...). The
         command line must be provided in the configuration file.
 
-    documentation
+    document
         Performs all processing required to produce the .pdf, .dvi, or .ps
         file for the document. This command is also known as gen_doc.
 
@@ -402,6 +411,10 @@ OPTIONS FOR COMMANDS
         See the options for *clean*, except for --all, which is implicit for
         *cleanall*.
 
+    *createbeamer*
+
+        --force     Overwrites the .sty file for LaTeX Beamer if it exists.
+
     *createconfig*
 
         --force     Overwrites the configuration file if it exists.
@@ -412,7 +425,7 @@ OPTIONS FOR COMMANDS
 
     *createsty*
 
-        --force     Overwrites the .sty file if it exists.
+        --force     Overwrites the .sty file for LaTeX if it exists.
 
     *document*
 
@@ -925,8 +938,8 @@ CONFIGURATION FILE
     AutoLaTeX configuration files can be located in several places:
 
     *   System Configuration (for all users): In the directory where
-        AutoLaTeX is installed (typically /usr/lib/autolatex on Unix
-        systems).
+        AutoLaTeX is installed (typically
+        /usr/lib/python3/dist-packages/autolatex2 on Unix systems).
 
     *   User Configuration: Two cases apply: either the configuration
         directory ($HOME/.autolatex on Unix or

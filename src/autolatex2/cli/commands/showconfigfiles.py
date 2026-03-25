@@ -25,15 +25,14 @@ from typing import override
 
 from autolatex2.cli.abstract_actions import AbstractMakerAction
 from autolatex2.utils.extprint import eprint
+from autolatex2.utils.i18n import T
 
-import gettext
-_T = gettext.gettext
 
 class MakerAction(AbstractMakerAction):
 
 	id : str = 'showconfigfiles'
 
-	help : str = _T('Display the list of the detected configuration files that will be read by autolatex')
+	help : str = T('Display the list of the detected configuration files that will be read by autolatex')
 
 	@override
 	def run(self, cli_arguments : Namespace) -> bool:
@@ -44,29 +43,31 @@ class MakerAction(AbstractMakerAction):
 		:return: True if the process could continue. False if an error occurred and the process should stop.
 		:rtype: bool
 		"""
+		# noinspection DuplicatedCode
 		system_path = self.configuration.system_config_file
 		if system_path is not None:
 			if os.path.isfile(system_path):
 				if os.access(system_path, os.R_OK):
 					eprint(system_path)
 				else:
-					logging.error(_T("%s (unreadable)") % system_path)
+					logging.error(T("%s (unreadable)") % system_path)
 			else:
-				logging.error(_T("%s (not found)") % system_path)
+				logging.error(T("%s (not found)") % system_path)
 
+		#noinspection DuplicatedCode
 		user_path = self.configuration.user_config_file
 		if user_path is not None:
 			if os.path.isfile(user_path):
 				if os.access(user_path, os.R_OK):
 					eprint(user_path)
 				else:
-					logging.error(_T("%s (unreadable)") % user_path)
+					logging.error(T("%s (unreadable)") % user_path)
 			else:
-				logging.error(_T("%s (not found)") % user_path)
+				logging.error(T("%s (not found)") % user_path)
 
 		document_directory = self.configuration.document_directory
 		if document_directory is None:
-			logging.error(_T("Cannot detect document directory"))
+			logging.error(T("Cannot detect document directory"))
 		else:
 			doc_path = self.configuration.make_document_config_filename(document_directory)
 			if doc_path is not None:
@@ -74,8 +75,8 @@ class MakerAction(AbstractMakerAction):
 					if os.access(doc_path, os.R_OK):
 						eprint(doc_path)
 					else:
-						logging.error(_T("%s (unreadable)") % doc_path)
+						logging.error(T("%s (unreadable)") % doc_path)
 				else:
-					logging.error(_T("%s (not found)") % doc_path)
+					logging.error(T("%s (not found)") % doc_path)
 
 		return True

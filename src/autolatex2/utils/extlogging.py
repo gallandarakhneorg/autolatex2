@@ -27,9 +27,6 @@ import re
 from enum import IntEnum, unique
 from typing import Any, override
 
-import gettext
-_T = gettext.gettext
-
 @unique
 class LogLevel(IntEnum):
 	"""

@@ -230,6 +230,7 @@ class Config:
 				self.__user_directory = os.path.join(self.home_directory, "autolatex")
 		return self.__user_directory
 
+	# noinspection PyMethodMayBeStatic
 	def _isdir(self, directory : str) -> bool:
 		"""
 		Replies if the given directory exists in the operating system.

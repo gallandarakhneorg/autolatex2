@@ -30,15 +30,13 @@ import autolatex2.utils.utilfunctions as genutils
 import autolatex2.tex.utils as texutils
 from autolatex2.translator.translatorrepository import TranslatorRepository
 from autolatex2.translator.translatorrunner import TranslatorRunner
-
-import gettext
-_T = gettext.gettext
+from autolatex2.utils.i18n import T, TT
 
 class MakerAction(AbstractMakerAction):
 
 	id : str = 'clean'
 
-	help : str = _T('Clean the current working directory by removing all LaTeX temp files and other temp files that are created during the processing of the document')
+	help : str = T('Clean the current working directory by removing all LaTeX temp files and other temp files that are created during the processing of the document')
 
 	CLEANABLE_FILE_EXTENSIONS : list[str] = [
 		'.aux',
@@ -111,20 +109,20 @@ class MakerAction(AbstractMakerAction):
 		"""
 		self.parse_cli.add_argument('--nochdir',
 			action = 'store_true', 
-			help=_T('Don\'t set the current directory of the application to document\'s root directory before the launch of the building process'))
+			help = T('Don\'t set the current directory of the application to document\'s root directory before the launch of the building process'))
 
 		self.parse_cli.add_argument('--norecursive',
 			action = 'store_true', 
-			help=_T('Disable cleaning of the subfolders'))
+			help = T('Disable cleaning of the subfolders'))
 
 		self.parse_cli.add_argument('--simulate',
 			action = 'store_true', 
-			help=_T('Simulate the removal of the files, i.e. the files are not removed from the disk'))
+			help = T('Simulate the removal of the files, i.e. the files are not removed from the disk'))
 
 		if command_name == 'clean':
 			self.parse_cli.add_argument('--all',
 				action = 'store_true', 
-				help=_T('If specified, the cleaning command behaves as the command \'cleanall\''))
+				help = T('If specified, the cleaning command behaves as the command \'cleanall\''))
 
 
 	@override
@@ -148,9 +146,9 @@ class MakerAction(AbstractMakerAction):
 
 	def _delete_file(self,  filename : str,  simulate : bool):
 		if simulate:
-			msg = _T("Selecting: %s") % filename
+			msg = T("Selecting: %s") % filename
 		else:
-			msg = _T("Deleting: %s") % filename
+			msg = T("Deleting: %s") % filename
 		logging.info(msg)
 		if not simulate:
 			genutils.unlink(filename)
@@ -200,7 +198,7 @@ class MakerAction(AbstractMakerAction):
 			os.chdir(old_dir)
 		return True
 
-
+	# noinspection PyMethodMayBeStatic
 	def _is_deletable_anywhere(self, filename : str) -> bool:
 		"""
 		Replies if the given filename is for a deletable file anywhere.
@@ -212,6 +210,7 @@ class MakerAction(AbstractMakerAction):
 		return False
 
 
+	# noinspection PyMethodMayBeStatic
 	def _is_deletable_in_root_folder_only(self,  root_dir : str,  tex_filename : str,  filename : str) -> bool:
 		"""
 		Replies if the given filename is for a deletable file in the root folder.
@@ -235,6 +234,7 @@ class MakerAction(AbstractMakerAction):
 		return filename in candidates
 
 
+	# noinspection PyMethodMayBeStatic
 	def _is_deletable_from_constants(self, filename : str) -> bool:
 		"""
 		Replies if the given filename is for a deletable file anywhere.
@@ -249,13 +249,14 @@ class MakerAction(AbstractMakerAction):
 		return False
 
 
+	# noinspection PyMethodMayBeStatic
 	def _is_deletable_shell(self,
 							filename : str,
 							basename : str,
 							absolute_shell_patterns : list[str],
 							basename_shell_patterns : list[str]) -> bool:
 		"""
-		Replies if the given filename Shell pattern is for a deletable file anywhere.
+		Replies if the given filename shell pattern is for a deletable file anywhere.
 		"""
 		for pattern in absolute_shell_patterns:
 			if fnmatch.fnmatch(filename,  pattern):
@@ -290,6 +291,7 @@ class MakerAction(AbstractMakerAction):
 		:return: True if the process could continue. False if an error occurred and the process should stop.
 		"""
 		# Remove additional files
+		# noinspection DuplicatedCode
 		maker = self._internal_create_maker()
 		# Prepare used-defined list of deletable files
 		clean_files = self.configuration.clean.cleanall_files
@@ -327,14 +329,8 @@ class MakerAction(AbstractMakerAction):
 		:param cli_arguments: The CLI arguments.
 		:type cli_arguments: argparse object
 		"""
-		if self.__nb_deletions > 1:
-			if cli_arguments.simulate:
-				msg = _T("%d files were selected as deletion candidates") % self.__nb_deletions
-			else:
-				msg = _T("%d files were deleted") % self.__nb_deletions
+		if cli_arguments.simulate:
+			msg = TT("%d file were selected as deletion candidates", "%d files were selected as deletion candidates", self.__nb_deletions)
 		else:
-			if cli_arguments.simulate:
-				msg = _T("%d file was selected as deletion candidate") % self.__nb_deletions
-			else:
-				msg = _T("%d file was deleted") % self.__nb_deletions
+			msg = TT("%d file were deleted", "%d files were deleted", self.__nb_deletions)
 		logging.info(msg)

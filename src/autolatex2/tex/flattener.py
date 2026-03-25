@@ -36,9 +36,7 @@ from autolatex2.tex.texobservers import Observer
 from autolatex2.tex.texparsers import Parser
 from autolatex2.tex.texparsers import TeXParser
 import autolatex2.utils.utilfunctions as genutils
-
-import gettext
-_T = gettext.gettext
+from autolatex2.utils.i18n import T
 
 class Flattener(Observer):
 	"""
@@ -95,11 +93,11 @@ class Flattener(Observer):
 		self.__include_paths = []
 		if self.__dirname:
 			self.__include_paths.append(self.__dirname)
-		# Premable entries added by this tool
+		# Preamble entries added by this tool
 		self.__dynamic_preamble = []
 		# Content of the TeX file to generate
 		self.__tex_file_content = ''
-		# Mapping betwwen the files of the source TeX and the target TeX.
+		# Mapping between the files of the source TeX and the target TeX.
 		self.__source2target = dict()
 		self.__target2source = dict()
 		# Files to copy
@@ -122,7 +120,7 @@ class Flattener(Observer):
 	def use_biblio(self) -> bool:
 		"""
 		Replies if the biblio database.
-		:return: True if the biblio database may be use. False for inline biliography entries.
+		:return: True if the biblio database may be used. False for inline biliography entries.
 		:rtype: bool
 		"""
 		return self.__use_biblio
@@ -131,7 +129,7 @@ class Flattener(Observer):
 	def use_biblio(self, b : bool):
 		"""
 		Set if the biblio database.
-		:param b: True if the biblio database may be use. False for inline biliography entries.
+		:param b: True if the biblio database may be used. False for inline biliography entries.
 		:type b: bool
 		"""
 		self.__use_biblio = b
@@ -220,7 +218,7 @@ class Flattener(Observer):
 		:type special: bool
 		:param math: Indicates if the math mode is active.
 		:type math: bool
-		:return: the definition of the macro, ie. the macro prototype. See the class documentation for an explanation about the format of the macro prototype.
+		:return: the definition of the macro, i.e., the macro prototype. See the class documentation for an explanation about the format of the macro prototype.
 		:rtype: str
 		"""
 		if not special:
@@ -298,6 +296,7 @@ class Flattener(Observer):
 		if text:
 			self.__tex_file_content += text
 
+	# noinspection DuplicatedCode
 	@override
 	def expand(self, parser : Parser, raw_text : str, name : str, *parameter : dict[str,Any]) -> str | None:
 		"""
@@ -310,7 +309,7 @@ class Flattener(Observer):
 		:type name: str
 		:param parameter: Descriptions of the values passed to the TeX macro.
 		:type parameter: dict[str,Any]
-		:return: the result of the expand of the macro, or None to not replace the macro by something (the macro is used as-is)
+		:return: the result of expansion of the macro, or None to not replace the macro by something (the macro is used as-is)
 		:rtype: str
 		"""
 		if name == "\\begin":
@@ -343,7 +342,7 @@ class Flattener(Observer):
 				if not self.use_biblio:
 					filename = self.__make_filename(self.basename, '.bbl', '.tex')
 					if os.path.isfile(filename) and filename not in self.__embedded_files_added:
-						logging.debug(_T('Embedding %s'), filename)
+						logging.debug(T('Embedding %s'), filename)
 						if not self.__embedded_files_added:
 							self.__dynamic_preamble.append("\\usepackage{filecontents}")
 						self.__embedded_files_added.add(filename)
@@ -360,9 +359,9 @@ class Flattener(Observer):
 								%%=======================================================
 								""") % (basename, basename, content)
 					else:
-						logging.error(_T('File not found: %s'), filename)
+						logging.error(T('File not found: %s'), filename)
 			elif self.__is_document_file(filename) and filename not in self.__embedded_files_added:
-				logging.debug(_T('Embedding %s'), filename)
+				logging.debug(T('Embedding %s'), filename)
 				if not self.__embedded_files_added:
 					self.__dynamic_preamble.append("\\usepackage{filecontents}")
 				self.__embedded_files_added.add(filename)
@@ -501,7 +500,7 @@ class Flattener(Observer):
 							%%=======================================================
 							""") % (os.path.basename(bbl_file), content)
 				else:
-					logging.error(_T('File not found: %s'), bbl_file)
+					logging.error(T('File not found: %s'), bbl_file)
 		elif name == "\\addbibresource":
 			if self.use_biblio:
 				tex_name = parameter[1]['text']
@@ -546,16 +545,17 @@ class Flattener(Observer):
 			return filename.startswith(self.dirname)
 		return False
 
+	# noinspection DuplicatedCode
 	def __create_mapping(self, filename : str, ext : str) -> str:
 		"""
-		Compute an unique filename, and map it to the source file.
-		:param filename: The filename to translate.
-		:type filename: str
-		:param ext: The filename extension to remove.
-		:type ext: str
-		:return: The unique basename.
-		:rtype: str
-		"""
+                Compute an unique filename, and map it to the source file.
+                :param filename: The filename to translate.
+                :type filename: str
+                :param ext: The filename extension to remove.
+                :type ext: str
+                :return: The unique basename.
+                :rtype: str
+                """
 		name = os.path.basename(filename)
 		if ext and name.endswith(ext):
 			name = name[0:(-len(ext))]
@@ -568,6 +568,7 @@ class Flattener(Observer):
 		self.__source2target[filename] = name + ext
 		return name
 
+	# noinspection DuplicatedCode
 	def __find_picture(self, tex_name : str) -> tuple[str,str]:
 		"""
 		Find a picture.
@@ -619,7 +620,7 @@ class Flattener(Observer):
 						filenames[fn] = True
 
 			if not filenames:
-				logging.error(_T('Picture not found: %s'), tex_name)
+				logging.error(T('Picture not found: %s'), tex_name)
 			else:
 				selected_name1 = None
 				selected_name2 = None
@@ -634,7 +635,7 @@ class Flattener(Observer):
 						selected_name2 = tex_name
 				if selected_name1:
 					tex_name, filename = selected_name1
-					logging.debug(_T('Embedding %s'), filename)
+					logging.debug(T('Embedding %s'), filename)
 					with open(filename) as f:
 						filecontent = f.read()
 					# Replacing the filename in the newly embedded TeX file
@@ -642,6 +643,7 @@ class Flattener(Observer):
 						for source in self.__source2target:
 							filecontent = filecontent.replace('{' + source + '}',
 											'{' + self.__source2target[source] + '}')
+					bsn = os.path.basename(tex_name)
 					prefix +=	textwrap.dedent("""
 								%%=======================================================
 								%%== BEGIN FILE: %s
@@ -650,7 +652,7 @@ class Flattener(Observer):
 								%s
 								\\end{filecontents*}
 								%%=======================================================
-								""") % (os.path.basename(tex_name), os.path.basename(tex_name), filecontent)
+								""") % (bsn, bsn, filecontent)
 					self.__dynamic_preamble.append('\\usepackage{filecontents}')
 				elif selected_name2:
 					tex_name = selected_name2
@@ -659,8 +661,9 @@ class Flattener(Observer):
 			tex_name = self.__create_mapping(filename, ext) + ext
 			self.__files_to_copy.add(filename)
 
-		return (tex_name, prefix)
+		return tex_name, prefix
 
+	# noinspection DuplicatedCode
 	def _analyze_document(self) -> str:
 		"""
 		Analyze the tex document for extracting information.
@@ -706,7 +709,7 @@ class Flattener(Observer):
 		# Create the main TeX file
 		output_file = os.path.join(self.output_directory, self.basename) + '.tex'
 
-		logging.debug(_T('Writing %s') % output_file)
+		logging.debug(T('Writing %s') % output_file)
 		with open(output_file, 'w') as f:
 			f.write(content)
 
@@ -714,7 +717,7 @@ class Flattener(Observer):
 		for source in self.__files_to_copy:
 			target = self.__source2target[source]
 			target = os.path.join(self.output_directory, target)
-			logging.debug(_T('Copying resource %s to %s') % (source, target))
+			logging.debug(T('Copying resource %s to %s') % (source, target))
 			target_directory = os.path.dirname(target)
 			if not os.path.isdir(target_directory):
 				os.makedirs(target_directory)
@@ -728,7 +731,7 @@ class Flattener(Observer):
 		"""
 		self.__init()
 		content = self._analyze_document()
-		logging.debug(_T("File content: %s") % content)
+		logging.debug(T("File content: %s") % content)
 		return self._generate_flat_document(content)
 
 	@override

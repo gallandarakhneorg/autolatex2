@@ -29,6 +29,7 @@ from typing import override, Any
 from autolatex2.translator.interpreters.abstractinterpreter import AbstractTranslatorInterpreter
 from autolatex2.config.configobj import Config
 
+
 class TranslatorInterpreter(AbstractTranslatorInterpreter):
 	"""
 	Definition of a Python implementation of an interpreter for the AutoLaTeX translators.
@@ -36,7 +37,7 @@ class TranslatorInterpreter(AbstractTranslatorInterpreter):
 
 	def __init__(self,  configuration : Config):
 		"""
-		Construct an translator interpreter.
+		Construct a translator interpreter.
 		:param configuration: The general configuration.
 		:type configuration: Config
 		"""
@@ -46,7 +47,7 @@ class TranslatorInterpreter(AbstractTranslatorInterpreter):
 	@override
 	def runnable(self) -> bool:
 		"""
-		Replies if the interpreter is runnable, ie. the underground interpreter can be run.
+		Replies if the interpreter is runnable, i.e., the underground interpreter can be run.
 		:return: True if the interpreter could be run.
 		:rtype: bool
 		"""
@@ -83,6 +84,7 @@ class TranslatorInterpreter(AbstractTranslatorInterpreter):
 		"""
 		return "_%s" % name.strip()
 
+	# noinspection PyMethodMayBeStatic
 	def __find_line_prefix(self,  code_array : list[str]) -> str:
 		prefix = ''
 		if code_array and len(code_array) > 0:

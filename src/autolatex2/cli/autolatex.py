@@ -25,10 +25,7 @@ from typing import override
 from autolatex2.cli import exiters
 from autolatex2.cli.abstract_main import AbstractAutoLaTeXMain
 from autolatex2.utils.extlogging import ensure_autolatex_logging_levels
-
-import gettext
-_T = gettext.gettext
-
+from autolatex2.utils.i18n import T
 
 
 class AutoLaTeXMain(AbstractAutoLaTeXMain):
@@ -60,7 +57,7 @@ class AutoLaTeXMain(AbstractAutoLaTeXMain):
 		:param parser: the CLI parser
 		:type parser: argparse.ArgumentParser
 		"""
-		async_group = self.cli_parser.add_argument_group(_T('asynchronous behavior optional arguments'))
+		async_group = self.cli_parser.add_argument_group(T('asynchronous behavior optional arguments'))
 
 		outer : AutoLaTeXMain = self
 
@@ -75,15 +72,15 @@ class AutoLaTeXMain(AbstractAutoLaTeXMain):
 
 		view_group.add_argument('--view',
 			action = ViewAction, 
-			const=True, 
-			nargs=0, 
-			help=_T('Enable the document viewer at the end of the compilation'))
+			const = True,
+			nargs = 0,
+			help = T('Enable the document viewer at the end of the compilation'))
 
 		view_group.add_argument('--noview',
 			action = ViewAction, 
-			const=False, 
-			nargs=0, 
-			help=_T('Disable the document viewer at the end of the compilation'))
+			const = False,
+			nargs = 0,
+			help = T('Disable the document viewer at the end of the compilation'))
 
 		# --asyncview
 		# --noasyncview
@@ -95,16 +92,16 @@ class AutoLaTeXMain(AbstractAutoLaTeXMain):
 				outer.configuration.view.async_view = self.const
 
 		async_view_group.add_argument('--asyncview',
-			action=AsyncViewAction,
-			const=True, 
-			nargs=0, 
-			help=_T('Enable the asynchronous launching of the viewer'))
+			action = AsyncViewAction,
+			const = True,
+			nargs = 0,
+			help = T('Enable the asynchronous launching of the viewer'))
 
 		async_view_group.add_argument('--noasyncview',
-			action=AsyncViewAction,
-			const=False, 
-			nargs=0, 
-			help=_T('Disable the asynchronous launching of the viewer'))
+			action = AsyncViewAction,
+			const = False,
+			nargs = 0,
+			help = T('Disable the asynchronous launching of the viewer'))
 
 		# --continuous
 		# --nocontinuous
@@ -123,8 +120,8 @@ class AutoLaTeXMain(AbstractAutoLaTeXMain):
 		continuous_group.add_argument('--continuous',
 			action = ContinuousAction, 
 			nargs = '?', 
-			metavar='SECONDS',
-			help=_T('Do not stop AutoLaTeX, and continually do the action(s) given as parameter(s). If SECONDS is specified, it is the delay to wait for between two runs of AutoLaTeX'))
+			metavar = 'SECONDS',
+			help = T('Do not stop AutoLaTeX, and continually do the action(s) given as parameter(s). If SECONDS is specified, it is the delay to wait for between two runs of AutoLaTeX'))
 
 		class NoContinuousAction(argparse.Action):
 			@override
@@ -132,9 +129,9 @@ class AutoLaTeXMain(AbstractAutoLaTeXMain):
 				outer.configuration.infinite_loop = False
 
 		continuous_group.add_argument('--nocontinuous', 
-			action=NoContinuousAction,
+			action = NoContinuousAction,
 			nargs = 0, 
-			help=_T('Disable continuous execution of AutoLaTeX'))
+			help = T('Disable continuous execution of AutoLaTeX'))
 
 
 	@override
@@ -147,10 +144,10 @@ class AutoLaTeXMain(AbstractAutoLaTeXMain):
 		self.__commands = self.build_command_dict('autolatex2.cli.commands')
 		if self.__commands:
 			if self.configuration.default_cli_action:
-				help_msg = _T('Command to be run by autolatex, by default \'%s\'. Available commands are:') % self.configuration.default_cli_action
+				help_msg = T('Command to be run by autolatex, by default \'%s\'. Available commands are:') % self.configuration.default_cli_action
 			else:
-				help_msg = _T('Command to be run by autolatex. Available commands are:')
-			self._create_cli_arguments_for_commands(commands=self.__commands, title=_T("commands"), help_text=help_msg)
+				help_msg = T('Command to be run by autolatex. Available commands are:')
+			self._create_cli_arguments_for_commands(commands=self.__commands, title=T("commands"), help_text=help_msg)
 
 
 

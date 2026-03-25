@@ -27,15 +27,14 @@ from autolatex2.translator.translatorrepository import TranslatorRepository
 from autolatex2.translator.translatorrunner import TranslatorRunner
 from autolatex2.utils.extprint import eprint
 import autolatex2.utils.utilfunctions as genutils
+from autolatex2.utils.i18n import T
 
-import gettext
-_T = gettext.gettext
 
 class MakerAction(AbstractMakerAction):
 
 	id : str = 'showimages'
 
-	help : str = _T('Display the filenames of the figures that are automatically generated')
+	help : str = T('Display the filenames of the figures that are automatically generated')
 
 	@override
 	def _add_command_cli_arguments(self, command_name : str, command_help : str | None,
@@ -50,19 +49,19 @@ class MakerAction(AbstractMakerAction):
 		output_group = self.parse_cli.add_mutually_exclusive_group()
 
 		output_group.add_argument('--changed',
-			action='store_true',
-			dest='show_changed_images',
-			help=_T('Show only the images for which the generated files are not up-to-date'))
+			action = 'store_true',
+			dest = 'show_changed_images',
+			help = T('Show only the images for which the generated files are not up-to-date'))
 
 		output_group.add_argument('--translators',
-			action='store_true',
-			dest='show_image_translators',
-			help=_T('Show the names of the translators that is associated to each of the images'))
+			action = 'store_true',
+			dest = 'show_image_translators',
+			help = T('Show the names of the translators that is associated to each of the images'))
 
 		output_group.add_argument('--valid',
-			action='store_true',
-			dest='show_valid_images',
-			help=_T('Show only the images for which the generated files are up-to-date'))
+			action = 'store_true',
+			dest = 'show_valid_images',
+			help = T('Show only the images for which the generated files are up-to-date'))
 
 
 	@override
@@ -102,20 +101,22 @@ class MakerAction(AbstractMakerAction):
 		elif cli_arguments.show_image_translators:
 			self._show_image_translators(image_list, runner)
 		else:
-			self._show_all_images(image_list, runner)
+			self._show_all_images(image_list)
 		return True
 
-	def _show_all_images(self,  image_list : dict[str,str], runner : TranslatorRunner):
+	# noinspection PyMethodMayBeStatic
+	def _show_all_images(self,  image_list : dict[str,str]):
 		sorted_dict = {k: image_list[k] for k in sorted(image_list)}
 		for abspath, relpath in sorted_dict.items():
 			eprint(relpath)
 
+	# noinspection PyMethodMayBeStatic
 	def _show_image_translators(self,  image_list : dict[str,str], runner : TranslatorRunner):
 		sorted_dict = {k: image_list[k] for k in sorted(image_list)}
 		for abspath, relpath in sorted_dict.items():
 			translator = runner.get_translator_for(abspath)
 			if translator:
-				eprint(_T("%s => %s") % (relpath, translator.name))
+				eprint(T("%s => %s") % (relpath, translator.name))
 
 	def _show_changed_images(self,  image_list : dict[str,str], runner : TranslatorRunner):
 		sorted_dict = {k: image_list[k] for k in sorted(image_list)}
@@ -129,6 +130,7 @@ class MakerAction(AbstractMakerAction):
 			if self._is_valid_image(abspath,  runner):
 				eprint(relpath)
 
+	# noinspection PyMethodMayBeStatic
 	def _is_valid_image(self,  image : str, runner : TranslatorRunner) -> bool:
 			in_change = genutils.get_file_last_change(image)
 			target_files = runner.get_target_files(in_file=image)

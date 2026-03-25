@@ -22,9 +22,8 @@ from argparse import Namespace
 from typing import override
 
 from autolatex2.cli.abstract_actions import AbstractMakerAction
+from autolatex2.utils.i18n import T
 
-import gettext
-_T = gettext.gettext
 
 # Extends MakerAction from document module (alias extended_maker_action) in order
 # to inherit from this super action.
@@ -32,7 +31,7 @@ class MakerAction(AbstractMakerAction):
 
 	id : str = 'view'
 
-	help : str = _T('Performs all processing actions that are required to produce the PDF, DVI or Postscript and to view it with the specified PDF viewer')
+	help : str = T('Performs all processing actions that are required to produce the PDF, DVI or Postscript and to view it with the specified PDF viewer')
 
 
 	@override

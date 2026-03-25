@@ -41,12 +41,7 @@ from autolatex2.translator.translatorobj import TranslatorLevel
 from autolatex2.utils.extlogging import LogLevel, DynamicLogLevelFormatter
 import autolatex2.utils.extprint as eprintpkg
 import autolatex2.utils.utilfunctions as genutils
-
-import gettext
-_T = gettext.gettext
-
-
-#SUPPRESS = '==SUPPRESS=='
+from autolatex2.utils.i18n import T
 
 
 class AbstractAutoLaTeXMain(ABC):
@@ -213,15 +208,15 @@ class AbstractAutoLaTeXMain(ABC):
 		"""
 		# --version
 		self._cli_parser.add_argument('--version',
-			action='version',
-			help=_T('Display the version of AutoLaTeX'))
+			action = 'version',
+			help = T('Display the version of AutoLaTeX'))
 
 
 	def _add_standard_cli_options_path(self):
 		"""
 		Add standard CLI options in the "path configuration" category.
 		"""
-		path_group = self._cli_parser.add_argument_group(_T('path optional arguments'))
+		path_group = self._cli_parser.add_argument_group(T('path optional arguments'))
 
 		input_method_group = path_group.add_mutually_exclusive_group()
 
@@ -235,11 +230,11 @@ class AbstractAutoLaTeXMain(ABC):
 					outer.configuration.document_directory = value
 					outer.configuration.document_filename = None
 				else:
-					logging.error(_T("Invalid directory: %s") % value)
+					logging.error(T("Invalid directory: %s") % value)
 					outer._exit_on_failure()
 		input_method_group.add_argument('-d', '--directory',
-			action=DirectoryAction, 
-			help=_T('Specify a directory in which a LaTeX document to compile is located. You could specify this option for each directory in which you have a LaTeX document to treat'))
+			action = DirectoryAction,
+			help = T('Specify a directory in which a LaTeX document to compile is located. You could specify this option for each directory in which you have a LaTeX document to treat'))
 
 		# --file
 		class FileAction(argparse.Action):
@@ -248,12 +243,12 @@ class AbstractAutoLaTeXMain(ABC):
 				if os.path.isfile(value):
 					outer.configuration.set_document_directory_and_filename(value)
 				else:
-					logging.error(_T("File not found: %s") % value)
+					logging.error(T("File not found: %s") % value)
 					outer._exit_on_failure()
 		input_method_group.add_argument('-f', '--file',
-			action=FileAction, 
-			metavar='TEX_FILE',
-			help=_T('Specify the main LaTeX file to compile. If this option is not specified, AutoLaTeX will search for a TeX file in the current directory'))
+			action = FileAction,
+			metavar = 'TEX_FILE',
+			help = T('Specify the main LaTeX file to compile. If this option is not specified, AutoLaTeX will search for a TeX file in the current directory'))
 
 		# --search-project-from
 		class SearchProjectFromAction(argparse.Action):
@@ -269,15 +264,15 @@ class AbstractAutoLaTeXMain(ABC):
 					outer.__read_document_configuration = False
 		path_group.add_argument('--search-project-from',
 			action=SearchProjectFromAction, 
-			metavar='FILE',
-			help=_T('When this option is specified, AutoLaTeX is searching a project configuration file (usually \'.autolatex_project.cfg\' on Unix platforms) in the directory of the specified FILE or in one of its ancestors'))
+			metavar = 'FILE',
+			help = T('When this option is specified, AutoLaTeX is searching a project configuration file (usually \'.autolatex_project.cfg\' on Unix platforms) in the directory of the specified FILE or in one of its ancestors'))
 
 
 	def _add_standard_cli_options_output(self):
 		"""
 		Add standard CLI options in the "output configuration" category.
 		"""
-		output_group = self._cli_parser.add_argument_group(_T('output optional arguments'))
+		output_group = self._cli_parser.add_argument_group(T('output optional arguments'))
 
 		output_type_group = output_group.add_mutually_exclusive_group()
 
@@ -289,9 +284,9 @@ class AbstractAutoLaTeXMain(ABC):
 			def __call__(self, parser, namespace, value, option_string=None):
 				outer.configuration.generation.pdf_mode = True
 		output_type_group.add_argument('--pdf',
-			action=PdfAction, 
-			nargs=0, 
-			help=_T('Do the compilation to produce a PDF document'))
+			action = PdfAction,
+			nargs = 0,
+			help = T('Do the compilation to produce a PDF document'))
 
 		# --dvi
 		# --ps
@@ -300,9 +295,9 @@ class AbstractAutoLaTeXMain(ABC):
 			def __call__(self, parser, namespace, value, option_string=None):
 				outer.configuration.generation.pdf_mode = False
 		output_type_group.add_argument('--dvi',  '--ps',
-			action=DvipsAction,
-			nargs=0, 
-			help=_T('Do the compilation to produce a DVI, XDV or Postscript document'))
+			action = DvipsAction,
+			nargs = 0,
+			help = T('Do the compilation to produce a DVI, XDV or Postscript document'))
 
 		# --stdout
 		# --stderr
@@ -314,23 +309,23 @@ class AbstractAutoLaTeXMain(ABC):
 		std_output_group = output_group.add_mutually_exclusive_group()
 
 		std_output_group.add_argument('--stdout',
-			action=StdouterrAction, 
+			action = StdouterrAction,
 			const = True, 
-			nargs=0, 
-			help=_T('All the standard messages (no log message) are printed out on the standard output (stdout) of the process'))
+			nargs = 0,
+			help = T('All the standard messages (no log message) are printed out on the standard output (stdout) of the process'))
 
 		std_output_group.add_argument('--stderr',
-			action=StdouterrAction, 
+			action = StdouterrAction,
 			const = False, 
-			nargs=0, 
-			help=_T('All the standard messages (no log message) are printed out on the standard error output (stderr) of the process'))
+			nargs = 0,
+			help = T('All the standard messages (no log message) are printed out on the standard error output (stderr) of the process'))
 
 
 	def _add_standard_cli_options_tex(self):
 		"""
 		Add standard CLI options in the "tex configuration" category.
 		"""
-		tex_group = self._cli_parser.add_argument_group(_T('TeX optional arguments'))
+		tex_group = self._cli_parser.add_argument_group(T('TeX optional arguments'))
 
 		tex_tool_group = tex_group.add_mutually_exclusive_group()
 
@@ -342,9 +337,9 @@ class AbstractAutoLaTeXMain(ABC):
 			def __call__(self, parser, namespace, value, option_string=None):
 				outer.configuration.generation.latex_compiler = 'pdflatex'
 		tex_tool_group.add_argument('--pdflatex',
-			action=PdflatexCmdAction,
-			nargs=0, 
-			help=_T('Use the LaTeX command: \'pdflatex\''))
+			action = PdflatexCmdAction,
+			nargs = 0,
+			help = T('Use the LaTeX command: \'pdflatex\''))
 
 		# --latex
 		class LatexCmdAction(argparse.Action):
@@ -352,9 +347,9 @@ class AbstractAutoLaTeXMain(ABC):
 			def __call__(self, parser, namespace, value, option_string=None):
 				outer.configuration.generation.latex_compiler = 'latex'
 		tex_tool_group.add_argument('--latex',
-			action=LatexCmdAction,
-			nargs=0, 
-			help=_T('Use the historical LaTeX command: \'latex\''))
+			action = LatexCmdAction,
+			nargs = 0,
+			help = T('Use the historical LaTeX command: \'latex\''))
 
 		# --lualatex
 		class LualatexCmdAction(argparse.Action):
@@ -362,9 +357,9 @@ class AbstractAutoLaTeXMain(ABC):
 			def __call__(self, parser, namespace, value, option_string=None):
 				outer.configuration.generation.latex_compiler = 'lualatex'
 		tex_tool_group.add_argument('--lualatex',
-			action=LualatexCmdAction,
-			nargs=0, 
-			help=_T('Use the LaTeX command: \'lualatex\''))
+			action = LualatexCmdAction,
+			nargs = 0,
+			help = T('Use the LaTeX command: \'lualatex\''))
 
 		# --xelatex
 		class XelatexCmdAction(argparse.Action):
@@ -372,9 +367,9 @@ class AbstractAutoLaTeXMain(ABC):
 			def __call__(self, parser, namespace, value, option_string=None):
 				outer.configuration.generation.latex_compiler = 'xelatex'
 		tex_tool_group.add_argument('--xelatex',
-			action=XelatexCmdAction,
-			nargs=0, 
-			help=_T('Use the LaTeX command: \'xelatex\''))
+			action = XelatexCmdAction,
+			nargs = 0,
+			help = T('Use the LaTeX command: \'xelatex\''))
 
 		# --synctex
 		# --nosynctex
@@ -386,23 +381,23 @@ class AbstractAutoLaTeXMain(ABC):
 				outer.configuration.generation.synctex = self.const
 
 		synctex_group.add_argument('--synctex',
-			action=SynctexAction,
+			action = SynctexAction,
 			const = True, 
-			nargs=0, 
-			help=_T('Enable the generation of the output file with SyncTeX'))
+			nargs = 0,
+			help = T('Enable the generation of the output file with SyncTeX'))
 
 		synctex_group.add_argument('--nosynctex',
-			action=SynctexAction,
+			action = SynctexAction,
 			const = False, 
-			nargs=0, 
-			help=_T('Disable the generation of the output file with SyncTeX'))
+			nargs = 0,
+			help = T('Disable the generation of the output file with SyncTeX'))
 
 
 	def _add_standard_cli_options_translator(self):
 		"""
 		Add standard CLI options in the "translator configuration" category.
 		"""
-		translator_group = self._cli_parser.add_argument_group(_T('translator optional arguments'))
+		translator_group = self._cli_parser.add_argument_group(T('translator optional arguments'))
 
 		outer : AbstractAutoLaTeXMain = self
 
@@ -416,16 +411,16 @@ class AbstractAutoLaTeXMain(ABC):
 		enable_translator_group = translator_group.add_mutually_exclusive_group()
 
 		enable_translator_group.add_argument('--auto',
-			action=AutoAction,
-			const=True, 
-			nargs=0, 
-			help=_T('Enable the auto generation of the figures'))
+			action = AutoAction,
+			const = True,
+			nargs = 0,
+			help = T('Enable the auto generation of the figures'))
 
 		enable_translator_group.add_argument('--noauto',
-			action=AutoAction,
-			const=False, 
-			nargs=0, 
-			help=_T('Disable the auto generation of the figures'))
+			action = AutoAction,
+			const = False,
+			nargs = 0,
+			help = T('Disable the auto generation of the figures'))
 
 		# --exclude
 		class ExcludeAction(argparse.Action):
@@ -433,9 +428,9 @@ class AbstractAutoLaTeXMain(ABC):
 			def __call__(self, parser, namespace, value, option_string=None):
 				outer.configuration.translators.set_included(value, TranslatorLevel.DOCUMENT, False)
 		translator_group.add_argument('-e', '--exclude',
-			action=ExcludeAction,
-			metavar='TRANSLATOR',
-			help=_T('Avoid AutoLaTeX to load the translator named TRANSLATOR'))
+			action = ExcludeAction,
+			metavar = 'TRANSLATOR',
+			help = T('Avoid AutoLaTeX to load the translator named TRANSLATOR'))
 
 		# --include
 		class IncludeAction(argparse.Action):
@@ -443,9 +438,9 @@ class AbstractAutoLaTeXMain(ABC):
 			def __call__(self, parser, namespace, value, option_string=None):
 				outer.configuration.translators.set_included(value, TranslatorLevel.DOCUMENT, True)
 		translator_group.add_argument('-i', '--include',
-			action=IncludeAction,
-			metavar='TRANSLATOR',
-			help=_T('Force AutoLaTeX to load the translator named TRANSLATOR'))
+			action = IncludeAction,
+			metavar = 'TRANSLATOR',
+			help = T('Force AutoLaTeX to load the translator named TRANSLATOR'))
 
 		# --include-path
 		class IncludePathAction(argparse.Action):
@@ -455,9 +450,9 @@ class AbstractAutoLaTeXMain(ABC):
 				for path in paths:
 					outer.configuration.translators.add_include_path(path)
 		translator_group.add_argument('-I', '--include-path',
-			action=IncludePathAction,
-			metavar='PATH',
-			help=_T('Notify AutoLaTeX that it could find translator scripts inside the specified directories. The specified PATH could be a list of paths separated by the operating system\'s path separator (\':\' for Unix, \';\' for Windows for example)'))
+			action = IncludePathAction,
+			metavar = 'PATH',
+			help = T('Notify AutoLaTeX that it could find translator scripts inside the specified directories. The specified PATH could be a list of paths separated by the operating system\'s path separator (\':\' for Unix, \';\' for Windows for example)'))
 
 		# --imgdirectory
 		class ImgDirectoryAction(argparse.Action):
@@ -467,16 +462,16 @@ class AbstractAutoLaTeXMain(ABC):
 				for path in paths:
 					outer.configuration.translators.add_image_path(path)
 		translator_group.add_argument('-D', '--imgdirectory',
-			action=ImgDirectoryAction,
-			metavar='DIRECTORY',
-			help=_T('Specify a directory inside which AutoLaTeX will find the pictures which must be processed by the translators. Each time this option is put on the command line, a directory is added inside the list of the directories to explore'))
+			action = ImgDirectoryAction,
+			metavar = 'DIRECTORY',
+			help = T('Specify a directory inside which AutoLaTeX will find the pictures which must be processed by the translators. Each time this option is put on the command line, a directory is added inside the list of the directories to explore'))
 
 
 	def _add_standard_cli_options_biblio(self):
 		"""
 		Add standard CLI options in the "bibliography configuration" category.
 		"""
-		biblio_group = self._cli_parser.add_argument_group(_T('bibliography optional arguments'))
+		biblio_group = self._cli_parser.add_argument_group(T('bibliography optional arguments'))
 
 		outer : AbstractAutoLaTeXMain = self
 
@@ -493,20 +488,20 @@ class AbstractAutoLaTeXMain(ABC):
 			action=BiblioAction,
 			const = True, 
 			nargs = 0, 
-			help=_T('Enable the call to the bibliography tool (BibTeX, Biber...)'))
+			help = T('Enable the call to the bibliography tool (BibTeX, Biber...)'))
 
 		enable_biblio_group.add_argument('--nobiblio',
 			action=BiblioAction,
 			const = False, 
 			nargs = 0, 
-			help=_T('Disable the call to the bibliography tool (BibTeX, Biber...)'))
+			help = T('Disable the call to the bibliography tool (BibTeX, Biber...)'))
 
 
 	def _add_standard_cli_options_index(self):
 		"""
 		Add standard CLI options in the "index configuration" category.
 		"""
-		index_group = self._cli_parser.add_argument_group(_T('index optional arguments'))
+		index_group = self._cli_parser.add_argument_group(T('index optional arguments'))
 
 		outer : AbstractAutoLaTeXMain = self
 
@@ -516,9 +511,9 @@ class AbstractAutoLaTeXMain(ABC):
 			def __call__(self, parser, namespace, value, option_string=None):
 				outer.configuration.generation.makeindex_style_filename = outer.configuration.get_system_ist_file()
 		index_group.add_argument('--defaultist',
-			action=DefaultistAction,
-			nargs=0, 
-			help=_T('Allow AutoLaTeX to use MakeIndex with the default style (\'.ist\' file)'))
+			action = DefaultistAction,
+			nargs = 0,
+			help = T('Allow AutoLaTeX to use MakeIndex with the default style (\'.ist\' file)'))
 
 		# --index
 		index_e_group = index_group.add_mutually_exclusive_group()
@@ -532,15 +527,15 @@ class AbstractAutoLaTeXMain(ABC):
 					if os.path.isfile(path):
 						outer.configuration.generation.makeindex_style_filename = path
 					else:
-						logging.error(_T("File not found: %s") % value)
+						logging.error(T("File not found: %s") % value)
 						outer._exit_on_failure()
 						return
 		index_e_group.add_argument('--index',
 			action = IndexAction, 
 			default = None, 
 			nargs = '?', 
-			metavar='FILE',
-			help=_T('Allow AutoLaTeX to use MakeIndex. If this option was specified with a value, the FILE value will be assumed to be an \'.ist\' file to pass to MakeIndex'))
+			metavar = 'FILE',
+			help = T('Allow AutoLaTeX to use MakeIndex. If this option was specified with a value, the FILE value will be assumed to be an \'.ist\' file to pass to MakeIndex'))
 
 		# --noindex
 		class NoindexAction(argparse.Action):
@@ -550,14 +545,14 @@ class AbstractAutoLaTeXMain(ABC):
 		index_e_group.add_argument('--noindex',
 			action = NoindexAction,
 			nargs = 0, 
-			help=_T('Avoid AutoLaTeX to use MakeIndex'))
+			help = T('Avoid AutoLaTeX to use MakeIndex'))
 
 
 	def _add_standard_cli_options_glossary(self):
 		"""
 		Add standard CLI options in the "glossary configuration" category.
 		"""
-		glossary_group = self._cli_parser.add_argument_group(_T('glossary optional arguments'))
+		glossary_group = self._cli_parser.add_argument_group(T('glossary optional arguments'))
 
 		outer : AbstractAutoLaTeXMain = self
 
@@ -576,20 +571,20 @@ class AbstractAutoLaTeXMain(ABC):
 			action=GlossaryAction,
 			const = True, 
 			nargs = 0, 
-			help=_T('Enable the call to the glossary tool (makeglossaries...)'))
+			help = T('Enable the call to the glossary tool (makeglossaries...)'))
 
 		glossary_e_group.add_argument('--noglossary', '--nogloss', 
 			action=GlossaryAction,
 			const = False, 
 			nargs = 0, 
-			help=_T('Disable the call to the glossary tool (makeglossaries...)'))
+			help = T('Disable the call to the glossary tool (makeglossaries...)'))
 
 
 	def _add_standard_cli_options_warning(self):
 		"""
 		Add standard CLI options in the "warning configuration" category.
 		"""
-		warning_cfg_group = self._cli_parser.add_argument_group(_T('warning optional arguments'))
+		warning_cfg_group = self._cli_parser.add_argument_group(T('warning optional arguments'))
 
 		outer : AbstractAutoLaTeXMain = self
 
@@ -606,19 +601,19 @@ class AbstractAutoLaTeXMain(ABC):
 			action=FilelinewarningAction,
 			const = True, 
 			nargs=0, 
-			help=_T('Enable the extended format for warnings. This format add the filename and the line number where the warning is occuring, before the warning message by itself'))
+			help = T('Enable the extended format for warnings. This format add the filename and the line number where the warning is occuring, before the warning message by itself'))
 
 		warning_group.add_argument('--nofile-line-warning',
 			action=FilelinewarningAction,
 			const = False, 
 			nargs=0, 
-			help=_T('Disable the extended format for warnings. This format add the filename and the line number where the warning is occuring, before the warning message by itself'))
+			help = T('Disable the extended format for warnings. This format add the filename and the line number where the warning is occuring, before the warning message by itself'))
 
 	def _add_standard_cli_options_logging(self):
 		"""
 		Add standard CLI options in the "logging configuration" category.
 		"""
-		logging_group = self._cli_parser.add_argument_group(_T('logging optional arguments'))
+		logging_group = self._cli_parser.add_argument_group(T('logging optional arguments'))
 
 		outer : AbstractAutoLaTeXMain = self
 
@@ -631,9 +626,9 @@ class AbstractAutoLaTeXMain(ABC):
 				for handler in logger.handlers:
 					handler.setLevel(LogLevel.DEBUG)
 		logging_group.add_argument('--debug',
-			action=DebugAction,
-			nargs=0, 
-			help=_T('Run AutoLaTeX in debug mode, i.e., the maximum logging level'))
+			action = DebugAction,
+			nargs = 0,
+			help = T('Run AutoLaTeX in debug mode, i.e., the maximum logging level'))
 
 		# --quiet
 		class QuietAction(argparse.Action):
@@ -644,9 +639,9 @@ class AbstractAutoLaTeXMain(ABC):
 				for handler in logger.handlers:
 					handler.setLevel(LogLevel.ERROR)
 		logging_group.add_argument('-q', '--quiet',
-			action=QuietAction,
-			nargs=0, 
-			help=_T('Run AutoLaTeX without logging except the errors'))
+			action = QuietAction,
+			nargs = 0,
+			help = T('Run AutoLaTeX without logging except the errors'))
 
 		# --silent
 		class SilentAction(argparse.Action):
@@ -657,9 +652,9 @@ class AbstractAutoLaTeXMain(ABC):
 				for handler in logger.handlers:
 					handler.setLevel(LogLevel.OFF)
 		logging_group.add_argument('--silent',
-			action=SilentAction,
-			nargs=0, 
-			help=_T('Run AutoLaTeX without logging, including no error message'))
+			action = SilentAction,
+			nargs = 0,
+			help = T('Run AutoLaTeX without logging, including no error message'))
 
 		# --info
 		class InfoAction(argparse.Action):
@@ -670,9 +665,9 @@ class AbstractAutoLaTeXMain(ABC):
 				for handler in logger.handlers:
 					handler.setLevel(LogLevel.INFO)
 		logging_group.add_argument('--info',
-			action=InfoAction,
-			nargs=0,
-			help=_T('Run AutoLaTeX with info logging level'))
+			action = InfoAction,
+			nargs = 0,
+			help = T('Run AutoLaTeX with info logging level'))
 
 		# --verbose
 		class VerboseAction(argparse.Action):
@@ -689,9 +684,9 @@ class AbstractAutoLaTeXMain(ABC):
 					for handler in logger.handlers:
 						handler.setLevel(level)
 		logging_group.add_argument('-v', '--verbose',
-			action=VerboseAction,
-			nargs=0, 
-			help=_T('Each time this option was specified, AutoLaTeX is more verbose'))
+			action = VerboseAction,
+			nargs = 0,
+			help = T('Each time this option was specified, AutoLaTeX is more verbose'))
 
 		# --Wall
 		class WallAction(argparse.Action):
@@ -702,9 +697,9 @@ class AbstractAutoLaTeXMain(ABC):
 				for handler in logger.handlers:
 					handler.setLevel(LogLevel.FINE_WARNING)
 		logging_group.add_argument('--Wall',
-			action=WallAction,
-			nargs=0, 
-			help=_T('Show all the warnings'))
+			action = WallAction,
+			nargs = 0,
+			help = T('Show all the warnings'))
 
 		#--Wnone
 		class WnoneAction(argparse.Action):
@@ -715,9 +710,9 @@ class AbstractAutoLaTeXMain(ABC):
 				for handler in logger.handlers:
 					handler.setLevel(LogLevel.ERROR)
 		logging_group.add_argument('--Wnone',
-			action=WnoneAction,
-			nargs=0, 
-			help=_T('Show no warning'))
+			action = WnoneAction,
+			nargs = 0,
+			help = T('Show no warning'))
 
 		#--showloglevel
 		class ShowloglevelAction(argparse.Action):
@@ -729,23 +724,22 @@ class AbstractAutoLaTeXMain(ABC):
 				eprintpkg.eprint("%s (%d)" % (level_name, level))
 				outer._exit_on_success()
 		logging_group.add_argument('--showloglevel',
-			action=ShowloglevelAction,
-			nargs=0,
-			help=_T('Show the current level of logging'))
+			action = ShowloglevelAction,
+			nargs = 0,
+			help = T('Show the current level of logging'))
 
 		#--testlogs
 		class TestlogsAction(argparse.Action):
 			@override
 			def __call__(self, parser, namespace, value, option_string=None):
-				logger = logging.getLogger()
 				for level in LogLevel:
 					level_name = LogLevel.get_logging_level_name(level)
-					logging.log(level, _T("message for level '%s' (%d)") % (level_name, level))
+					logging.log(level, T("message for level '%s' (%d)") % (level_name, level))
 				outer._exit_on_success()
 		logging_group.add_argument('--testlogs',
-			action=TestlogsAction,
-			nargs=0,
-			help=_T('Show a message at each level of logging'))
+			action = TestlogsAction,
+			nargs = 0,
+			help = T('Show a message at each level of logging'))
 
 
 	def _init_logging_system(self):
@@ -761,6 +755,7 @@ class AbstractAutoLaTeXMain(ABC):
 			logger.addHandler(handler)
 			logger.setLevel(self.__configuration.logging.level)
 
+	# noinspection PyMethodMayBeStatic
 	def _build_help_epilog(self) -> str | None:
 		"""
 		Build a string that could serve as help epilog.
@@ -769,6 +764,7 @@ class AbstractAutoLaTeXMain(ABC):
 		"""
 		return None
 
+	# noinspection PyMethodMayBeStatic
 	def _create_cli_parser(self, name : str, version : str, default_arg : Any | None = None,
 						   description : str | None = None, osname : str | None = None,
 						   platform_name : str | None = None, epilog : str | None = None) -> argparse.ArgumentParser:
@@ -792,7 +788,11 @@ class AbstractAutoLaTeXMain(ABC):
 		:rtype: argparse.ArgumentParser
 		"""
 		if not description:
-			description = _T('AutoLaTeX is a tool for managing small to large sized LaTeX documents. The user can easily perform all required steps to do such tasks as: preview the document, or produce a PDF file. AutoLaTeX will keep track of files that have changed and how to run the various programs that are needed to produce the output. One of the best feature of AutoLaTeX is to provide translator rules (aka. translators) to automatically generate the figures which will be included into the PDF.')
+			description = T('AutoLaTeX is a tool for managing small to large sized LaTeX documents. The user can easily '
+				'perform all required steps to do such tasks as: preview the document, or produce a PDF file. '
+				'AutoLaTeX will keep track of files that have changed and how to run the various programs that '
+				'are needed to produce the output. One of the best feature of AutoLaTeX is to provide translator '
+				'rules (aka. translators) to automatically generate the figures which will be included into the PDF.')
 		if not osname:
 			osname = os.name
 		if not platform_name:
@@ -802,7 +802,7 @@ class AbstractAutoLaTeXMain(ABC):
 										 description=description,
 										 epilog=epilog,
 										 formatter_class=argparse.HelpFormatter)
-		parser.version = _T("%s %s - %s/%s platform") % (name, version, osname, platform_name)
+		parser.version = T("%s %s - %s/%s platform") % (name, version, osname, platform_name)
 		return parser
 
 
@@ -859,6 +859,7 @@ class AbstractAutoLaTeXMain(ABC):
 		return parsed_args, positional_arguments, other_args
 
 
+	# noinspection PyUnusedLocal
 	def _post_run_program(self,  cli_arguments : Namespace, positional_arguments: list[str], unknown_arguments: list[str]):
 		"""
 		Run the behavior of the main program after the specific behavior.
@@ -997,7 +998,7 @@ class AbstractAutoLaTeXMain(ABC):
 					for prereq in instance.prerequisites:
 						queue.append(prereq)
 				else:
-					msg = _T('Undefined command %s') % cmd
+					msg = T('Undefined command %s') % cmd
 					logging.error(msg)
 					ex = Exception(msg)
 					self._exit_on_exception(ex)
@@ -1012,7 +1013,7 @@ class AbstractAutoLaTeXMain(ABC):
 				if cmd not in in_degree:
 					in_degree[cmd] = 0
 			else:
-				msg = _T('Undefined command %s') % cmd
+				msg = T('Undefined command %s') % cmd
 				logging.error(msg)
 				ex = Exception(msg)
 				self._exit_on_exception(ex)
@@ -1033,7 +1034,7 @@ class AbstractAutoLaTeXMain(ABC):
 					queue.append(neighbor)
 
 		if in_degree:
-			msg = _T('Cycle detected in command prerequisites')
+			msg = T('Cycle detected in command prerequisites')
 			logging.error(msg)
 			ex = ValueError(msg)
 			self._exit_on_exception(ex)
@@ -1044,8 +1045,8 @@ class AbstractAutoLaTeXMain(ABC):
 	def _execute_commands(self,  commands_to_run : list[str],  all_commands : dict[str,AutolatexCommand], cli_arguments : Namespace):
 		"""
 		Execute the commands.
-		:param command_to_run: List of arguments on the command line.
-		:type command_to_run: list[str]
+		:param commands_to_run: List of arguments on the command line.
+		:type commands_to_run: list[str]
 		:param all_commands: Dict of all the available commands.
 		:type all_commands: dict[str,AutolatexCommand]
 		:param cli_arguments: the successfully parsed CLI arguments.
@@ -1054,25 +1055,24 @@ class AbstractAutoLaTeXMain(ABC):
 
 		# Check existing command
 		if not commands_to_run:
-			logging.error(_T('Unable to determine the command to run'))
+			logging.error(T('Unable to determine the command to run'))
 			self._exit_on_failure()
-			return None
+		else:
+			# Build the list of commands
+			cmds = self.build_command_list_from_prerequisites(commands_to_run, all_commands)
 
-		# Build the list of commands
-		cmds = self.build_command_list_from_prerequisites(commands_to_run, all_commands)
-
-		# Run the commands
-		for cmd in cmds:
-			try:
-				cmd_instance = all_commands[cmd]
-				continuation = cmd_instance.instance.run(cli_arguments)
-				if not continuation:
-					self._exit_on_success()
+			# Run the commands
+			for cmd in cmds:
+				try:
+					cmd_instance = all_commands[cmd]
+					continuation = cmd_instance.instance.run(cli_arguments)
+					if not continuation:
+						self._exit_on_success()
+						break
+				except BaseException as exception:
+					#logging.error(_T('Error when running the command: %s') % str(exception))
+					self._exit_on_exception(exception)
 					break
-			except BaseException as exception:
-				#logging.error(_T('Error when running the command: %s') % str(exception))
-				self._exit_on_exception(exception)
-				break
 
 	@staticmethod
 	def _detect_tex_file(directory : str) -> str | None:
@@ -1086,13 +1086,13 @@ class AbstractAutoLaTeXMain(ABC):
 		files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f)) and f.endswith('.tex')]
 		length = len(files)
 		if length <= 0:
-			logging.error(_T("Unable to find a TeX file to compile in: %s") % directory)
+			logging.error(T("Unable to find a TeX file to compile in: %s") % directory)
 			return None
 		else:
 			file = files[0]
 			if length > 1:
-				logging.warning(_T("Too much TeX files in: %s") % directory)
-				logging.warning(_T("Select the TeX file: %s") % file)
+				logging.warning(T("Too much TeX files in: %s") % directory)
+				logging.warning(T("Select the TeX file: %s") % file)
 			return file
 
 	def _exit_on_failure(self):

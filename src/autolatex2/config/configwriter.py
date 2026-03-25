@@ -28,11 +28,13 @@ from typing import Any
 
 from autolatex2.config.configobj import Config
 
+
 class OldStyleConfigWriter:
 	"""
 	Writer of AutoLaTeX Configuration that is written with the old-style format (ini file).
 	"""
-	
+
+	# noinspection PyMethodMayBeStatic
 	def to_bool(self,  value : bool) -> str | None:
 		"""
 		Convert the given boolean value to a string representation for the configuration file.
@@ -45,6 +47,7 @@ class OldStyleConfigWriter:
 			return None
 		return 'true' if value else 'false'
 
+	# noinspection PyMethodMayBeStatic
 	def to_cli(self,  value : Any) -> str | None:
 		"""
 		Convert the given value to a string representation for the command-line operation.
@@ -60,6 +63,7 @@ class OldStyleConfigWriter:
 				return str(value)
 		return None
 
+	# noinspection PyMethodMayBeStatic
 	def to_path(self,  value : Any,  cdir : str) -> str | None:
 		"""
 		Convert the given value to a path that is relative to the folder cdir.
@@ -74,6 +78,7 @@ class OldStyleConfigWriter:
 			return os.path.relpath(str(value),  cdir)
 		return None
 
+	# noinspection PyMethodMayBeStatic
 	def to_paths(self,  value : Any,  cdir : str) -> str | None:
 		"""
 		Convert the given value to a list of path that are relative to the folder cdir.
@@ -91,11 +96,12 @@ class OldStyleConfigWriter:
 				return os.path.relpath(str(value),  cdir)
 		return None
 
-	def set(self,  config_out : Config,  section : str,  key : str,  value : Any):
+	# noinspection PyMethodMayBeStatic
+	def set(self,  config_out : configparser.ConfigParser,  section : str,  key : str,  value : Any):
 		"""
 		Put the given value in the configuration inside the given section and for the given key.
 		:param config_out: configuration to be filled up.
-		:type config_out: Config
+		:type config_out: ConfigParser
 		:param section: name of the section of the configuration to set.
 		:type section: str
 		:param key: the name of the key that is supposed to be set.

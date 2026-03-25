@@ -26,15 +26,13 @@ from typing import override
 
 import autolatex2.utils.utilfunctions as genutils
 from autolatex2.cli.abstract_actions import AbstractMakerAction
-
-import gettext
-_T = gettext.gettext
+from autolatex2.utils.i18n import T
 
 class MakerAction(AbstractMakerAction):
 
 	id : str = 'createsty'
 
-	help : str = _T('Create LaTeX style file into the document directory that provides the standard AutoLaTeX control sequences. The created file will be named \'autolatex.sty\'. If a file with this name already exists, it may be overwritten')
+	help : str = T('Create LaTeX style file into the document directory that provides the standard AutoLaTeX control sequences. The created file will be named \'autolatex.sty\'. If a file with this name already exists, it may be overwritten')
 
 	@override
 	def _add_command_cli_arguments(self, command_name : str, command_help : str | None,
@@ -48,7 +46,7 @@ class MakerAction(AbstractMakerAction):
 		"""
 		self.parse_cli.add_argument('--force',
 			action = 'store_true', 
-			help=_T('Force to overwrite the STY file if it exists'))
+			help = T('Force to overwrite the STY file if it exists'))
 
 	@override
 	def run(self, cli_arguments : Namespace) -> bool:
@@ -62,11 +60,12 @@ class MakerAction(AbstractMakerAction):
 		in_file = self.configuration.get_system_sty_file()
 		out_directory = self.configuration.document_directory
 		out_file = os.path.join(out_directory,  'autolatex.sty')
+		# noinspection DuplicatedCode
 		if os.path.isfile(out_file) and not cli_arguments.force:
-			logging.error(_T("File already exists: %s") % out_file)
+			logging.error(T("File already exists: %s") % out_file)
 			return False
 		try:
-			logging.info(_T("Copying %s to %s") % (in_file,  out_file))
+			logging.info(T("Copying %s to %s") % (in_file,  out_file))
 			genutils.unlink(out_file)
 			os.makedirs(out_directory, exist_ok=True)
 			shutil.copyfile(in_file,  out_file)

@@ -28,8 +28,6 @@ from typing import override, Any
 
 from autolatex2.tex.parser import Parser
 
-import gettext
-_T = gettext.gettext
 
 class Observer(abc.ABC):
 	"""

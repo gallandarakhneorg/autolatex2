@@ -24,9 +24,7 @@ from argparse import Namespace
 from typing import override
 
 from autolatex2.cli.abstract_actions import AbstractMakerAction
-
-import gettext
-_T = gettext.gettext
+from autolatex2.utils.i18n import T
 
 class MakerAction(AbstractMakerAction):
 
@@ -34,7 +32,7 @@ class MakerAction(AbstractMakerAction):
 
 	alias : list[str] = ['glossary', 'makeglossaries', 'makeglossary']
 
-	help : str = _T('Performs all processing that permits to generate the glossaries (makeglossaries)')
+	help : str = T('Performs all processing that permits to generate the glossaries (makeglossaries)')
 
 	@override
 	def _add_command_cli_arguments(self, command_name : str, command_help : str | None,
@@ -48,7 +46,7 @@ class MakerAction(AbstractMakerAction):
 		"""
 		self.parse_cli.add_argument('--nochdir',
 			action = 'store_true', 
-			help=_T('Don\'t set the current directory of the application to document\'s root directory before the launch of the building process'))
+			help = T('Don\'t set the current directory of the application to document\'s root directory before the launch of the building process'))
 
 	@override
 	def run(self, cli_arguments : Namespace) -> bool:
@@ -67,7 +65,7 @@ class MakerAction(AbstractMakerAction):
 			maker = self._internal_create_maker()
 			for root_file in maker.root_files:
 				if not maker.run_makeglossaries(root_file):
-					logging.error(_T("Error when running the glossary tool"))
+					logging.error(T("Error when running the glossary tool"))
 					return False
 		finally:
 			os.chdir(old_dir)

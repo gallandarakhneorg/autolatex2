@@ -192,9 +192,9 @@ class TestTranslatorRepositoryShared(AbstractBaseTest):
 				}, included)
 
 	def test__buildIncludedTranslatorDict(self):
-		svg2pdf = self.repo._get_object_for('svg2pdf')
-		texsvg2pdf = self.repo._get_object_for('svg2pdf+tex')
-		uml2pdf = self.repo._get_object_for('uml2pdf_umbrello')
+		svg2pdf = self.repo.get_object_for('svg2pdf')
+		texsvg2pdf = self.repo.get_object_for('svg2pdf+tex')
+		uml2pdf = self.repo.get_object_for('uml2pdf_umbrello')
 		self.config.translators.set_included('svg2pdf', TranslatorLevel.SYSTEM, False)
 		self.config.translators.set_included('svg2pdf', TranslatorLevel.DOCUMENT, True)
 		self.config.translators.set_included('dot2pdf', TranslatorLevel.USER, False)
@@ -238,8 +238,8 @@ class TestTranslatorRepositoryConflict(AbstractBaseTest):
 			self.directory = None
 
 	def test__detectConflicts(self):
-		svg2pdf = self.repo._get_object_for('svg2pdf')
-		svg2png = self.repo._get_object_for('svg2png')
+		svg2pdf = self.repo.get_object_for('svg2pdf')
+		svg2png = self.repo.get_object_for('svg2png')
 		conflicts = self.repo._detect_conflicts()
 		self.assertListEqual([
 				{},
@@ -249,8 +249,8 @@ class TestTranslatorRepositoryConflict(AbstractBaseTest):
 				}], conflicts)
 
 	def test__failOnConflict(self):
-		self.repo._get_object_for('svg2pdf')
-		self.repo._get_object_for('svg2png')
+		self.repo.get_object_for('svg2pdf')
+		self.repo.get_object_for('svg2png')
 		conflicts = self.repo._detect_conflicts()
 		with self.assertRaises(TranslatorConflictError):
 			self.repo._fail_on_conflict(conflicts[TranslatorLevel.DOCUMENT], 'myfilename.cfg')

@@ -19,7 +19,7 @@
 # 330, Boston, MA 02111-1307, USA.
 
 """
-Tools for extracting the bibliography citations from a AUX file or a BSF file.
+Tools for extracting the bibliography citations from AUX file or BSF file.
 """
 
 import os
@@ -33,7 +33,7 @@ from autolatex2.tex.texparsers import TeXParser, Parser
 
 class AuxiliaryCitationAnalyzer(Observer):
 	"""
-	Observer on TeX parsing extracting the bibliography citations from a AUX file.
+	Observer on TeX parsing extracting the bibliography citations from AUX file.
 	"""
 
 	__MACROS : dict[str,str] = {
@@ -145,7 +145,7 @@ class AuxiliaryCitationAnalyzer(Observer):
 		:type name: str
 		:param parameter: Descriptions of the values passed to the TeX macro.
 		:type parameter: dict[str,str]
-		:return: the result of the expand of the macro, or None to not replace the macro by something (the macro is used as-is)
+		:return: the result of expansion of the macro, or None to not replace the macro by something (the macro is used as-is)
 		:rtype: str
 		"""
 		if name == '\\bibdata':
@@ -164,9 +164,10 @@ class AuxiliaryCitationAnalyzer(Observer):
 					self.__citations.add(bibdb)
 		return ''
 
+	# noinspection DuplicatedCode
 	def run(self):
 		"""
-		Extract the data from the AUX file.
+		Run the process for extracting the data from the AUX file.
 		"""
 		with open(self.filename) as f:
 			content = f.read()

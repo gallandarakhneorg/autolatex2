@@ -32,10 +32,7 @@ from autolatex2.translator.readers.abstractreader import AbstractTransdefReader
 from autolatex2.translator.readers.perlreader import PerlTransdefReader
 from autolatex2.translator.readers.transdefline import TransdefLine
 from autolatex2.translator.readers.yamlreader import YamlTransdefReader
-
-import gettext
-_T = gettext.gettext
-
+from autolatex2.utils.i18n import T
 
 
 class Translator:
@@ -73,19 +70,20 @@ class Translator:
 	@classmethod
 	def _label(cls, full_source : str, target : str, variant : str = None) -> str:
 		"""
-		Replies a human readable string that corresponds to the specified translator data.
+		Replies a human-readable string that corresponds to the specified translator data.
 		:param full_source: The filename extension for the source file.
 		:type full_source: str
 		:param target: The filename extension for the target file.
 		:type target: str
 		:param variant: The name of the transformation variant version. Default is None.
 		:type variant: str
+		:return: the string representation that is readable by a human
 		:rtype: str
 		"""
 		if variant:
-			return _T("Translate %s to %s with %s alternative") % (full_source, target, variant)
+			return T("Translate %s to %s with %s alternative") % (full_source, target, variant)
 		else:
-			return _T("Translate %s to %s") % (full_source, target)
+			return T("Translate %s to %s") % (full_source, target)
 
 	def __str__(self):
 		return Translator._label(self.full_source, self.target, self.variant)
@@ -129,7 +127,7 @@ class Translator:
 			self.__variant = variant
 			self.__basename = basename
 		else:
-			raise RuntimeError(_T("Invalid translator name: %s") % name)
+			raise RuntimeError(T("Invalid translator name: %s") % name)
 
 
 	@property

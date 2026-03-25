@@ -24,15 +24,13 @@ from typing import override
 
 from autolatex2.cli.abstract_actions import AbstractMakerAction
 from autolatex2.utils.runner import Runner
-
-import gettext
-_T = gettext.gettext
+from autolatex2.utils.i18n import T
 
 class MakerAction(AbstractMakerAction):
 
 	id : str = 'commit'
 
-	help : str = _T('Create a new commit to your preferred SCM system containing the current contents of the document and a log message describing the changes. Commiting is done through the dedicated command-line in the configuration')
+	help : str = T('Create a new commit to your preferred SCM system containing the current contents of the document and a log message describing the changes. Commiting is done through the dedicated command-line in the configuration')
 
 	@override
 	def run(self, cli_arguments : Namespace) -> bool:
@@ -45,7 +43,7 @@ class MakerAction(AbstractMakerAction):
 		"""
 		cli = self.configuration.scm.commit_cli
 		if not cli:
-			logging.error(_T("Unable to find the command-line for the commiting action. Did you set the configuration?"))
+			logging.error(T("Unable to find the command-line for the commiting action. Did you set the configuration?"))
 			return False
 		
 		cmd = list(cli)

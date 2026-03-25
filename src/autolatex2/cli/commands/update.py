@@ -24,15 +24,14 @@ from typing import override
 
 from autolatex2.cli.abstract_actions import AbstractMakerAction
 from autolatex2.utils.runner import Runner
+from autolatex2.utils.i18n import T
 
-import gettext
-_T = gettext.gettext
 
 class MakerAction(AbstractMakerAction):
 
 	id : str = 'update'
 
-	help : str = _T('Update the current document from your preferred SCM system. Update is done through the dedicated command-line in the configuration')
+	help : str = T('Update the current document from your preferred SCM system. Update is done through the dedicated command-line in the configuration')
 
 	@override
 	def run(self, cli_arguments : Namespace) -> bool:
@@ -45,7 +44,7 @@ class MakerAction(AbstractMakerAction):
 		"""
 		cli = self.configuration.scm.update_cli
 		if not cli:
-			logging.error(_T("Unable to find the command-line for the updating action. Did you set the configuration?"))
+			logging.error(T("Unable to find the command-line for the updating action. Did you set the configuration?"))
 			return False
 		
 		cmd = list(cli)

@@ -19,20 +19,17 @@
 # 330, Boston, MA 02111-1307, USA.
 
 import logging
-import gettext
 from argparse import Namespace
 from typing import override
 
 from autolatex2.cli.abstract_actions import AbstractMakerAction
-from autolatex2.make.maker import AutoLaTeXMaker
-
-_T = gettext.gettext
+from autolatex2.utils.i18n import T
 
 class MakerAction(AbstractMakerAction):
 
 	id : str = 'images'
 
-	help : str = _T('Performs the automatic generation of the figures based on the calls to the enabled translators')
+	help : str = T('Performs the automatic generation of the figures based on the calls to the enabled translators')
 
 
 	@override
@@ -47,7 +44,7 @@ class MakerAction(AbstractMakerAction):
 		"""
 		self.parse_cli.add_argument('--force', 
 			action = 'store_true', 
-			help=_T('Force the generation of the images even if the source image is not more recent than the generated image'))
+			help = T('Force the generation of the images even if the source image is not more recent than the generated image'))
 
 
 	@override
@@ -68,7 +65,7 @@ class MakerAction(AbstractMakerAction):
 				if target:
 					nb = nb + 1
 		if nb > 0:
-			logging.info(_T("%d images were generated") % nb)
+			logging.info(T("%d images were generated") % nb)
 		else:
-			logging.info(_T("All generated images are up-to-date"))
+			logging.info(T("All generated images are up-to-date"))
 		return True

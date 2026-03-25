@@ -32,9 +32,8 @@ import autolatex2.utils.utilfunctions as genutils
 from autolatex2.config.configobj import Config
 from autolatex2.config.translator import TranslatorLevel
 from autolatex2.utils.extlogging import ensure_autolatex_logging_levels
+from autolatex2.utils.i18n import T
 
-import gettext
-_T = gettext.gettext
 
 class OldStyleConfigReader:
 	"""
@@ -45,7 +44,7 @@ class OldStyleConfigReader:
 		self._base_dir = os.getcwd()
 		ensure_autolatex_logging_levels()
 
-	def _read_viewer(self,  content : Any,  config : Config):
+	def _read_viewer(self, content : Any, config : Config):
 		"""
 		Read the configuration section [viewer].
 		:param content: the configuration file content.
@@ -56,7 +55,7 @@ class OldStyleConfigReader:
 		config.view.view = OldStyleConfigReader.to_bool(self._ensure_ascendent_compatibility(content.get('view')), config.view.view)
 		config.view.viewer_cli = self._ensure_ascendent_compatibility(content.get('viewer')) or config.view.viewer_cli
 
-	def _read_scm(self,  content : Any,  config : Config):
+	def _read_scm(self, content : Any, config : Config):
 		"""
 		Read the configuration section [scm].
 		:param content: the configuration file content.
@@ -67,7 +66,7 @@ class OldStyleConfigReader:
 		config.scm.commit_cli = self._ensure_ascendent_compatibility(content.get('scm commit')) or config.scm.commit_cli
 		config.scm.update_cli = self._ensure_ascendent_compatibility(content.get('scm update')) or config.scm.commit_cli
 
-	def _read_clean(self,  content : Any,  config : Config):
+	def _read_clean(self, content : Any, config : Config):
 		"""
 		Read the configuration section [clean].
 		:param content: the configuration file content.
@@ -80,13 +79,11 @@ class OldStyleConfigReader:
 		for p in OldStyleConfigReader.to_path_list(self._ensure_ascendent_compatibility(content.get('files to desintegrate'))):
 			config.clean.add_cleanall_file(p)
 
-	def _read_generation_prefix(self,  content : Any,  filename : str, config : Config):
+	def _read_generation_prefix(self, content : Any, config : Config):
 		"""
 		Read the path definition in the configuration section [generation].
 		:param content: the configuration file content.
 		:type content: dict
-		:param filename: the name of the configuration file.
-		:type filename: str
 		:param config: the configuration object to fill up.
 		:type config: Config
 		"""
@@ -96,7 +93,7 @@ class OldStyleConfigReader:
 			config.document_directory = os.path.dirname(main_name)
 			config.document_filename = os.path.basename(main_name)
 
-	def _read_generation(self,  content : Any,  config : Config):
+	def _read_generation(self, content : Any, config : Config):
 		"""
 		Read the configuration section [generation], except the ones "_read_generation_prefix".
 		:param content: the configuration file content.
@@ -107,9 +104,9 @@ class OldStyleConfigReader:
 		for p in OldStyleConfigReader.to_path_list(self._ensure_ascendent_compatibility(content.get('image directory'))):
 			config.translators.add_image_path(self.to_path(p))
 
-		config.translators.is_translator_enable = OldStyleConfigReader.to_bool(self._ensure_ascendent_compatibility(content.get('generate images')),  config.translators.is_translator_enable)
+		config.translators.is_translator_enable = OldStyleConfigReader.to_bool(self._ensure_ascendent_compatibility(content.get('generate images')), config.translators.is_translator_enable)
 		
-		generation_type = OldStyleConfigReader.to_kw(self._ensure_ascendent_compatibility(content.get('generation type')),  'pdf' if config.generation.pdf_mode else 'ps')
+		generation_type = OldStyleConfigReader.to_kw(self._ensure_ascendent_compatibility(content.get('generation type')), 'pdf' if config.generation.pdf_mode else 'ps')
 		if generation_type == 'dvi' or generation_type == 'ps':
 			config.generation.pdf_mode = False
 		else:
@@ -120,7 +117,7 @@ class OldStyleConfigReader:
 			tex_compiler = 'pdflatex'
 		config.generation.latex_compiler = tex_compiler
 
-		config.generation.synctex = OldStyleConfigReader.to_bool(self._ensure_ascendent_compatibility(content.get('synctex')),  config.generation.synctex)
+		config.generation.synctex = OldStyleConfigReader.to_bool(self._ensure_ascendent_compatibility(content.get('synctex')), config.generation.synctex)
 
 		for p in OldStyleConfigReader.to_path_list(self._ensure_ascendent_compatibility(content.get('translator include path'))):
 			config.translators.add_include_path(self.to_path(p))
@@ -178,7 +175,7 @@ class OldStyleConfigReader:
 		if not make_index_style:
 			make_index_style = ['@detect@system']
 		for key in make_index_style:
-			kw = OldStyleConfigReader.to_kw(key,  '@detect@system')
+			kw = OldStyleConfigReader.to_kw(key, '@detect@system')
 			result = None
 			if kw == '@detect':
 				result = self.to_path(self.__detect_ist_file(config))
@@ -193,13 +190,11 @@ class OldStyleConfigReader:
 					result = self.to_path(ist_file)
 				else:
 					result = self.to_path(config.get_system_ist_file())
-			else:
-				result = self.to_path(make_index_style)
 			if result:
 				config.generation.makeindex_style_filename = result
 				break
 
-	def _read_translator(self,  translator_name : str,  translator_level : TranslatorLevel,  content : Any,  config : Config):
+	def _read_translator(self, translator_name : str, translator_level : TranslatorLevel, content : Any, config : Config):
 		"""
 		Read the configuration section [<translator>].
 		:param translator_name: The name of the translator.
@@ -212,8 +207,8 @@ class OldStyleConfigReader:
 		:type config: Config
 		"""
 		raw_value = self._ensure_ascendent_compatibility(content.get('include module'))
-		default_value = config.translators.included(translator_name,  translator_level)
-		new_value = OldStyleConfigReader.to_bool(raw_value,  default_value)
+		default_value = config.translators.included(translator_name, translator_level)
+		new_value = OldStyleConfigReader.to_bool(raw_value, default_value)
 		config.translators.set_included(translator_name, translator_level, new_value)
 		raw_files = self._ensure_ascendent_compatibility(content.get('files to convert'))
 		path_list = OldStyleConfigReader.to_path_list(raw_files)
@@ -221,7 +216,8 @@ class OldStyleConfigReader:
 			formatted_path = self.to_path(path_element)
 			config.translators.add_image_to_convert(formatted_path)
 
-	def _is_translator_section(self,  section_name : str) -> bool:
+	# noinspection PyMethodMayBeStatic
+	def _is_translator_section(self, section_name : str) -> bool:
 		"""
 		Replies if the given section name is for a translator or not.
 		:param section_name: Name of the section to test.
@@ -229,11 +225,11 @@ class OldStyleConfigReader:
 		:return: True if the given section name is for a translator.
 		:rtype: bool
 		"""
-		if re.match(r'^[a-zA-Z+-]+2[a-zA-Z0-9+-]+(?:_[a-zA-Z0-9_+-]+)?$',  section_name,  re.S):
+		if re.match(r'^[a-zA-Z+-]+2[a-zA-Z0-9+-]+(?:_[a-zA-Z0-9_+-]+)?$', section_name, re.S):
 			return True
 		return False
 
-	def read(self, filename : str,  translator_level : TranslatorLevel,  config : Config = None) -> Config:
+	def read(self, filename : str, translator_level : TranslatorLevel, config : Config = None) -> Config:
 		"""
 		Read the configuration file.
 		:param filename: the name of the file to read.
@@ -259,28 +255,29 @@ class OldStyleConfigReader:
 				nsection = section.lower()
 				if nsection == 'generation':
 					content = dict(config_file.items(section))
-					self._read_generation_prefix(content,  filename,  config)
+					self._read_generation_prefix(content, config)
 
 			for section in config_file.sections():
 				nsection = section.lower()
 				content = dict(config_file.items(section))
 				if nsection == 'generation':
-					self._read_generation(content,  config)
+					self._read_generation(content, config)
 				elif nsection == 'viewer':
-					self._read_viewer(content,  config)
+					self._read_viewer(content, config)
 				elif nsection == 'clean':
-					self._read_clean(content,  config)
+					self._read_clean(content, config)
 				elif nsection == 'scm':
-					self._read_scm(content,  config)
+					self._read_scm(content, config)
 				elif self._is_translator_section(nsection):
-					self._read_translator(section,  translator_level,  content,  config)
+					self._read_translator(section, translator_level, content, config)
 				else:
-					logging.debug(_T("Ignore section '%s' in the configuration file: %s") % (section,  filename))
+					logging.debug(T("Ignore section '%s' in the configuration file: %s") % (section, filename))
 		finally:
 			self._base_dir = os.getcwd()
 		return config
 
-	def __detect_ist_file(self,  config : Config) -> str | None:
+	# noinspection PyMethodMayBeStatic
+	def __detect_ist_file(self, config : Config) -> str | None:
 		"""
 		Detect an IST file into the current document.
 		:param config: the configuration.
@@ -295,29 +292,30 @@ class OldStyleConfigReader:
 			only_files = [f for f in os.listdir(ddir) if os.path.isfile(os.path.join(ddir, f))]
 			ist_files = list()
 			for file in only_files:
-				if re.match(r'.ist$',  file,  re.I):
+				if re.match(r'.ist$', file, re.I):
 					ist_files.append(file)
 			if len(ist_files) > 0:
 				filename = ist_files[0]
 				if len(ist_files) > 1:
-					logging.warning(_T('Multiple IST files were found into the document directory. Use: %s') % filename)
+					logging.warning(T('Multiple IST files were found into the document directory. Use: %s') % filename)
 				return filename
 		return None
 
-	def _ensure_ascendent_compatibility(self,  value : str) -> str:
+	# noinspection PyMethodMayBeStatic
+	def _ensure_ascendent_compatibility(self, value : str) -> str:
 		if value:
-			m = re.match(r'^(.*?)\s*#.*$',  value)
+			m = re.match(r'^(.*?)\s*#.*$', value)
 			if m:
 				return m.group(1)
 		return value
 
-	def to_path(self,  value : str) -> str:
+	def to_path(self, value : str) -> str:
 		if value:
 			return genutils.abs_path(value, self._base_dir)
 		return value
 
 	@staticmethod
-	def to_bool(value : str,  default : bool) -> bool:
+	def to_bool(value : str, default : bool) -> bool:
 		"""
 		Convert a string to a bool. This function takes care of strings as "True", "False", "Yes", "No", "t", "f", "y", "n", "1", "0".
 		:param value: the value to convert.
@@ -357,11 +355,11 @@ class OldStyleConfigReader:
 		:rtype: list
 		"""
 		if value:
-			return re.split(r'\s*[,;]\s*',  value)
+			return re.split(r'\s*[,;]\s*', value)
 		return None
 
 	@staticmethod
-	def to_kw(value : str,  default : str) -> str:
+	def to_kw(value : str, default : str) -> str:
 		"""
 		Convert a string to string-based keyword.
 		:param value: the value to convert.
@@ -406,7 +404,7 @@ class OldStyleConfigReader:
 		filename = config.user_config_file
 		if filename and os.path.isfile(filename) and os.access(filename, os.R_OK):
 			try:
-				self.read(filename,  TranslatorLevel.USER,  config)
+				self.read(filename, TranslatorLevel.USER, config)
 			except:
 				pass
 		return config
@@ -425,7 +423,7 @@ class OldStyleConfigReader:
 			config = Config()
 		if filename and os.path.isfile(filename) and os.access(filename, os.R_OK):
 			try:
-				self.read(filename,  TranslatorLevel.DOCUMENT,  config)
+				self.read(filename, TranslatorLevel.DOCUMENT, config)
 			except:
 				pass
 		return config

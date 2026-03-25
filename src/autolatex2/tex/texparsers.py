@@ -29,9 +29,7 @@ from typing import override
 from autolatex2.tex.mathmode import MathMode
 from autolatex2.tex.parser import Parser
 from autolatex2.tex.texobservers import Observer
-
-import gettext
-_T = gettext.gettext
+from autolatex2.utils.i18n import T
 
 
 class TeXParser(Parser):
@@ -646,7 +644,7 @@ class TeXParser(Parser):
 						self.observer.text(self, c)
 				else:
 					logging.warning(
-						_T("you try to close with a '\\$' a mathematical mode opened with '\\[' (%s:%d)") % (self.filename, lineno))
+						T("you try to close with a '\\$' a mathematical mode opened with '\\[' (%s:%d)") % (self.filename, lineno))
 			elif sep in self.comment_characters:
 				# Comment
 				r = re.match(r'^(.*?)[\n\r](.*)$', text, re.DOTALL)
@@ -667,7 +665,7 @@ class TeXParser(Parser):
 					if self.math_mode is not None:
 						if not is_math:
 							logging.warning(
-								_T("you cannot use in text mode the active character '%s', which is defined in math mode (%s:%d)") % (sep, self.filename, lineno))
+								T("you cannot use in text mode the active character '%s', which is defined in math mode (%s:%d)") % (sep, self.filename, lineno))
 							if sep is not None:
 								self.observer.text(self, sep)
 						else:
@@ -676,7 +674,7 @@ class TeXParser(Parser):
 								self.observer.text(self, c)
 					elif not is_text:
 						logging.warning(
-							_T("you cannot use in math mode the active character '%s', which is defined in text mode (%s:%d)") % (sep, self.filename, lineno))
+							T("you cannot use in math mode the active character '%s', which is defined in text mode (%s:%d)") % (sep, self.filename, lineno))
 						if sep is not None:
 							self.observer.text(self, sep)
 					else:
@@ -796,7 +794,7 @@ class TeXParser(Parser):
 		:type lineno: int
 		:param prefix: A prefix merged to the command name. Use carefully.
 		:type prefix: str
-		:return: the tuple (the result of the expand of the macro, the rest of the tex text after the macro).
+		:return: the tuple (the result of expansion of the macro, the rest of the tex text after the macro).
 		:rtype: tuple[str,str]
 		"""
 		expand_to = ''
@@ -822,7 +820,7 @@ class TeXParser(Parser):
 						trans = ''
 					expand_to, text = self.__run_cmd(prefix + cmd_name, trans, text, lineno)
 				else:
-					logging.warning(_T("invalid syntax for the TeX command: %s (lineno: %d)"), prefix + text, lineno)
+					logging.warning(T("invalid syntax for the TeX command: %s (lineno: %d)"), prefix + text, lineno)
 		return expand_to, text
 
 	def __parse_active_char(self, text : str, lineno : int) -> tuple[str,str]:
@@ -844,7 +842,7 @@ class TeXParser(Parser):
 				trans = ''
 			expand_to, text = self.__run_cmd(active_char, trans, text, lineno)
 		else:
-			logging.warning(_T("invalid syntax for the TeX active character: %s (lineno: %d)"), text, lineno)
+			logging.warning(T("invalid syntax for the TeX active character: %s (lineno: %d)"), text, lineno)
 			expand_to = text[0:1] if len(text) > 0 else ''
 			text = text[1:] if len(text) > 0 else ''
 
@@ -893,18 +891,18 @@ class TeXParser(Parser):
 						found_text = True
 						text = proto
 
-		logging.debug(_T("Found parameter definition for '%s': math=%s; text=%s (%s:%d)") % (name, (math or '<undef>'), (text or '<undef>'), self.filename, lineno))
+		logging.debug(T("Found parameter definition for '%s': math=%s; text=%s (%s:%d)") % (name, (math or '<undef>'), (text or '<undef>'), self.filename, lineno))
 
 		if found_math or found_text:
 			if self.math_mode is not None:
 				if not found_math:
-					logging.warning(_T("the command %s%s was not defined for math-mode, assumes to use the text-mode version instead (lineno: %d)"),
+					logging.warning(T("the command %s%s was not defined for math-mode, assumes to use the text-mode version instead (lineno: %d)"),
 							( '' if special else '\\' ), name, lineno)
 					return text
 				else:
 					return math
 			elif not found_text:
-				logging.warning(_T("the command %s%s was not defined for text-mode, assumes to use the math-mode version instead (lineno: %d)"),
+				logging.warning(T("the command %s%s was not defined for text-mode, assumes to use the math-mode version instead (lineno: %d)"),
 						( '' if special else '\\' ), name, lineno)
 				return math
 			else:
@@ -928,13 +926,13 @@ class TeXParser(Parser):
 		"""
 		if trans:
 			# This macro has params
-			logging.debug(_T("Expanding '%s' (%s:%d)") % (name, self.filename, lineno))
+			logging.debug(T("Expanding '%s' (%s:%d)") % (name, self.filename, lineno))
 			text, params, raw_params = self.__eat_cmd_parameters(trans, text, name, lineno)
 			# Apply the macro
 			expand_to = self.observer.expand(self, name + raw_params, name, *params)
 		else:
 			# No param, put the string inside the output stream
-			logging.debug(_T("Expanding '%s' (%s:%d)") % (name, self.filename, lineno))
+			logging.debug(T("Expanding '%s' (%s:%d)") % (name, self.filename, lineno))
 			expand_to = self.observer.expand(self, name, name)
 		return expand_to, text
 
@@ -954,11 +952,11 @@ class TeXParser(Parser):
 		"""
 		params = []
 		raw_params = ''
-		logging.debug(_T("Macro prototype of '%s': %s (%s:%d)") % (macro, p_params, self.filename, lineno))
+		logging.debug(T("Macro prototype of '%s': %s (%s:%d)") % (macro, p_params, self.filename, lineno))
 		for p in re.findall(r'(!?\{}|!?\[[^]]*]|-|\\)', p_params, re.DOTALL):
 			# Eats no significant white spaces
 			r = re.match(r'^(!?)\{}', p, re.DOTALL)
-			if r: # Eates a mandatory parameter
+			if r: # Eats a mandatory parameter
 				optional = r.group(1) or ''
 				prem = text[0:1]
 				text = text[1:]
@@ -992,7 +990,7 @@ class TeXParser(Parser):
 					raw_params += prem
 			else:
 				r = re.match(r'^(!?)\[([^]]*)]', p, re.DOTALL)
-				if r: # Eates an optional parameter
+				if r: # Eats an optional parameter
 					optional = r.group(1) or ''
 					default_val = r.group(2) or ''
 					prem = text[0:1]
@@ -1006,7 +1004,7 @@ class TeXParser(Parser):
 						params.append({
 								'eval' : (optional != '!'),
 								'text' : default_val })
-				elif p == '\\': # Eates a TeX command name
+				elif p == '\\': # Eats a TeX command name
 					r = re.match(r'^\\([a-zA-Z]+\*?|.)(.*)$', text, re.DOTALL)
 					if r:
 						n = r.group(1)
@@ -1019,19 +1017,19 @@ class TeXParser(Parser):
 						msg = text[0:50]
 						msg = re.sub('[\n\r]', '\\n', msg, 0, re.DOTALL)
 						msg = msg.replace("\t", "\\t")
-						logging.warning(_T("expected a TeX macro for expanding the macro %s, here: '%s' (%s:%d)") % (macro, msg, self.filename, lineno))
+						logging.warning(T("expected a TeX macro for expanding the macro %s, here: '%s' (%s:%d)") % (macro, msg, self.filename, lineno))
 						params.append({
 								'eval' : 1,
 								'text' : '' })
 						raw_params += "\\"
-				elif p == '-': # Eates until the end of the current context
+				elif p == '-': # Eats until the end of the current context
 					context, text = self.__eat_context(text, '\\}')
 					params.append({
 							'eval' : True,
 							'text' : context })
 					raw_params += context
 				else:
-					raise Exception(_T("unable to recognize the following argument specification: %s") % p)
+					raise Exception(T("unable to recognize the following argument specification: %s") % p)
 		return text, params, raw_params
 
 
@@ -1063,7 +1061,7 @@ class TeXParser(Parser):
 				r = re.match(r'^([a-zA-Z]+\*?|.)(.*)$', text, re.DOTALL)
 				eaten += "\\" + r.group(1)
 				text = r.group(2)
-			elif (context_level <= 0) and (re.match(re.escape(end_delim), sep, re.DOTALL)): # The closing delemiter was found
+			elif (context_level <= 0) and (re.match(re.escape(end_delim), sep, re.DOTALL)): # The closing delimiter was found
 				return context + eaten, text
 			else: # Unknow separator, treat as text
 				eaten += sep

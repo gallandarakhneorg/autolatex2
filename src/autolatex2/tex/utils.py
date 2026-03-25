@@ -26,11 +26,7 @@ import os
 import re
 from enum import IntEnum, unique
 
-import gettext
-_T = gettext.gettext
 
-######################################################################
-##
 @unique
 class TeXWarnings(IntEnum):
 	"""

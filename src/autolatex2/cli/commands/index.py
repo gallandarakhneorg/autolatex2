@@ -25,13 +25,8 @@ from typing import override
 import autolatex2.utils.utilfunctions as genutils
 import autolatex2.tex.utils as texutils
 from autolatex2.cli.abstract_actions import AbstractMakerAction
-
-import gettext
-
-from autolatex2.make.maker import AutoLaTeXMaker
+from autolatex2.utils.i18n import T
 from autolatex2.utils import extlogging
-
-_T = gettext.gettext
 
 class MakerAction(AbstractMakerAction):
 
@@ -39,7 +34,7 @@ class MakerAction(AbstractMakerAction):
 
 	alias : str = 'makeindex'
 
-	help : str = _T('Performs all processing that permits to generate the index (makeindex)')
+	help : str = T('Performs all processing that permits to generate the index (makeindex)')
 
 	@override
 	def _add_command_cli_arguments(self, command_name : str, command_help : str | None,
@@ -53,7 +48,7 @@ class MakerAction(AbstractMakerAction):
 		"""
 		self.parse_cli.add_argument('--nochdir',
 			action = 'store_true', 
-			help=_T('Don\'t set the current directory of the application to document\'s root directory before the launch of the building process'))
+			help = T('Don\'t set the current directory of the application to document\'s root directory before the launch of the building process'))
 
 	@override
 	def run(self, cli_arguments : Namespace) -> bool:
@@ -72,13 +67,13 @@ class MakerAction(AbstractMakerAction):
 			maker = self._internal_create_maker()
 			idx_ext = texutils.get_index_file_extensions()[0]
 			for root_file in maker.root_files:
-				idx_file = genutils.basename2(root_file,  texutils.get_tex_file_extensions()) + idx_ext
+				idx_file = genutils.basename2(root_file,  *texutils.get_tex_file_extensions()) + idx_ext
 				result = maker.run_makeindex(idx_file)
 				if result is not None:
 					exit_code, sout, serr = result
 					if exit_code != 0:
 						message = (sout or '') + (serr or '')
-						extlogging.multiline_error(_T("Error when running the indexing tool: %s") % message)
+						extlogging.multiline_error(T("Error when running the indexing tool: %s") % message)
 						return False
 		finally:
 			os.chdir(old_dir)

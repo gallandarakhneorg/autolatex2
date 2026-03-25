@@ -28,15 +28,14 @@ from autolatex2.translator.translatorrunner import TranslatorRunner
 from autolatex2.tex.imageinclusions import ImageInclusions
 from autolatex2.utils.extprint import eprint
 import autolatex2.utils.utilfunctions as genutils
+from autolatex2.utils.i18n import T
 
-import gettext
-_T = gettext.gettext
 
 class MakerAction(AbstractMakerAction):
 
 	id : str = 'unusedimages'
 
-	help : str = _T('Display (or remove) the figures that are inside the document folder and not included into the document')
+	help : str = T('Display (or remove) the figures that are inside the document folder and not included into the document')
 
 	IMAGE_FORMATS : list[str] = ['.png', '.jpeg', '.jpg', '.eps', '.ps', '.pdf', '.gif', '.bmp', '.tiff', '.pdftex_t', '.pstex_t', '.pdf_tex', '.ps_tex']
 
@@ -51,10 +50,11 @@ class MakerAction(AbstractMakerAction):
 		:type command_help: str | None
 		"""
 		self.parse_cli.add_argument('--delete',
-			action='store_true', 
-			help=_T('Delete the unused figures instead of simply listing them'))
+			action = 'store_true',
+			help = T('Delete the unused figures instead of simply listing them'))
 
 
+	# noinspection PyMethodMayBeStatic
 	def _is_picture(self, filename : str) -> bool:
 		"""
 		Replies if the given filename is for an image and not compressed image.
@@ -78,7 +78,7 @@ class MakerAction(AbstractMakerAction):
 		for root in self.configuration.translators.image_paths:
 			parent = os.path.abspath(root)
 			# Compare the common path of the parent and child path with the common path of just the parent path.
-			# Using the commonpath method on just the parent path will regularise the path name in the same way
+			# Using the commonpath method on just the parent path will regularize the path name in the same way
 			# as the comparison that deals with both paths, removing any trailing path separator
 			if os.path.commonpath([parent]) == os.path.commonpath([parent, simple_name]):
 				return True

@@ -32,10 +32,7 @@ from autolatex2.tex.texobservers import Observer
 from autolatex2.tex.texparsers import Parser
 from autolatex2.tex.texparsers import TeXParser
 import autolatex2.utils.utilfunctions as genutils
-
-import gettext
-_T = gettext.gettext
-
+from autolatex2.utils.i18n import T
 
 class ImageInclusions(Observer):
 	"""
@@ -79,7 +76,7 @@ class ImageInclusions(Observer):
 			self.__include_paths.append(self.__directory_name)
 		# Content of the TeX file to generate
 		self.__files_to_copy = set()
-		# Mapping betwwen the files of the source TeX and the target TeX.
+		# Mapping between the files of the source TeX and the target TeX.
 		self.__source2target = dict()
 		self.__target2source = dict()
 
@@ -220,6 +217,7 @@ class ImageInclusions(Observer):
 		"""
 		pass
 
+	# noinspection DuplicatedCode
 	@override
 	def expand(self, parser : Parser, raw_text : str, name : str, *parameter : dict[str,Any]) -> str:
 		"""
@@ -232,7 +230,7 @@ class ImageInclusions(Observer):
 		:type name: str
 		:param parameter: Descriptions of the values passed to the TeX macro.
 		:type parameter: dict[str,Any]
-		:return: the result of the expand of the macro, or None to not replace the macro by something (the macro is used as-is)
+		:return: the result of expansion of the macro, or None to not replace the macro by something (the macro is used as-is)
 		:rtype: str
 		"""
 		if	name == "\\includegraphics" or name == "\\includeanimatedfigure" or name == "\\includeanimatedfigurewtex" or name == "\\includefigurewtex" or name == "\\includegraphicswtex":
@@ -289,6 +287,7 @@ class ImageInclusions(Observer):
 			return os.path.join(self.dirname, name)
 		return name
 
+	# noinspection DuplicatedCode
 	def __create_mapping(self, filename : str, ext : str) -> str:
 		"""
 		Compute an unique filename, and map it to the source file.
@@ -311,6 +310,7 @@ class ImageInclusions(Observer):
 		self.__source2target[filename] = name + ext
 		return name
 
+	# noinspection DuplicatedCode
 	def __find_picture(self, tex_name : str) -> tuple[str,str]:
 		"""
 		Find a picture.
@@ -362,7 +362,7 @@ class ImageInclusions(Observer):
 						filenames[fn] = True
 
 			if not filenames:
-				logging.error(_T('Picture not found: %s'), tex_name)
+				logging.error(T('Picture not found: %s'), tex_name)
 			else:
 				selected_name1 = None
 				selected_name2 = None
@@ -377,7 +377,7 @@ class ImageInclusions(Observer):
 						selected_name2 = tex_name
 				if selected_name1:
 					tex_name, filename = selected_name1
-					logging.debug(_T('Embedding %s'), filename)
+					logging.debug(T('Embedding %s'), filename)
 					with open(filename) as f:
 						file_content = f.read()
 					# Replacing the filename in the newly embedded TeX file
@@ -385,6 +385,7 @@ class ImageInclusions(Observer):
 						for source in self.__source2target:
 							file_content = file_content.replace('{' + source + '}',
 											'{' + self.__source2target[source] + '}')
+					bsn = os.path.basename(tex_name)
 					prefix +=	textwrap.dedent("""
 								%%=======================================================
 								%%== BEGIN FILE: %s
@@ -393,7 +394,7 @@ class ImageInclusions(Observer):
 								%s
 								\\end{filecontents*}
 								%%=======================================================
-								""") % (os.path.basename(tex_name), os.path.basename(tex_name), file_content)
+								""") % (bsn, bsn, file_content)
 					self.__dynamic_preamble.append('\\usepackage{filecontents}')
 				elif selected_name2:
 					tex_name = selected_name2
@@ -404,6 +405,7 @@ class ImageInclusions(Observer):
 
 		return tex_name, prefix
 
+	# noinspection DuplicatedCode
 	def _analyze_document(self):
 		"""
 		Analyze the tex document for extracting information.

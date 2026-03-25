@@ -24,15 +24,14 @@ from typing import override
 
 from autolatex2.cli.abstract_actions import AbstractMakerAction
 from autolatex2.utils.extprint import eprint
+from autolatex2.utils.i18n import T
 
-import gettext
-_T = gettext.gettext
 
 class MakerAction(AbstractMakerAction):
 
 	id : str = 'showpath'
 
-	help : str = _T('Show the value of the environment variable PATH')
+	help : str = T('Show the value of the environment variable PATH')
 	
 	@override
 	def run(self, cli_arguments : Namespace) -> bool:

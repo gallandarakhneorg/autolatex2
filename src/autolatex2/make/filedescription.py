@@ -101,10 +101,10 @@ class FileDescription:
 		return self.__input_filename
 
 	@property
-	def dependencies(self) -> set[str]:
+	def dependencies(self) -> SortedSet:
 		"""
 		Replies the names of the files that are needed to build the current file.
-		:rtype: set[str]
+		:rtype: SortedSet
 		"""
 		return self.__dependencies
 
@@ -117,10 +117,10 @@ class FileDescription:
 		return self.__main_file
 
 	@property
-	def change(self) -> bool:
+	def change(self) -> float | None:
 		"""
 		Replies the date of the last change of the file.
-		:rtype: int
+		:rtype: float|None
 		"""
 		return self.__change
 

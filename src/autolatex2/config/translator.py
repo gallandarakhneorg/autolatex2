@@ -24,8 +24,7 @@ Configuration for the translators.
 
 from enum import IntEnum, unique
 
-import gettext
-_T = gettext.gettext
+from autolatex2.utils.i18n import T
 
 
 ######################################################################
@@ -41,7 +40,7 @@ class TranslatorLevel(IntEnum):
 	DOCUMENT = 2
 
 	def __str__(self):
-		return _T(self.name.lower())
+		return T(self.name.lower())
 
 
 class TranslatorConfig:
@@ -152,7 +151,7 @@ class TranslatorConfig:
 		else:
 			for p in path:
 				if p is None:
-					raise Exception(_T('Illegal None value for the include path'))
+					raise Exception(T('Illegal None value for the include path'))
 			self.__include_paths = list(path)
 
 	def add_include_path(self, path : str | None):
@@ -162,7 +161,7 @@ class TranslatorConfig:
 		:type path: str
 		"""
 		if path is None:
-			raise Exception(_T('Illegal None value for the include path'))
+			raise Exception(T('Illegal None value for the include path'))
 		self.__include_paths.append(path)
 
 	@property

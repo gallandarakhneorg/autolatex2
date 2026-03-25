@@ -27,15 +27,13 @@ from typing import override
 from autolatex2.cli.abstract_actions import AbstractMakerAction
 from autolatex2.config.configobj import Config
 from autolatex2.config.configwriter import OldStyleConfigWriter
-
-import gettext
-_T = gettext.gettext
+from autolatex2.utils.i18n import T
 
 class MakerAction(AbstractMakerAction):
 
 	id : str = 'init'
 
-	help : str = _T('Create an empty LaTeX document that is following a standard folder structure suitable for AutoLaTeX')
+	help : str = T('Create an empty LaTeX document that is following a standard folder structure suitable for AutoLaTeX')
 
 	@override
 	def _add_command_cli_arguments(self, command_name : str, command_help : str | None,
@@ -49,12 +47,12 @@ class MakerAction(AbstractMakerAction):
 		"""
 		self.parse_cli.add_argument('--force',
 			action = 'store_true', 
-			help=_T('Force to overwrite any existing file'))
+			help = T('Force to overwrite any existing file'))
 		self.parse_cli.add_argument('--out',
 			action = 'store', 
 			default = None, 
 			type=str, 
-			help=_T('Specify the output directory for creating the project structure'))
+			help = T('Specify the output directory for creating the project structure'))
 
 
 	@override
@@ -75,7 +73,7 @@ class MakerAction(AbstractMakerAction):
 
 		tex_file = os.path.join(out_directory,  'main.tex')
 		if os.path.isfile(tex_file) and not cli_arguments.force:
-			logging.error(_T("TeX file already exists: %s") % tex_file)
+			logging.error(T("TeX file already exists: %s") % tex_file)
 			return False
 
 		cfg.document_directory = os.path.dirname(tex_file)
@@ -92,12 +90,12 @@ class MakerAction(AbstractMakerAction):
 
 		cfg_file = cfg.make_document_config_filename(out_directory)
 		if os.path.isfile(cfg_file) and not cli_arguments.force:
-			logging.error(_T("Configuration file already exists: %s") % cfg_file)
+			logging.error(T("Configuration file already exists: %s") % cfg_file)
 			return False
 	
 		gitignore_file = os.path.join(out_directory,  '.gitignore')
 		if os.path.isfile(gitignore_file) and not cli_arguments.force:
-			logging.error(_T("Git-ignore file already exists: %s") % gitignore_file)
+			logging.error(T("Git-ignore file already exists: %s") % gitignore_file)
 			return False
 
 		excl1 = os.path.join('*',  local_image_directory,  '*.pdf')
@@ -121,7 +119,7 @@ class MakerAction(AbstractMakerAction):
 			*.pdftex_t
 		""") % (excl1,  excl2)
 
-		logging.info(_T("Creating document structure in %s") % out_directory)
+		logging.info(T("Creating document structure in %s") % out_directory)
 		try:
 			# Create the folders
 			os.makedirs(image_directory, exist_ok=True)
@@ -130,7 +128,7 @@ class MakerAction(AbstractMakerAction):
 				file.write(tex_file_content)
 			# Git ignore
 			if os.path.isfile(gitignore_file):
-				logging.warning(_T('Ignore file that already exists: %s') % gitignore_file)
+				logging.warning(T('Ignore file that already exists: %s') % gitignore_file)
 			else:
 				with open(gitignore_file,  'w') as file:
 					file.write(gitignore_file_content)

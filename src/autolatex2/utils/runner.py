@@ -29,8 +29,7 @@ import subprocess
 from abc import ABC
 from typing import override, Any
 
-import gettext
-_T = gettext.gettext
+from autolatex2.utils.i18n import T
 
 class CommandExecutionError(Exception):
 
@@ -44,9 +43,9 @@ class CommandExecutionError(Exception):
 		"""
 		self.__errno = return_code
 		if msg:
-			self.__strerror = _T('Error during the execution of the command: %s') % msg
+			self.__strerror = T('Error during the execution of the command: %s') % msg
 		else:
-			self.__strerror = _T('Error during the execution of the command; return code is %d') % return_code
+			self.__strerror = T('Error during the execution of the command; return code is %d') % return_code
 
 	@property
 	def errno(self) -> int:
@@ -90,7 +89,7 @@ class Runner(ABC):
 			if standard_error:
 				raise Exception(standard_error)
 			else:
-				raise Exception(_T("Error when running the command. Return code is %d") % return_code)
+				raise Exception(T("Error when running the command. Return code is %d") % return_code)
 
 	@staticmethod
 	def check_runner_exit_code(code : int):
@@ -100,7 +99,7 @@ class Runner(ABC):
 		:type code: int
 		"""
 		if code != 0:
-			raise Exception(_T("Errorneous command with exit code %d") % code)
+			raise Exception(T("Errorneous command with exit code %d") % code)
 
 	@staticmethod
 	def run_python(script : str, intercept_error : bool = False, local_variables : dict = None, show_script_on_error : bool = True) -> tuple[str,str,Any,int]:
@@ -110,7 +109,7 @@ class Runner(ABC):
 		:type script: str
 		:param intercept_error: Indicates if all the exception are intercepted
 		                       and put inside the returned value. If False,
-		                       the exceptions are not intercepted and they are
+		                       the exceptions are not intercepted, and they are
 		                       raised by this function. Default value is: False.
 		:type intercept_error: bool
 		:param local_variables: Dictionnary of the predefined elmeents (imports or local variables)
@@ -235,12 +234,12 @@ class Runner(ABC):
 		return proc is not None
 	
 	@staticmethod
-	def normalize_command(*cmd : str) -> tuple[str]:
+	def normalize_command(*cmd : str) -> list[str]:
 		"""
 		Ensure that the command (the first element of the list) is a command with an absolute path.
 		:param cmd: The command line to run.
 		:type cmd: str
-		:rtype: tuple[str]
+		:rtype: list[str]
 		"""
 		c = cmd[0]
 		if not os.path.isabs(c):
@@ -249,7 +248,7 @@ class Runner(ABC):
 				if os.path.exists(fn):
 					cmd = list(cmd[1:])
 					cmd.insert(0, fn)
-					return tuple(cmd)
+					return cmd
 		return cmd
 
 	@staticmethod

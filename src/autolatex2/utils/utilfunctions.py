@@ -30,8 +30,7 @@ import subprocess
 import sys
 from typing import TypeVar, Any
 
-import gettext
-_T = gettext
+from autolatex2.utils.i18n import T
 
 if os.name == 'nt':
 	import win32api
@@ -52,7 +51,7 @@ def get_java_version():
 		# The version info is sent to stderr, not stdout
 		version_output = result.stderr
 
-		# Parse the version string (example: "openjdk version \"17.0.1\"")
+		# Parse the version string (example: openjdk version "17.0.1")
 		for line in version_output.splitlines():
 			m = re.search(r'version "([^"]+?)"', line)
 			if m:
@@ -104,10 +103,11 @@ def unlink_pattern(directory : str, file_pattern : str):
 	file_list = glob.glob(pattern, recursive=False)
 	if file_list:
 		for file in file_list:
-			message = _T("Deleting %s") % str(file)
+			message = T("Deleting %s") % str(file)
 			logging.debug(message)
 			unlink(file)
 
+# noinspection PyBroadException
 def unlink(name : str):
 	"""
 	Remove the file. Do not fail if the file does not exist.
@@ -161,8 +161,8 @@ def basename2(name : str, *ext : str) -> str:
 		return os.path.join(dn,  bn)
 	return bn
 
-T = TypeVar('T')
-def first_of(*values : list[T]) -> T:
+TO = TypeVar('TO')
+def first_of(*values : list[TO]) -> TO:
 	"""
 	Replies the first non-null value in the given values.
 	:param values: The array of values.
@@ -189,6 +189,8 @@ def is_hidden_file(filename : str) -> bool:
 	else:
 		return filename.startswith('.')
 
+
+# noinspection PyBroadException
 def get_file_last_change(filename : str) -> float | None:
 	"""
 	Replies the time of the last change on the given file.

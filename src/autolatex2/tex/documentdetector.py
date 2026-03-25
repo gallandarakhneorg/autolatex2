@@ -27,6 +27,7 @@ from autolatex2.tex.texobservers import Observer
 from autolatex2.tex.texparsers import Parser
 from autolatex2.tex.texparsers import TeXParser
 
+
 class DocumentDetector(Observer):
 	"""
 	Observer on TeX parsing for detecting the documentclass macro inside a file.
@@ -99,7 +100,7 @@ class DocumentDetector(Observer):
         :type name: str
         :param parameter: Descriptions of the values passed to the TeX macro.
         :type parameter: dict[str,Any]
-        :return: the result of the expand of the macro, or None to not replace the macro by something (the macro is used as-is)
+        :return: the result of expansion of the macro, or None to not replace the macro by something (the macro is used as-is)
         :rtype: str
         """
 		if name == '\\documentclass':
@@ -109,7 +110,7 @@ class DocumentDetector(Observer):
 
 	def run(self):
 		"""
-		Determine if the given string is a LaTeX document, ie. it contains the \\documentclass macro.
+		Determine if the given string is a LaTeX document, i.e., it contains the \\documentclass macro.
 		"""
 		self.latex = False
 		if self.__content:

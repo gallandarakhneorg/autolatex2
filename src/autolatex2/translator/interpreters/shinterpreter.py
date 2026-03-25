@@ -29,9 +29,6 @@ from typing import override, Any
 from autolatex2.translator.interpreters.abstractinterpreter import AbstractTranslatorInterpreter
 from autolatex2.config.configobj import Config
 
-import gettext
-_T = gettext.gettext
-
 
 class TranslatorInterpreter(AbstractTranslatorInterpreter):
 	"""
@@ -40,7 +37,7 @@ class TranslatorInterpreter(AbstractTranslatorInterpreter):
 
 	def __init__(self,  configuration : Config):
 		"""
-		Construct an translator interpreter.
+		Construct a translator interpreter.
 		:param configuration: The general configuration.
 		:type configuration: Config
 		"""
@@ -50,7 +47,7 @@ class TranslatorInterpreter(AbstractTranslatorInterpreter):
 	@override
 	def runnable(self) -> bool:
 		"""
-		Replies if the interpreter is runnable, ie. the underground interpreter can be run.
+		Replies if the interpreter is runnable, i.e., the underground interpreter can be run.
 		:return: True if the interpreter could be run.
 		:rtype: bool
 		"""
@@ -67,7 +64,7 @@ class TranslatorInterpreter(AbstractTranslatorInterpreter):
 		"""
 		return 'sh'
 
-
+	# noinspection PyMethodMayBeStatic
 	def to_shell_value(self, value : Any) -> str:
 		"""
 		Convert a value to Shell code.
@@ -99,7 +96,7 @@ class TranslatorInterpreter(AbstractTranslatorInterpreter):
 					i = i + 1
 				return '\n'.join(plist)
 			elif isinstance(value, dict):
-				raise Exception["dictionary not supported"]
+				raise Exception("dictionary not supported")
 			else:
 				return self.to_shell_value(value)
 		else:

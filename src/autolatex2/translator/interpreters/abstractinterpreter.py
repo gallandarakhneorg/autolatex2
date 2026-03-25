@@ -29,9 +29,6 @@ from typing import Any
 from autolatex2.utils.runner import Runner
 from autolatex2.config.configobj import Config
 
-import gettext
-_T = gettext.gettext
-
 class AbstractTranslatorInterpreter(Runner):
 	"""
 	Definition of an abstract implementation of an interpreter for the AutoLaTeX translators.
@@ -39,7 +36,7 @@ class AbstractTranslatorInterpreter(Runner):
 
 	def __init__(self,  configuration : Config):
 		"""
-		Construct an translator interpreter.
+		Construct a translator interpreter.
 		:param configuration: The general configuration.
 		:type configuration: Config
 		"""
@@ -84,7 +81,7 @@ class AbstractTranslatorInterpreter(Runner):
 		self.__parent = p
 
 	@property
-	def global_variables(self):
+	def global_variables(self) -> dict[str,str]:
 		"""
 		Replies all the global variables.
 		:return: the map of the global variables in which the keys are the variable names.
@@ -95,7 +92,7 @@ class AbstractTranslatorInterpreter(Runner):
 	@property
 	def runnable(self) -> bool:
 		"""
-		Replies if the interpreter is runnable, ie. the underground interpreter can be run.
+		Replies if the interpreter is runnable, i.e., the underground interpreter can be run.
 		:return: True if the interpreter could be run.
 		:rtype: bool
 		"""
@@ -130,6 +127,7 @@ class AbstractTranslatorInterpreter(Runner):
 		"""
 		raise NotImplementedError
 
+	# noinspection PyMethodMayBeStatic
 	def to_python(self, value : Any) -> str:
 		"""
 		Convert a value to a valid Python code.

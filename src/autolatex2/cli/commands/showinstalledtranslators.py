@@ -26,9 +26,7 @@ from autolatex2.config.translator import TranslatorLevel
 from autolatex2.translator.translatorrepository import TranslatorRepository
 from autolatex2.translator.translatorobj import Translator
 from autolatex2.utils.extprint import eprint
-
-import gettext
-_T = gettext.gettext
+from autolatex2.utils.i18n import T
 
 class MakerAction(AbstractMakerAction):
 
@@ -36,7 +34,7 @@ class MakerAction(AbstractMakerAction):
 
 	alias : str = 'installedtranslators'
 
-	help : str = _T('Display the list of the installed translators and their highest loading levels')
+	help : str = T('Display the list of the installed translators and their highest loading levels')
 
 	@override
 	def _add_command_cli_arguments(self, command_name : str, command_help : str | None,
@@ -51,15 +49,15 @@ class MakerAction(AbstractMakerAction):
 		level_group = self.parse_cli.add_mutually_exclusive_group()
 
 		level_group.add_argument('--level',
-			action='store_true',
-			default=True, 
-			dest='show_installed_translator_level',
-			help=_T('Show the installation level for each translator'))
+			action = 'store_true',
+			default = True,
+			dest = 'show_installed_translator_level',
+			help = T('Show the installation level for each translator'))
 
 		level_group.add_argument('--nolevel',
-			action='store_false',
-			dest='show_installed_translator_level',
-			help=_T('Hide the installation level for each translator'))
+			action = 'store_false',
+			dest = 'show_installed_translator_level',
+			help = T('Hide the installation level for each translator'))
 
 
 	@override
@@ -97,7 +95,7 @@ class MakerAction(AbstractMakerAction):
 		:param all_inclusions: the collection of included translators
 		:return: dict[str,TranslatorLevel]
 		"""
-		self.__show_inclusions(all_inclusions, lambda a, b: _T("%s = %s") % (a,  b))
+		self.__show_inclusions(all_inclusions, lambda a, b: T("%s = %s") % (a,  b))
 
 	def _show_inclusion_names_only(self,  all_inclusions : dict[str,TranslatorLevel]):
 		"""
@@ -107,6 +105,7 @@ class MakerAction(AbstractMakerAction):
 		"""
 		self.__show_inclusions(all_inclusions, lambda a, b: a)
 
+	# noinspection PyMethodMayBeStatic
 	def __show_inclusions(self,  all_inclusions : dict[str,TranslatorLevel], label : Callable[[str,str],str]):
 		"""
 		Show the included translators without the associated inclusion levels.
@@ -119,7 +118,11 @@ class MakerAction(AbstractMakerAction):
 		for translator_name,  level in sorted_dict.items():
 			eprint(label(translator_name, str(level)))
 
-	def _add_implicit_inclusions(self,  all_inclusions : dict[str,TranslatorLevel],  installed_translators : list[dict[str,Translator]],  level : TranslatorLevel,  default_inclusion_level : TranslatorLevel=TranslatorLevel.SYSTEM):
+	# noinspection PyMethodMayBeStatic
+	def _add_implicit_inclusions(self,  all_inclusions : dict[str,TranslatorLevel],
+								 installed_translators : list[dict[str,Translator]],
+								 level : TranslatorLevel,
+								 default_inclusion_level : TranslatorLevel=TranslatorLevel.SYSTEM):
 		if level in installed_translators:
 			for translator_name,  translator in installed_translators[level].items():
 				if translator_name not in all_inclusions:

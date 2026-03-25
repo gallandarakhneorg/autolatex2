@@ -98,7 +98,7 @@ See the command B<createbeamer> for creating a package dedicated to LaTeX Beamer
 Commits changes to a version control system (GIT, CVS, SVN...). The command line must be provided in the
 configuration file.
 
-=item B<documentation>
+=item B<document>
 
 Performs all processing required to produce the F<.pdf>, F<.dvi>, or F<.ps> file for the document. This command is
 also known as B<gen_doc>.
@@ -1391,7 +1391,7 @@ AutoLaTeX configuration files can be located in several places:
 =over 4
 
 =item * System Configuration (for all users): In the directory where AutoLaTeX is installed (typically
-F</usr/lib/autolatex> on Unix systems).
+F</usr/lib/python3/dist-packages/autolatex2> on Unix systems).
 
 =item * User Configuration: Two cases apply: either the configuration directory (S<$HOME/.autolatex> on Unix or
 S<C:\Documents and Settings\E<lt>userE<gt>\Local Settings\Application Data\autolatex> on Windows) exists, or it
