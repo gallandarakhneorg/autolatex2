@@ -332,5 +332,5 @@ class MakerAction(AbstractMakerAction):
 		if cli_arguments.simulate:
 			msg = TT("%d file were selected as deletion candidates", "%d files were selected as deletion candidates", self.__nb_deletions)
 		else:
-			msg = TT("%d file were deleted", "%d files were deleted", self.__nb_deletions)
+			msg = TT("%d file was deleted", "%d files were deleted", self.__nb_deletions) % self.__nb_deletions
 		logging.info(msg)

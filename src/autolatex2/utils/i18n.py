@@ -74,10 +74,10 @@ class Translation:
         :return: the translation result.
         :rtype: str
         """
-        return gettext.ngettext(singular, plural, n)
+        return gettext.ngettext(singular, plural, 1 if n < 1 else n)
 
 gettext.install('myapp')  # Installs _() globally
 
-tr = Translation('autolatex', 'locale')
+tr = Translation('autolatex', 'locales')
 T = tr.get_text
 TT = tr.get_text_n
