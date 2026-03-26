@@ -19,6 +19,7 @@
 # 330, Boston, MA 02111-1307, USA.
 
 import unittest
+import tempfile
 import logging
 import os
 from typing import override
@@ -97,6 +98,345 @@ class TestUtils(AbstractBaseTest):
 		fatal_error, blocks = parse_tex_log_file(filename)
 		self.assertTrue(fatal_error.startswith("Undefined control sequence."))
 		self.assertEqual(42, len(blocks))
+
+	def test_find_aux_files_1_file_wo_subfolder_wo_selector(self):
+		try:
+			folder = tempfile.TemporaryDirectory(delete=False)
+			tex_file_0 = os.path.join(folder.name, "root_file.tex")
+			with open(tex_file_0, 'w') as f:
+				f.write("xyz")
+			aux_file_0 = os.path.join(folder.name, "root_file.aux")
+			with open(aux_file_0, 'w') as f:
+				f.write("xyz")
+
+			aux_files = find_aux_files(tex_file_0)
+			self.assertIsNotNone(aux_files)
+			self.assertEqual(1, len(aux_files))
+			self.assertTrue(aux_file_0 in aux_files)
+		finally:
+			folder.cleanup()
+
+	def test_find_aux_files_2_files_wo_subfolder_wo_selector(self):
+		try:
+			folder = tempfile.TemporaryDirectory(delete=False)
+			tex_file_0 = os.path.join(folder.name, "root_file.tex")
+			with open(tex_file_0, 'w') as f:
+				f.write("xyz")
+			aux_file_0 = os.path.join(folder.name, "root_file.aux")
+			with open(aux_file_0, 'w') as f:
+				f.write("xyz")
+			aux_file_1 = os.path.join(folder.name, "root_file_0.aux")
+			with open(aux_file_1, 'w') as f:
+				f.write("xyz")
+
+			aux_files = find_aux_files(tex_file_0)
+			self.assertIsNotNone(aux_files)
+			self.assertEqual(2, len(aux_files))
+			self.assertTrue(aux_file_0 in aux_files)
+			self.assertTrue(aux_file_1 in aux_files)
+		finally:
+			folder.cleanup()
+
+	def test_find_aux_files_3_files_wo_subfolder_wo_selector(self):
+		try:
+			folder = tempfile.TemporaryDirectory(delete=False)
+			tex_file_0 = os.path.join(folder.name, "root_file.tex")
+			with open(tex_file_0, 'w') as f:
+				f.write("xyz")
+			aux_file_0 = os.path.join(folder.name, "root_file.aux")
+			with open(aux_file_0, 'w') as f:
+				f.write("xyz")
+			aux_file_1 = os.path.join(folder.name, "root_file_0.aux")
+			with open(aux_file_1, 'w') as f:
+				f.write("xyz")
+			aux_file_2 = os.path.join(folder.name, "bu1.aux")
+			with open(aux_file_2, 'w') as f:
+				f.write("xyz")
+
+			aux_files = find_aux_files(tex_file_0)
+			self.assertIsNotNone(aux_files)
+			self.assertEqual(3, len(aux_files))
+			self.assertTrue(aux_file_0 in aux_files)
+			self.assertTrue(aux_file_1 in aux_files)
+			self.assertTrue(aux_file_2 in aux_files)
+		finally:
+			folder.cleanup()
+
+	def test_find_aux_files_1_file_w_subfolder_wo_selector(self):
+		try:
+			folder = tempfile.TemporaryDirectory(delete=False)
+			tex_file_0 = os.path.join(folder.name, "root_file.tex")
+			with open(tex_file_0, 'w') as f:
+				f.write("xyz")
+			aux_file_0 = os.path.join(folder.name, "root_file.aux")
+			with open(aux_file_0, 'w') as f:
+				f.write("xyz")
+			subfolder_0 = os.path.join(folder.name, "sub0")
+			os.makedirs(subfolder_0)
+			aux_sfile_1 = os.path.join(subfolder_0, "sub0.aux")
+			with open(aux_sfile_1, 'w') as f:
+				f.write("xyz")
+			subfolder_1 = os.path.join(folder.name, "sub1")
+			os.makedirs(subfolder_1)
+			aux_sfile_2 = os.path.join(subfolder_1, "sub1.aux")
+			with open(aux_sfile_2, 'w') as f:
+				f.write("xyz")
+			tex_file_1 = os.path.join(subfolder_1, "sub1.tex")
+			with open(tex_file_1, 'w') as f:
+				f.write("xyz")
+
+			aux_files = find_aux_files(tex_file_0)
+			self.assertIsNotNone(aux_files)
+			self.assertEqual(2, len(aux_files))
+			self.assertTrue(aux_file_0 in aux_files)
+			self.assertFalse(aux_sfile_1 in aux_files)
+			self.assertTrue(aux_sfile_2 in aux_files)
+		finally:
+			folder.cleanup()
+
+	def test_find_aux_files_2_files_w_subfolder_wo_selector(self):
+		try:
+			folder = tempfile.TemporaryDirectory(delete=False)
+			tex_file_0 = os.path.join(folder.name, "root_file.tex")
+			with open(tex_file_0, 'w') as f:
+				f.write("xyz")
+			aux_file_0 = os.path.join(folder.name, "root_file.aux")
+			with open(aux_file_0, 'w') as f:
+				f.write("xyz")
+			aux_file_1 = os.path.join(folder.name, "root_file_0.aux")
+			with open(aux_file_1, 'w') as f:
+				f.write("xyz")
+			subfolder_0 = os.path.join(folder.name, "sub0")
+			os.makedirs(subfolder_0)
+			aux_sfile_1 = os.path.join(subfolder_0, "sub0.aux")
+			with open(aux_sfile_1, 'w') as f:
+				f.write("xyz")
+			subfolder_1 = os.path.join(folder.name, "sub1")
+			os.makedirs(subfolder_1)
+			aux_sfile_2 = os.path.join(subfolder_1, "sub1.aux")
+			with open(aux_sfile_2, 'w') as f:
+				f.write("xyz")
+			tex_file_1 = os.path.join(subfolder_1, "sub1.tex")
+			with open(tex_file_1, 'w') as f:
+				f.write("xyz")
+
+			aux_files = find_aux_files(tex_file_0)
+			self.assertIsNotNone(aux_files)
+			self.assertEqual(3, len(aux_files))
+			self.assertTrue(aux_file_0 in aux_files)
+			self.assertTrue(aux_file_1 in aux_files)
+			self.assertFalse(aux_sfile_1 in aux_files)
+			self.assertTrue(aux_sfile_2 in aux_files)
+		finally:
+			folder.cleanup()
+
+	def test_find_aux_files_3_files_w_subfolder_wo_selector(self):
+		try:
+			folder = tempfile.TemporaryDirectory(delete=False)
+			tex_file_0 = os.path.join(folder.name, "root_file.tex")
+			with open(tex_file_0, 'w') as f:
+				f.write("xyz")
+			aux_file_0 = os.path.join(folder.name, "root_file.aux")
+			with open(aux_file_0, 'w') as f:
+				f.write("xyz")
+			aux_file_1 = os.path.join(folder.name, "root_file_0.aux")
+			with open(aux_file_1, 'w') as f:
+				f.write("xyz")
+			aux_file_2 = os.path.join(folder.name, "bu1.aux")
+			with open(aux_file_2, 'w') as f:
+				f.write("xyz")
+			subfolder_0 = os.path.join(folder.name, "sub0")
+			os.makedirs(subfolder_0)
+			aux_sfile_1 = os.path.join(subfolder_0, "sub0.aux")
+			with open(aux_sfile_1, 'w') as f:
+				f.write("xyz")
+			subfolder_1 = os.path.join(folder.name, "sub1")
+			os.makedirs(subfolder_1)
+			aux_sfile_2 = os.path.join(subfolder_1, "sub1.aux")
+			with open(aux_sfile_2, 'w') as f:
+				f.write("xyz")
+			tex_file_1 = os.path.join(subfolder_1, "sub1.tex")
+			with open(tex_file_1, 'w') as f:
+				f.write("xyz")
+
+			aux_files = find_aux_files(tex_file_0)
+			self.assertIsNotNone(aux_files)
+			self.assertEqual(4, len(aux_files))
+			self.assertTrue(aux_file_0 in aux_files)
+			self.assertTrue(aux_file_1 in aux_files)
+			self.assertTrue(aux_file_2 in aux_files)
+			self.assertFalse(aux_sfile_1 in aux_files)
+			self.assertTrue(aux_sfile_2 in aux_files)
+		finally:
+			folder.cleanup()
+
+	def test_find_aux_files_1_file_wo_subfolder_w_selector(self):
+		try:
+			folder = tempfile.TemporaryDirectory(delete=False)
+			tex_file_0 = os.path.join(folder.name, "root_file.tex")
+			with open(tex_file_0, 'w') as f:
+				f.write("xyz")
+			aux_file_0 = os.path.join(folder.name, "root_file.aux")
+			with open(aux_file_0, 'w') as f:
+				f.write("xyz")
+
+			aux_files = find_aux_files(tex_file_0, lambda x: '1' in os.path.basename(x))
+			self.assertIsNotNone(aux_files)
+			self.assertEqual(0, len(aux_files))
+		finally:
+			folder.cleanup()
+
+	def test_find_aux_files_2_files_wo_subfolder_w_selector(self):
+		try:
+			folder = tempfile.TemporaryDirectory(delete=False)
+			tex_file_0 = os.path.join(folder.name, "root_file.tex")
+			with open(tex_file_0, 'w') as f:
+				f.write("xyz")
+			aux_file_0 = os.path.join(folder.name, "root_file.aux")
+			with open(aux_file_0, 'w') as f:
+				f.write("xyz")
+			aux_file_1 = os.path.join(folder.name, "root_file_0.aux")
+			with open(aux_file_1, 'w') as f:
+				f.write("xyz")
+
+			aux_files = find_aux_files(tex_file_0, lambda x: '1' in os.path.basename(x))
+			self.assertIsNotNone(aux_files)
+			self.assertEqual(0, len(aux_files))
+		finally:
+			folder.cleanup()
+
+	def test_find_aux_files_3_files_wo_subfolder_w_selector(self):
+		try:
+			folder = tempfile.TemporaryDirectory(delete=False)
+			tex_file_0 = os.path.join(folder.name, "root_file.tex")
+			with open(tex_file_0, 'w') as f:
+				f.write("xyz")
+			aux_file_0 = os.path.join(folder.name, "root_file.aux")
+			with open(aux_file_0, 'w') as f:
+				f.write("xyz")
+			aux_file_1 = os.path.join(folder.name, "root_file_0.aux")
+			with open(aux_file_1, 'w') as f:
+				f.write("xyz")
+			aux_file_2 = os.path.join(folder.name, "bu1.aux")
+			with open(aux_file_2, 'w') as f:
+				f.write("xyz")
+
+			aux_files = find_aux_files(tex_file_0, lambda x: '1' in os.path.basename(x))
+			self.assertIsNotNone(aux_files)
+			self.assertEqual(1, len(aux_files))
+			self.assertFalse(aux_file_0 in aux_files)
+			self.assertFalse(aux_file_1 in aux_files)
+			self.assertTrue(aux_file_2 in aux_files)
+		finally:
+			folder.cleanup()
+
+	def test_find_aux_files_1_file_w_subfolder_w_selector(self):
+		try:
+			folder = tempfile.TemporaryDirectory(delete=False)
+			tex_file_0 = os.path.join(folder.name, "root_file.tex")
+			with open(tex_file_0, 'w') as f:
+				f.write("xyz")
+			aux_file_0 = os.path.join(folder.name, "root_file.aux")
+			with open(aux_file_0, 'w') as f:
+				f.write("xyz")
+			subfolder_0 = os.path.join(folder.name, "sub0")
+			os.makedirs(subfolder_0)
+			aux_sfile_1 = os.path.join(subfolder_0, "sub0.aux")
+			with open(aux_sfile_1, 'w') as f:
+				f.write("xyz")
+			subfolder_1 = os.path.join(folder.name, "sub1")
+			os.makedirs(subfolder_1)
+			aux_sfile_2 = os.path.join(subfolder_1, "sub1.aux")
+			with open(aux_sfile_2, 'w') as f:
+				f.write("xyz")
+			tex_file_1 = os.path.join(subfolder_1, "sub1.tex")
+			with open(tex_file_1, 'w') as f:
+				f.write("xyz")
+
+			aux_files = find_aux_files(tex_file_0, lambda x: '1' in os.path.basename(x))
+			self.assertIsNotNone(aux_files)
+			self.assertEqual(1, len(aux_files))
+			self.assertFalse(aux_file_0 in aux_files)
+			self.assertFalse(aux_sfile_1 in aux_files)
+			self.assertTrue(aux_sfile_2 in aux_files)
+		finally:
+			folder.cleanup()
+
+	def test_find_aux_files_2_files_w_subfolder_w_selector(self):
+		try:
+			folder = tempfile.TemporaryDirectory(delete=False)
+			tex_file_0 = os.path.join(folder.name, "root_file.tex")
+			with open(tex_file_0, 'w') as f:
+				f.write("xyz")
+			aux_file_0 = os.path.join(folder.name, "root_file.aux")
+			with open(aux_file_0, 'w') as f:
+				f.write("xyz")
+			aux_file_1 = os.path.join(folder.name, "root_file_0.aux")
+			with open(aux_file_1, 'w') as f:
+				f.write("xyz")
+			subfolder_0 = os.path.join(folder.name, "sub0")
+			os.makedirs(subfolder_0)
+			aux_sfile_1 = os.path.join(subfolder_0, "sub0.aux")
+			with open(aux_sfile_1, 'w') as f:
+				f.write("xyz")
+			subfolder_1 = os.path.join(folder.name, "sub1")
+			os.makedirs(subfolder_1)
+			aux_sfile_2 = os.path.join(subfolder_1, "sub1.aux")
+			with open(aux_sfile_2, 'w') as f:
+				f.write("xyz")
+			tex_file_1 = os.path.join(subfolder_1, "sub1.tex")
+			with open(tex_file_1, 'w') as f:
+				f.write("xyz")
+
+			aux_files = find_aux_files(tex_file_0, lambda x: '1' in os.path.basename(x))
+			self.assertIsNotNone(aux_files)
+			self.assertEqual(1, len(aux_files))
+			self.assertFalse(aux_file_0 in aux_files)
+			self.assertFalse(aux_file_1 in aux_files)
+			self.assertFalse(aux_sfile_1 in aux_files)
+			self.assertTrue(aux_sfile_2 in aux_files)
+		finally:
+			folder.cleanup()
+
+	def test_find_aux_files_3_files_w_subfolder_w_selector(self):
+		try:
+			folder = tempfile.TemporaryDirectory(delete=False)
+			tex_file_0 = os.path.join(folder.name, "root_file.tex")
+			with open(tex_file_0, 'w') as f:
+				f.write("xyz")
+			aux_file_0 = os.path.join(folder.name, "root_file.aux")
+			with open(aux_file_0, 'w') as f:
+				f.write("xyz")
+			aux_file_1 = os.path.join(folder.name, "root_file_0.aux")
+			with open(aux_file_1, 'w') as f:
+				f.write("xyz")
+			aux_file_2 = os.path.join(folder.name, "bu1.aux")
+			with open(aux_file_2, 'w') as f:
+				f.write("xyz")
+			subfolder_0 = os.path.join(folder.name, "sub0")
+			os.makedirs(subfolder_0)
+			aux_sfile_1 = os.path.join(subfolder_0, "sub0.aux")
+			with open(aux_sfile_1, 'w') as f:
+				f.write("xyz")
+			subfolder_1 = os.path.join(folder.name, "sub1")
+			os.makedirs(subfolder_1)
+			aux_sfile_2 = os.path.join(subfolder_1, "sub1.aux")
+			with open(aux_sfile_2, 'w') as f:
+				f.write("xyz")
+			tex_file_1 = os.path.join(subfolder_1, "sub1.tex")
+			with open(tex_file_1, 'w') as f:
+				f.write("xyz")
+
+			aux_files = find_aux_files(tex_file_0, lambda x: '1' in os.path.basename(x))
+			self.assertIsNotNone(aux_files)
+			self.assertEqual(2, len(aux_files))
+			self.assertFalse(aux_file_0 in aux_files)
+			self.assertFalse(aux_file_1 in aux_files)
+			self.assertTrue(aux_file_2 in aux_files)
+			self.assertFalse(aux_sfile_1 in aux_files)
+			self.assertTrue(aux_sfile_2 in aux_files)
+		finally:
+			folder.cleanup()
 
 
 

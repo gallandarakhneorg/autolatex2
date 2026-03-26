@@ -25,6 +25,11 @@ General utilities for TeX.
 import os
 import re
 from enum import IntEnum, unique
+from pathlib import Path
+from typing import Callable
+
+from autolatex2.utils.i18n import T
+import autolatex2.utils.utilfunctions as genutils
 
 
 @unique
@@ -45,6 +50,14 @@ def get_tex_file_extensions() -> list[str]:
 	:rtype: list
 	"""
 	return ['.tex', '.latex', '.ltx']
+
+def get_aux_file_extensions() -> list[str]:
+	"""
+	Replies the supported filename extensions for auxilliary files.
+	:return: The list of the filename extensions.
+	:rtype: list
+	"""
+	return ['.aux']
 
 def get_index_file_extensions() -> list[str]:
 	"""
@@ -155,3 +168,37 @@ def parse_tex_log_file(log_filename : str) -> tuple[str,list[str]]:
 		if not fatal_error:
 			fatal_error = __parse_tex_fatal_error_message(current_block)
 	return fatal_error, blocks
+
+def find_aux_files(tex_file : str, selector : Callable[[str], bool] | None = None) -> list[str]:
+	"""
+	Recursively find all aux files that are located in the same folder as the given TeX file, or
+	in one of its subfolders. For subfolders, it is mandatory that a tex file with the name basename
+	as the aux file exists. In the folder of the provided tex file, all the aux files are considered.
+	:param tex_file: The filename of the tex file.
+	:type tex_file: str
+	:param selector: A lambda function that permits is used as a filtering function for the auxilliary files.
+	The lambda takes one formal argument that is the auxilliary file's name. It replies True if the
+	auxilliary file is accepted; Otherwise False.
+	:type selector: Callable[[str], bool] | None
+	:return: the list of the aux files that are validated the constraints and the given lambda selector.
+	:rtype: list[str]
+	"""
+	folder_name = os.path.normpath(os.path.dirname(tex_file))
+	directory = Path(folder_name)
+	if not directory.exists():
+		raise FileNotFoundError(T("Directory does not exist: %s") % folder_name)
+	if not directory.is_dir():
+		raise NotADirectoryError(T("Path is not a directory: %s") % folder_name)
+	# Recursively find all .aux files
+	aux_files : list[str] = list()
+	for candidate in directory.rglob("*.aux"):
+		aux_dir = os.path.normpath(os.path.dirname(candidate))
+		candidate_name = str(candidate)
+		if aux_dir == folder_name:
+			if selector is None or selector(candidate_name):
+				aux_files.append(candidate_name)
+		else:
+			additional_tex_file = genutils.basename2(candidate_name, *get_aux_file_extensions()) + '.tex'
+			if os.path.isfile(additional_tex_file) and (selector is None or selector(candidate_name)):
+				aux_files.append(candidate_name)
+	return aux_files

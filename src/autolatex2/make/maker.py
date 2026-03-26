@@ -733,12 +733,51 @@ class AutoLaTeXMaker(Runner):
 			sout, serr, sex, exit_code = Runner.run_command(*cmd)
 		return sout, serr, sex, exit_code
 
-	def run_bibtex(self, filename : str) -> dict[str,Any] | None:
+	# noinspection PyMethodMayBeStatic,PyBroadException
+	def __select_aux_file(self, filename : str) -> bool:
+		try:
+			with open(filename, 'r') as f:
+				line = f.readline()
+				expr = re.compile(r'\\(?:abx@aux@cite|citation|bibcite)', re.S)
+				while line:
+					if expr.search(line):
+						return True
+					line = f.readline()
+		except:
+			pass
+		return False
+
+	def detect_aux_files_with_biliography(self, filename : str, check_aux_content : bool = True) -> list[str]:
+		"""
+		Explore the document folder and subfolders for finding auxilliary files that contains biliographical citations.
+		:param filename: The name TeX file to compile.
+		:type filename: str
+		:param check_aux_content: Indicates if this function has to read the auxilliary files to determine if a citation is inside.
+		Then, if it is the case, the auxilliary file is passed to the bibliography tool; Otherwise it is ignored. Default is: True.
+		:type check_aux_content: bool
+		:return: The list of auxilliary files
+		:rtype: list[str]
+		"""
+		if check_aux_content:
+			aux_file_list = texutils.find_aux_files(filename, self.__select_aux_file)
+		else:
+			aux_file_list = texutils.find_aux_files(filename)
+		if not aux_file_list:
+			aux_file = genutils.basename2(filename, *texutils.get_tex_file_extensions()) + '.aux'
+			aux_file_list.append(aux_file)
+		return aux_file_list
+
+	def run_bibtex(self, filename : str, check_aux_content : bool = True) -> dict[str,Any] | None:
 		"""
 		Launch the BibTeX tool (bibtex, biber, etc.) once time and replies a dictionary that describes any error.
 		The returned dictionnary has the keys: filename, lineno and message.
+		This function also supports the document with zro, one or more bibliography sections, such a those
+		introduced by the LaTeX package 'bibunits'.
 		:param filename: The name TeX file to compile.
 		:type filename: str
+		:param check_aux_content: Indicates if this function has to read the auxilliary files to determine if a citation is inside.
+		Then, if it is the case, the auxilliary file is passed to the bibliography tool; Otherwise it is ignored. Default is: True.
+		:type check_aux_content: bool
 		:return: the error result, or None if there is no error.
 		:rtype: dict[str,Any] | None
 		"""
@@ -748,39 +787,40 @@ class AutoLaTeXMaker(Runner):
 			if mfn is not None and mfn != '':
 				filename = mfn
 		self.__reset_warnings()
-		aux_file = genutils.basename2(filename, *texutils.get_tex_file_extensions())
-		if self.configuration.generation.is_biber:
-			logging.info(T('BIBER: %s') % os.path.basename(aux_file))
-			cmd = self.__biber_cli.copy()
-		else:
-			aux_file += '.aux'
-			logging.info(T('BIBTEX: %s') % os.path.basename(aux_file))
-			cmd = self.__bibtex_cli.copy()
-		cmd.append(os.path.relpath(aux_file))
-		cmd = Runner.normalize_command(*cmd)
-		if self.configuration.generation.is_biber:
-			logging.debug(T('BIBER: Command line is: %s') % ' '.join(cmd))
-		else:
-			logging.debug(T('BIBTEX: Command line is: %s') % ' '.join(cmd))
-		sout, serr, sex, exitcode = Runner.run_command(*cmd)
-		if exitcode != 0:
+		aux_file_list = self.detect_aux_files_with_biliography(filename, check_aux_content)
+		for aux_file in aux_file_list:
 			if self.configuration.generation.is_biber:
-				logging.debug(T('BIBER: error when processing %s') % os.path.basename(aux_file))
+				aux_file = genutils.basename2(aux_file, *texutils.get_aux_file_extensions())
+				logging.info(T('BIBER: %s') % os.path.basename(aux_file))
+				cmd = self.__biber_cli.copy()
 			else:
-				logging.debug(T('BIBTEX: error when processing %s') % os.path.basename(aux_file))
-			log = sout
-			if not log:
-				log = serr
-			if log:
+				logging.info(T('BIBTEX: %s') % os.path.basename(aux_file))
+				cmd = self.__bibtex_cli.copy()
+			cmd.append(os.path.relpath(aux_file))
+			cmd = Runner.normalize_command(*cmd)
+			if self.configuration.generation.is_biber:
+				logging.debug(T('BIBER: Command line is: %s') % ' '.join(cmd))
+			else:
+				logging.debug(T('BIBTEX: Command line is: %s') % ' '.join(cmd))
+			sout, serr, sex, exitcode = Runner.run_command(*cmd)
+			if exitcode != 0:
 				if self.configuration.generation.is_biber:
-					log_parser = BiberErrorParser()
+					logging.debug(T('BIBER: error when processing %s') % os.path.basename(aux_file))
 				else:
-					log_parser = BibTeXErrorParser()
-				current_error = log_parser.parse_log(aux_file, log)
-				if current_error:
-					return current_error
-			current_error = {'filename': aux_file, 'lineno': 0, 'message': sout + "\n" + serr}
-			return current_error
+					logging.debug(T('BIBTEX: error when processing %s') % os.path.basename(aux_file))
+				log = sout
+				if not log:
+					log = serr
+				if log:
+					if self.configuration.generation.is_biber:
+						log_parser = BiberErrorParser()
+					else:
+						log_parser = BibTeXErrorParser()
+					current_error = log_parser.parse_log(aux_file, log)
+					if current_error:
+						return current_error
+				current_error = {'filename': aux_file, 'lineno': 0, 'message': sout + "\n" + serr}
+				return current_error
 		return None
 
 	def run_makeindex(self, filename : str) -> tuple[int,str,str] | None:

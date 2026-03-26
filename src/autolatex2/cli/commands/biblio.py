@@ -23,6 +23,7 @@ from argparse import Namespace
 from typing import override
 
 import autolatex2.utils.extlogging as extlogging
+from autolatex2.utils.extprint import eprint
 from autolatex2.utils.i18n import T
 from autolatex2.cli.abstract_actions import AbstractMakerAction
 
@@ -48,6 +49,15 @@ class MakerAction(AbstractMakerAction):
 			action = 'store_true', 
 			help = T('Don\'t set the current directory of the application to document\'s root directory before the launch of the building process'))
 
+		self.parse_cli.add_argument('--noauxfileread',
+			action = 'store_true',
+			help = T('Don\'t read the content of the auxilliary files for determining if they contain bibliography citations'))
+
+		self.parse_cli.add_argument('--list',
+			action = 'store_true',
+			help = T('Show only the list of detected auxilliary files and do not run the biliography tool on them'))
+
+
 	@override
 	def run(self, cli_arguments : Namespace) -> bool:
 		"""
@@ -64,10 +74,15 @@ class MakerAction(AbstractMakerAction):
 				os.chdir(ddir)
 			maker = self._internal_create_maker()
 			for root_file in maker.root_files:
-				error = maker.run_bibtex(root_file)
-				if error:
-					extlogging.multiline_error(error['message'])
-					return False
+				if cli_arguments.list:
+					file_list = maker.detect_aux_files_with_biliography(root_file, not cli_arguments.noauxfileread)
+					for file in file_list:
+						eprint(file)
+				else:
+					error = maker.run_bibtex(root_file, not cli_arguments.noauxfileread)
+					if error:
+						extlogging.multiline_error(error['message'])
+						return False
 		finally:
 			os.chdir(old_dir)
 		return True
