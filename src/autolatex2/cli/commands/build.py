@@ -30,9 +30,9 @@ from autolatex2.utils.i18n import T
 # to inherit from this super action.
 class MakerAction(AbstractMakerAction):
 
-	id : str = 'all'
+	id : str = 'build'
 
-	alias : str = 'default'
+	alias : list[str] = [ 'default', 'all' ]
 
 	help : str = T('Performs all processing actions that are required to produce the PDF, DVI or Postscript and to view it with the specified PDF viewer if this option was enabled')
 
@@ -53,6 +53,11 @@ class MakerAction(AbstractMakerAction):
 		self.parse_cli.add_argument('--nochdir',
 			action = 'store_true',
 			help = T('Don\'t set the current directory of the application to document\'s root directory before the launch of the building process'))
+
+		self.parse_cli.add_argument('--noauxfileread',
+			action='store_true',
+			help=T('Don\'t read the content of the auxilliary files for determining if they contain bibliography citations'))
+
 
 	@override
 	def run(self, cli_arguments : Namespace) -> bool:

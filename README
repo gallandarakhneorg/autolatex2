@@ -53,13 +53,14 @@ COMMANDS
 
     The available commands are:
 
-    all Equivalent to the images, document and view commands, but the viewer
-        is launched only if enabled in the configuration or via the command
-        line.
-
     biblio
         Processes all tasks required to generate the bibliography (BibTeX,
         Biber, etc.).
+
+    build
+        Equivalent to the images, document and view commands, but the viewer
+        is launched only if enabled in the configuration or via the command
+        line.
 
     clean
         Removes all LaTeX temporary files and other temporary files created
@@ -388,15 +389,15 @@ GLOBAL OPTIONS
         --lualatex.
 
 OPTIONS FOR COMMANDS
-    *all*
-        See options for the *images*, *document* and *view* commands, if
-        any.
-
     *biblio*
 
         --nochdir   Prevents AutoLaTeX from changing the current directory
                     to the document's root directory before starting the
                     build process.
+
+    *build*
+        See options for the *images*, *document* and *view* commands, if
+        any.
 
     *clean*
 

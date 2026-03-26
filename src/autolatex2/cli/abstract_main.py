@@ -1042,6 +1042,36 @@ class AbstractAutoLaTeXMain(ABC):
 
 		return execution_order
 
+	def __unaliases(self, commands_to_run : list[str], all_commands : dict[str,AutolatexCommand]) -> list[str]:
+		"""
+		Replace any alias in the given list of commands to run by their regular names.
+		:param commands_to_run: the list of names or aliases for the commands to be run.
+		:type commands_to_run: list[str]
+		:param all_commands: The definition of all the known commands.
+		:type all_commands: dict[str,AutolatexCommand]
+		:return: the list of commands to run, with their regular names.
+		:rtype: list[str]
+		"""
+		aliases = dict()
+		for name, cmd in all_commands.items():
+			aliases[name] = name
+			if cmd.aliases:
+				for alias in cmd.aliases:
+					if alias in aliases:
+						raise Exception('multiple commands have the alias \'%s\'' % alias)
+					aliases[alias] = name
+		real_commands = list()
+		for command in commands_to_run:
+			if command in aliases:
+				cmd = aliases[command]
+				if cmd:
+					real_commands.append(cmd)
+				else:
+					real_commands.append(command)
+			else:
+				real_commands.append(command)
+		return real_commands
+
 	def _execute_commands(self,  commands_to_run : list[str],  all_commands : dict[str,AutolatexCommand], cli_arguments : Namespace):
 		"""
 		Execute the commands.
@@ -1058,6 +1088,9 @@ class AbstractAutoLaTeXMain(ABC):
 			logging.error(T('Unable to determine the command to run'))
 			self._exit_on_failure()
 		else:
+			# Convert aliases to the real command names
+			commands_to_run = self.__unaliases(commands_to_run, all_commands)
+
 			# Build the list of commands
 			cmds = self.build_command_list_from_prerequisites(commands_to_run, all_commands)
 

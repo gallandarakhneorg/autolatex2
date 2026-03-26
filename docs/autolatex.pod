@@ -52,14 +52,14 @@ The available commands are:
 
 =over 4
 
-=item B<all>
-
-Equivalent to the B<images>, B<document> and B<view> commands, but the viewer is launched only if enabled in the
-configuration or via the command line.
-
 =item B<biblio>
 
 Processes all tasks required to generate the bibliography (BibTeX, Biber, etc.).
+
+=item B<build>
+
+Equivalent to the B<images>, B<document> and B<view> commands, but the viewer is launched only if enabled in the
+configuration or via the command line.
 
 =item B<clean>
 
@@ -417,10 +417,6 @@ Uses the LaTeX command: F<xelatex>. See also: B<--pdflatex>, B<--latex>, and B<-
 
 =over 4
 
-=item I<all>
-
-See options for the I<images>, I<document>  and I<view> commands, if any.
-
 =item I<biblio>
 
 =over 12
@@ -430,6 +426,10 @@ See options for the I<images>, I<document>  and I<view> commands, if any.
 Prevents AutoLaTeX from changing the current directory to the document's root directory before starting the build process.
 
 =back
+
+=item I<build>
+
+See options for the I<images>, I<document>  and I<view> commands, if any.
 
 =item I<clean>
 

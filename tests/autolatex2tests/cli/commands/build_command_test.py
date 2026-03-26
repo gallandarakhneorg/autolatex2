@@ -28,10 +28,10 @@ from autolatex2.config.configreader import OldStyleConfigReader
 from autolatex2tests.cli.commands.abstract_command_test import AbstractCommandTest
 
 
-class TestDocumentAction(AbstractCommandTest):
+class TestBuildAction(AbstractCommandTest):
 
 	def __init__(self, x):
-		super().__init__(x, 'all')
+		super().__init__(x, 'build')
 
 	@override
 	def setUp(self):
