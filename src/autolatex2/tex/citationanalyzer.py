@@ -25,11 +25,29 @@ Tools for extracting the bibliography citations from AUX file or BSF file.
 import os
 import re
 from hashlib import md5
-from typing import override, Any
+from typing import override, Any, Callable
 
 from autolatex2.tex.texobservers import Observer
 from autolatex2.tex.texparsers import TeXParser, Parser
 
+# noinspection DuplicatedCode
+EXPAND_REGISTRY : dict[str, Callable[[Any, tuple[dict[str, Any], ...]], None]] = dict()
+
+def expand_function(func : Callable) -> Callable:
+	"""
+	Decorator to register functions with __expand__ prefix.
+	:param func: The function to be marked
+	:type func: Callable
+	:return: the function.
+	:rtype: Callable
+	"""
+	# Store the function and its metadata
+	# Remove "_expand__" prefix
+	if not func.__name__.startswith('_expand__'):
+		raise NameError('Function name must start with \'_expand__\'')
+	func_name = str(func.__name__)[9:]
+	EXPAND_REGISTRY[func_name] = func
+	return func
 
 class AuxiliaryCitationAnalyzer(Observer):
 	"""
@@ -49,6 +67,7 @@ class AuxiliaryCitationAnalyzer(Observer):
 		:param filename: The name of the file to parse.
 		:type filename: str
 		"""
+		self.__expand_registry = EXPAND_REGISTRY
 		self.__filename = filename
 		self.__basename = os.path.basename(os.path.splitext(filename)[0])
 		self.__databases = set()
@@ -148,21 +167,37 @@ class AuxiliaryCitationAnalyzer(Observer):
 		:return: the result of expansion of the macro, or None to not replace the macro by something (the macro is used as-is)
 		:rtype: str
 		"""
-		if name == '\\bibdata':
-			if parameter and len(parameter) > 1 and 'text' in parameter[1] and parameter[1]['text']:
-				for bibdb in re.split(r'\s*,\s*', parameter[1]['text']):
-					if bibdb:
-						self.__databases.add(bibdb)
-		elif name == '\\bibstyle':
-			if parameter and len(parameter) > 1 and 'text' in parameter[1] and parameter[1]['text']:
-				for bibdb in re.split(r'\s*,\s*', parameter[1]['text']):
-					if bibdb:
-						self.__styles.add(bibdb)
-		elif parameter and len(parameter) > 1 and 'text' in parameter[1] and parameter[1]['text']:
+		if name.startswith('\\'):
+			callback_name = name[1:]
+			if callback_name in self.__expand_registry:
+				func = self.__expand_registry[callback_name]
+				func(self, parameter)
+			else:
+				func = self.__expand_registry['_ELSE']
+				func(self, parameter)
+		return ''
+
+	# noinspection PyPep8Naming
+	@expand_function
+	def _expand___ELSE(self, parameter : list[dict[str,Any]]):
+		if parameter and len(parameter) > 1 and 'text' in parameter[1] and parameter[1]['text']:
 			for bibdb in re.split(r'\s*,\s*', parameter[1]['text']):
 				if bibdb:
 					self.__citations.add(bibdb)
-		return ''
+
+	@expand_function
+	def _expand__bibdata(self, parameter : list[dict[str,Any]]):
+		if parameter and len(parameter) > 1 and 'text' in parameter[1] and parameter[1]['text']:
+			for bibdb in re.split(r'\s*,\s*', parameter[1]['text']):
+				if bibdb:
+					self.__databases.add(bibdb)
+
+	@expand_function
+	def _expand__bibstyle(self, parameter : list[dict[str,Any]]):
+		if parameter and len(parameter) > 1 and 'text' in parameter[1] and parameter[1]['text']:
+			for bibdb in re.split(r'\s*,\s*', parameter[1]['text']):
+				if bibdb:
+					self.__styles.add(bibdb)
 
 	# noinspection DuplicatedCode
 	def run(self):

@@ -30,13 +30,40 @@ import shutil
 import re
 import textwrap
 import logging
-from typing import override, Any
+from typing import override, Any, Callable
 
 from autolatex2.tex.texobservers import Observer
 from autolatex2.tex.texparsers import Parser
 from autolatex2.tex.texparsers import TeXParser
 import autolatex2.utils.utilfunctions as genutils
 from autolatex2.utils.i18n import T
+
+FULL_EXPAND_REGISTRY : dict[str, Callable[[Any, Parser, str, list[dict[str, Any]]], str]] = dict()
+
+PREFIX_EXPAND_REGISTRY : dict[str, Callable[[Any, Parser, str, list[dict[str, Any]]], str]] = dict()
+
+
+# noinspection DuplicatedCode
+def expand_function(start_symbol : bool):
+	"""
+	Decorator to register functions with __expand__ prefix.
+	:param start_symbol: Marks the function as associated to the prefix of a LaTeX macro name.
+	:type start_symbol: bool
+	:return: the decorator.
+	"""
+	def decorator(func: Callable) -> Callable:
+		# Store the function and its metadata
+		# Remove "_expand__" prefix
+		if not func.__name__.startswith('_expand__'):
+			raise NameError('Function name must start with \'_expand__\'')
+		func_name = str(func.__name__)[9:]
+		if start_symbol:
+			PREFIX_EXPAND_REGISTRY[func_name] = func
+		else:
+			FULL_EXPAND_REGISTRY[func_name] = func
+		return func
+	return decorator
+
 
 class Flattener(Observer):
 	"""
@@ -76,6 +103,8 @@ class Flattener(Observer):
 		:type output_directory: ste
 		"""
 		# Following attributes are init in __init()
+		self.__full_expand_registry = FULL_EXPAND_REGISTRY
+		self.__prefix_expand_registry = PREFIX_EXPAND_REGISTRY
 		self.__file_content_counter = None
 		self.__embedded_files = None
 		# Other attributes
@@ -119,7 +148,7 @@ class Flattener(Observer):
 	@property
 	def use_biblio(self) -> bool:
 		"""
-		Replies if the biblio database.
+		Replies if the biblio database is used and kept in the flat version.
 		:return: True if the biblio database may be used. False for inline biliography entries.
 		:rtype: bool
 		"""
@@ -128,7 +157,7 @@ class Flattener(Observer):
 	@use_biblio.setter
 	def use_biblio(self, b : bool):
 		"""
-		Set if the biblio database.
+		Set if the biblio database is used and kept in the flat version.
 		:param b: True if the biblio database may be used. False for inline biliography entries.
 		:type b: bool
 		"""
@@ -296,7 +325,7 @@ class Flattener(Observer):
 		if text:
 			self.__tex_file_content += text
 
-	# noinspection DuplicatedCode
+	# noinspection DuplicatedCode,PyCallingNonCallable
 	@override
 	def expand(self, parser : Parser, raw_text : str, name : str, *parameter : dict[str,Any]) -> str | None:
 		"""
@@ -312,207 +341,296 @@ class Flattener(Observer):
 		:return: the result of expansion of the macro, or None to not replace the macro by something (the macro is used as-is)
 		:rtype: str
 		"""
-		if name == "\\begin":
-			tex_name = parameter[1]['text']
-			if tex_name == 'filecontents*':
-				self.__file_content_counter = self.__file_content_counter + 1
-			ret = name
-			if parameter[0]['text']:
-				ret += "[%s]" % parameter[0]['text']
-			ret += "{%s}" % tex_name
-			return ret
-		elif name == "\\end":
-			tex_name = parameter[1]['text']
-			if tex_name == 'filecontents*':
-				self.__file_content_counter = self.__file_content_counter - 1
-				if self.__file_content_counter <= 0:
-					for key,  value in self.__embedded_files.items():
-						parser.put_back(value)
-					self.__embedded_files = dict()
-			ret = name
-			if parameter[0]['text']:
-				ret += "[%s]" % parameter[0]['text']
-			ret += "{%s}" % tex_name
-			return ret
-		elif name == "\\usepackage" or name == "\\RequirePackage":
-			tex_name = parameter[1]['text']
-			filename = self.__make_filename(tex_name, '.sty')
-			added_file = ''
-			if tex_name == 'biblatex':
-				if not self.use_biblio:
-					filename = self.__make_filename(self.basename, '.bbl', '.tex')
-					if os.path.isfile(filename) and filename not in self.__embedded_files_added:
-						logging.debug(T('Embedding %s'), filename)
-						if not self.__embedded_files_added:
-							self.__dynamic_preamble.append("\\usepackage{filecontents}")
-						self.__embedded_files_added.add(filename)
-						with open(filename) as f:
-							content = f.read()
-						basename = os.path.basename(filename)
-						added_file = textwrap.dedent("""
-								%%=======================================================
-								%%== BEGIN FILE: %s
-								%%=======================================================
-								\\begin{filecontents*}{%s}
-								%s
-								\\end{filecontents*}
-								%%=======================================================
-								""") % (basename, basename, content)
-					else:
-						logging.error(T('File not found: %s'), filename)
-			elif self.__is_document_file(filename) and filename not in self.__embedded_files_added:
-				logging.debug(T('Embedding %s'), filename)
-				if not self.__embedded_files_added:
-					self.__dynamic_preamble.append("\\usepackage{filecontents}")
-				self.__embedded_files_added.add(filename)
-				with open(filename) as f:
-					content = f.read()
-				basename = os.path.basename(filename)
-				added_file = textwrap.dedent("""
-						%%=======================================================
-						%%== BEGIN FILE: %s
-						%%=======================================================
-						\\begin{filecontents*}{%s}
-						%s
-						\\end{filecontents*}
-						%%=======================================================
-						""") % (basename, basename, content)
-			ret = name
-			if parameter[0]['text']:
-				ret += "[%s]" % parameter[0]['text']
-			ret += "{%s}" % tex_name
-			if added_file:
-				if 	self.__file_content_counter <= 0:
-					parser.put_back(added_file + ret)
-					return ''
-				else:
-					self.__embedded_files[filename] = added_file
-					return ret
+		if name.startswith('\\'):
+			callback_name = re.sub(r'\*', 'star', name[1:])
+			if callback_name in self.__full_expand_registry:
+				func = self.__full_expand_registry[callback_name]
+				return func(self, parser, name, list(parameter))
 			else:
-				return ret
-		if name == "\\documentclass":
-			tex_name = parameter[1]['text']
-			filename = self.__make_filename(tex_name, '.cls')
-			if self.__is_document_file(filename):
-				tex_name = self.__create_mapping(filename, '.cls')
-				self.__files_to_copy.add(filename)
-			ret = name
-			if parameter[0]['text']:
-				ret += "[%s]" % parameter[0]['text']
-			ret += "{%s}\n\n%%========= AUTOLATEX PREAMBLE\n\n" % tex_name
-			return ret
-		elif	name == "\\includegraphics" or \
-				name == "\\includeanimatedfigure" or \
-				name == "\\includeanimatedfigurewtex" or \
-				name == "\\includefigurewtex" or \
-				name == "\\includegraphicswtex":
-			tex_name, prefix = self.__find_picture(parameter[1]['text'])
-			ret = prefix + name
-			if parameter[0]['text']:
-				ret += "[%s]" % parameter[0]['text']
-			ret += "{%s}" % tex_name
-			return ret
-		elif name == "\\graphicspath":
-			t = parameter[1]['text']
-			if t:
-				r = re.match(r'^\s*(?:\{([^}]+)}|([^,]+))\s*[,;]?\s*(.*)$', t)
-				while r:					
-					path = r.group(1) or r.group(2)
-					if not os.path.isabs(path):
-						path = os.path.join(self.__dirname, path)
-					t = r.group(3)
-					self.__include_paths.insert(0, path)
-					r = re.match(r'^\s*(?:\{([^}]+)}|([^,]+))\s*[,;]?\s*(.*)$', t) if t else None
-			return "\\graphicspath{{./}}"
-		elif	name == "\\mfigure" or \
-				name == "\\mfigure*" or \
-				name == "\\mfiguretex" or \
-				name == "\\mfiguretex*":
-			tex_name, prefix = self.__find_picture(parameter[2]['text'])
-			ret = prefix + name
-			if parameter[0]['text']:
-				ret += "[%s]" % parameter[0]['text']
-			ret += "{%s}{%s}{%s}{%s}" % (parameter[1]['text'], tex_name, parameter[3]['text'], parameter[4]['text'])
-			return ret
-		elif name == "\\msubfigure" or name == "\\msubfigure*":
-			tex_name, prefix = self.__find_picture(parameter[2]['text'])
-			ret = prefix + name
-			if parameter[0]['text']:
-				ret += "[%s]" % parameter[0]['text']
-			ret += "{%s}{%s}{%s}" % (parameter[1]['text'], tex_name, parameter[3]['text'])
-			return ret
-		elif name == "\\pgfdeclareimage":
-			tex_name, prefix = self.__find_picture(parameter[2]['text'])
-			ret = prefix + name
-			if parameter[0]['text']:
-				ret += "[%s]" % parameter[0]['text']
-			ret += "{%s}{%s}" % (parameter[1]['text'], tex_name)
-			return ret
-		elif name == "\\include" or name == "\\input":
-			filename = self.__make_filename(parameter[0]['text'], '.tex')
-			with open(filename) as f:
-				subcontent = f.read()
-			subcontent += textwrap.dedent("""
-							%%=======================================================
-							%%== END FILE: %s
-							%%=======================================================
-							""") % (os.path.basename(filename))
+				largest_size = 0
+				largest_func = None
+				for prefix, func in self.__prefix_expand_registry.items():
+					if callback_name.startswith(prefix):
+						l = len(prefix)
+						if l > largest_size:
+							largest_size = l
+							largest_func = func
+				if largest_func is not None:
+					return largest_func(self, parser, name, parameter)
+		return raw_text
 
-			parser.put_back(subcontent)
-			return textwrap.dedent("""
-					%%=======================================================
-					%%== BEGIN FILE: %s
-					%%=======================================================
-					""") % (os.path.basename(filename))
-		elif name.startswith("\\bibliographystyle"):
-			if self.use_biblio:
-				tex_name = parameter[0]['text']
-				filename = self.__make_filename(tex_name, '.bst')
-				if self.__is_document_file(filename):
-					tex_name = self.__create_mapping(filename, '.bst')
-					self.__files_to_copy.add(filename)
-				return "%s{%s}" % (name, tex_name)
-			return None
-		elif name.startswith("\\bibliography"):
-			if self.use_biblio:
-				tex_name = parameter[0]['text']
-				filename = self.__make_filename(tex_name, '.bib')
-				if self.__is_document_file(filename):
-					tex_name = self.__create_mapping(filename, '.bib')
-					self.__files_to_copy.add(filename)
-				return "%s{%s}" % (name, tex_name)
-			else:
-				if len(name) > 13:
-					bibdb = name[13:]
-				else:
-					bibdb = self.basename
-				bbl_file = bibdb + ".bbl"
-				if not os.path.isabs(bbl_file):
-					bbl_file = os.path.join(self.dirname, bbl_file)
-				if os.path.isfile(bbl_file):
-					with open(bbl_file) as f:
+	# noinspection PyUnusedLocal
+	@expand_function(start_symbol=False)
+	def _expand__begin(self, parser : Parser, name : str, parameter : list[dict[str,Any]]) -> str:
+		tex_name = parameter[1]['text']
+		if tex_name == 'filecontents*':
+			self.__file_content_counter = self.__file_content_counter + 1
+		ret = name
+		if parameter[0]['text']:
+			ret += "[%s]" % parameter[0]['text']
+		ret += "{%s}" % tex_name
+		return ret
+
+	@expand_function(start_symbol=False)
+	def _expand__end(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
+		tex_name = parameter[1]['text']
+		if tex_name == 'filecontents*':
+			self.__file_content_counter = self.__file_content_counter - 1
+			if self.__file_content_counter <= 0:
+				for key,  value in self.__embedded_files.items():
+					parser.put_back(value)
+				self.__embedded_files = dict()
+		ret = name
+		if parameter[0]['text']:
+			ret += "[%s]" % parameter[0]['text']
+		ret += "{%s}" % tex_name
+		return ret
+
+	# noinspection PyPep8Naming
+	@expand_function(start_symbol=False)
+	def _expand__RequirePackage(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
+		return self._expand__usepackage(parser, name, parameter)
+
+	# noinspection DuplicatedCode
+	@expand_function(start_symbol=False)
+	def _expand__usepackage(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
+		tex_name = parameter[1]['text']
+		filename = self.__make_filename(tex_name, '.sty')
+		added_file = ''
+		if tex_name == 'biblatex':
+			if not self.use_biblio:
+				filename = self.__make_filename(self.basename, '.bbl', '.tex')
+				if os.path.isfile(filename) and filename not in self.__embedded_files_added:
+					logging.debug(T('Embedding %s'), filename)
+					if not self.__embedded_files_added:
+						self.__dynamic_preamble.append("\\usepackage{filecontents}")
+					self.__embedded_files_added.add(filename)
+					with open(filename) as f:
 						content = f.read()
-					return textwrap.dedent("""
+					basename = os.path.basename(filename)
+					added_file = textwrap.dedent("""
 							%%=======================================================
 							%%== BEGIN FILE: %s
 							%%=======================================================
+							\\begin{filecontents*}{%s}
 							%s
+							\\end{filecontents*}
 							%%=======================================================
-							""") % (os.path.basename(bbl_file), content)
+							""") % (basename, basename, content)
 				else:
-					logging.error(T('File not found: %s'), bbl_file)
-		elif name == "\\addbibresource":
-			if self.use_biblio:
-				tex_name = parameter[1]['text']
-				filename = self.__make_filename(tex_name, '.bib')
-				if self.__is_document_file(filename):
-					tex_name = self.__create_mapping(filename, '.bib')
-					self.__files_to_copy.add(filename)
-				return "%s{%s}" % (name, tex_name)
+					logging.error(T('File not found: %s'), filename)
+		elif self.__is_document_file(filename) and filename not in self.__embedded_files_added:
+			logging.debug(T('Embedding %s'), filename)
+			if not self.__embedded_files_added:
+				self.__dynamic_preamble.append("\\usepackage{filecontents}")
+			self.__embedded_files_added.add(filename)
+			with open(filename) as f:
+				content = f.read()
+			basename = os.path.basename(filename)
+			added_file = textwrap.dedent("""
+					%%=======================================================
+					%%== BEGIN FILE: %s
+					%%=======================================================
+					\\begin{filecontents*}{%s}
+					%s
+					\\end{filecontents*}
+					%%=======================================================
+					""") % (basename, basename, content)
+		ret = name
+		if parameter[0]['text']:
+			ret += "[%s]" % parameter[0]['text']
+		ret += "{%s}" % tex_name
+		if added_file:
+			if 	self.__file_content_counter <= 0:
+				parser.put_back(added_file + ret)
+				return ''
 			else:
-				return None
-		# Reply the raw text back to the generated TeX document.
-		return raw_text
+				self.__embedded_files[filename] = added_file
+				return ret
+		else:
+			return ret
+
+	# noinspection PyUnusedLocal
+	@expand_function(start_symbol=False)
+	def _expand__documentclass(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
+		tex_name = parameter[1]['text']
+		filename = self.__make_filename(tex_name, '.cls')
+		if self.__is_document_file(filename):
+			tex_name = self.__create_mapping(filename, '.cls')
+			self.__files_to_copy.add(filename)
+		ret = name
+		if parameter[0]['text']:
+			ret += "[%s]" % parameter[0]['text']
+		ret += "{%s}\n\n%%========= AUTOLATEX PREAMBLE\n\n" % tex_name
+		return ret
+
+	@expand_function(start_symbol=False)
+	def _expand__includeanimatedfigure(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
+		return self._expand__includegraphics(parser, name, parameter)
+
+	@expand_function(start_symbol=False)
+	def _expand__includeanimatedfigurewtex(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
+		return self._expand__includegraphics(parser, name, parameter)
+
+	@expand_function(start_symbol=False)
+	def _expand__includefigurewtex(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
+		return self._expand__includegraphics(parser, name, parameter)
+
+	@expand_function(start_symbol=False)
+	def _expand__includegraphicswtex(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
+		return self._expand__includegraphics(parser, name, parameter)
+
+	# noinspection PyUnusedLocal
+	@expand_function(start_symbol=False)
+	def _expand__includegraphics(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
+		tex_name, prefix = self.__find_picture(parameter[1]['text'])
+		ret = prefix + name
+		if parameter[0]['text']:
+			ret += "[%s]" % parameter[0]['text']
+		ret += "{%s}" % tex_name
+		return ret
+
+	# noinspection PyUnusedLocal
+	@expand_function(start_symbol=False)
+	def _expand__graphicspath(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
+		t = parameter[1]['text']
+		if t:
+			r = re.match(r'^\s*(?:\{([^}]+)}|([^,]+))\s*[,;]?\s*(.*)$', t)
+			while r:
+				path = r.group(1) or r.group(2)
+				if not os.path.isabs(path):
+					path = os.path.join(self.__dirname, path)
+				t = r.group(3)
+				self.__include_paths.insert(0, path)
+				r = re.match(r'^\s*(?:\{([^}]+)}|([^,]+))\s*[,;]?\s*(.*)$', t) if t else None
+		return "\\graphicspath{{./}}"
+
+	@expand_function(start_symbol=False)
+	def _expand__mfigurestar(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
+		return self._expand__mfigure(parser, name, parameter)
+
+	@expand_function(start_symbol=False)
+	def _expand__mfiguretex(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
+		return self._expand__mfigure(parser, name, parameter)
+
+	@expand_function(start_symbol=False)
+	def _expand__mfiguretexstar(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
+		return self._expand__mfigure(parser, name, parameter)
+
+	# noinspection PyUnusedLocal
+	@expand_function(start_symbol=False)
+	def _expand__mfigure(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
+		tex_name, prefix = self.__find_picture(parameter[2]['text'])
+		ret = prefix + name
+		if parameter[0]['text']:
+			ret += "[%s]" % parameter[0]['text']
+		ret += "{%s}{%s}{%s}{%s}" % (parameter[1]['text'], tex_name, parameter[3]['text'], parameter[4]['text'])
+		return ret
+
+	@expand_function(start_symbol=False)
+	def _expand__msubfigurestar(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
+		return self._expand__msubfigure(parser, name, parameter)
+
+	# noinspection PyUnusedLocal
+	@expand_function(start_symbol=False)
+	def _expand__msubfigure(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
+		tex_name, prefix = self.__find_picture(parameter[2]['text'])
+		ret = prefix + name
+		if parameter[0]['text']:
+			ret += "[%s]" % parameter[0]['text']
+		ret += "{%s}{%s}{%s}" % (parameter[1]['text'], tex_name, parameter[3]['text'])
+		return ret
+
+	# noinspection PyUnusedLocal
+	@expand_function(start_symbol=False)
+	def _expand__pgfdeclareimage(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
+		tex_name, prefix = self.__find_picture(parameter[2]['text'])
+		ret = prefix + name
+		if parameter[0]['text']:
+			ret += "[%s]" % parameter[0]['text']
+		ret += "{%s}{%s}" % (parameter[1]['text'], tex_name)
+		return ret
+
+	@expand_function(start_symbol=False)
+	def _expand__include(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
+		return self._expand__input(parser, name, parameter)
+
+	# noinspection PyUnusedLocal,DuplicatedCode
+	@expand_function(start_symbol=False)
+	def _expand__input(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
+		filename = self.__make_filename(parameter[0]['text'], '.tex')
+		with open(filename) as f:
+			subcontent = f.read()
+		subcontent += textwrap.dedent("""
+						%%=======================================================
+						%%== END FILE: %s
+						%%=======================================================
+						""") % (os.path.basename(filename))
+
+		parser.put_back(subcontent)
+		return textwrap.dedent("""
+				%%=======================================================
+				%%== BEGIN FILE: %s
+				%%=======================================================
+				""") % (os.path.basename(filename))
+
+	# noinspection PyUnusedLocal
+	@expand_function(start_symbol=True)
+	def _expand__bibliographystyle(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
+		if self.use_biblio:
+			tex_name = parameter[0]['text']
+			filename = self.__make_filename(tex_name, '.bst')
+			if self.__is_document_file(filename):
+				tex_name = self.__create_mapping(filename, '.bst')
+				self.__files_to_copy.add(filename)
+			return "%s{%s}" % (name, tex_name)
+		return ''
+
+	# noinspection PyUnusedLocal
+	@expand_function(start_symbol=True)
+	def _expand__bibliography(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
+		if self.use_biblio:
+			tex_name = parameter[0]['text']
+			filename = self.__make_filename(tex_name, '.bib')
+			if self.__is_document_file(filename):
+				tex_name = self.__create_mapping(filename, '.bib')
+				self.__files_to_copy.add(filename)
+			return "%s{%s}" % (name, tex_name)
+		else:
+			if len(name) > 13:
+				bibdb = name[13:]
+			else:
+				bibdb = self.basename
+			bbl_file = bibdb + ".bbl"
+			if not os.path.isabs(bbl_file):
+				bbl_file = os.path.join(self.dirname, bbl_file)
+			if os.path.isfile(bbl_file):
+				with open(bbl_file) as f:
+					content = f.read()
+				return textwrap.dedent("""
+						%%=======================================================
+						%%== BEGIN FILE: %s
+						%%=======================================================
+						%s
+						%%=======================================================
+						""") % (os.path.basename(bbl_file), content)
+			else:
+				logging.error(T('File not found: %s'), bbl_file)
+				return "%s{%s}" % (name, parameter[0]['text'])
+
+	# noinspection PyUnusedLocal
+	@expand_function(start_symbol=False)
+	def _expand__addbibresource(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
+		if self.use_biblio:
+			tex_name = parameter[1]['text']
+			filename = self.__make_filename(tex_name, '.bib')
+			if self.__is_document_file(filename):
+				tex_name = self.__create_mapping(filename, '.bib')
+				self.__files_to_copy.add(filename)
+			return "%s{%s}" % (name, tex_name)
+		else:
+			return ''
+
 
 	def __make_filename(self, basename : str, *ext : str) -> str:
 		"""

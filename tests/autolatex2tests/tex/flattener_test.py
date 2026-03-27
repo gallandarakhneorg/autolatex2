@@ -79,8 +79,8 @@ class TestFlattener(AbstractBaseTest):
 			self.__flattener.use_biblio = use_biblio
 			self.__flattener.run()
 			for k, v in self.__outputs.items():
-				v = v.replace('\t', ' ').strip()
 				v = re.sub("\n[ \t]*", "\n", v, re.S)
+				v = v.replace('\t+', ' ').strip()
 				with open(os.path.join(output, k)) as out:
 					content = out.read()
 				self.assertEqual(v, content)

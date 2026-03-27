@@ -26,13 +26,32 @@ import os
 import re
 import textwrap
 import logging
-from typing import override, Any
+from typing import override, Any, Callable
 
 from autolatex2.tex.texobservers import Observer
 from autolatex2.tex.texparsers import Parser
 from autolatex2.tex.texparsers import TeXParser
 import autolatex2.utils.utilfunctions as genutils
 from autolatex2.utils.i18n import T
+
+EXPAND_REGISTRY : dict[str, Callable[[Any, Parser, tuple[dict[str, Any], ...]], None]] = dict()
+
+def expand_function(func : Callable) -> Callable:
+	"""
+	Decorator to register functions with __expand__ prefix.
+	:param func: The function to be marked.
+	:type func: Callable
+	:return: the function.
+	:rtype: Callable
+	"""
+	# Store the function and its metadata
+	# Remove "_expand__" prefix
+	if not func.__name__.startswith('_expand__'):
+		raise NameError('Function name must start with \'_expand__\'')
+	func_name = str(func.__name__)[9:]
+	EXPAND_REGISTRY[func_name] = func
+	return func
+
 
 class ImageInclusions(Observer):
 	"""
@@ -63,6 +82,7 @@ class ImageInclusions(Observer):
 		:param filename: The name of the file to parse.
 		:type filename: str
 		"""
+		self.__expand_registry = EXPAND_REGISTRY
 		self.__filename = filename
 		self.__basename = os.path.basename(os.path.splitext(filename)[0])
 		self.__directory_name = os.path.dirname(filename)
@@ -233,43 +253,109 @@ class ImageInclusions(Observer):
 		:return: the result of expansion of the macro, or None to not replace the macro by something (the macro is used as-is)
 		:rtype: str
 		"""
-		if	name == "\\includegraphics" or name == "\\includeanimatedfigure" or name == "\\includeanimatedfigurewtex" or name == "\\includefigurewtex" or name == "\\includegraphicswtex":
-			self.__find_picture(parameter[1]['text'])
-		elif name == "\\graphicspath":
-			t = parameter[1]['text']
-			if t:
-				r = re.match(r'^\s*(?:\{([^}]+)}|([^,]+))\s*[,;]?\s*(.*)$', t)
-				while r:
-					path = r.group(1) or r.group(2)
-					if not os.path.isabs(path):
-						path = os.path.normpath(os.path.join(self.__directory_name, path))
-					t = r.group(3)
-					self.__include_paths.insert(0, path)
-					r = re.match(r'^\s*(?:\{([^}]+)}|([^,]+))\s*[,;]?\s*(.*)$', t) if t else None
-		elif	name == "\\mfigure" or name == "\\mfigure*" or name == "\\mfiguretex" or name == "\\mfiguretex*":
-			self.__find_picture(parameter[2]['text'])
-		elif name == "\\msubfigure" or name == "\\msubfigure*":
-			self.__find_picture(parameter[2]['text'])
-		elif name == "\\pgfdeclareimage":
-			self.__find_picture(parameter[2]['text'])
-		elif name == "\\include" or name == "\\input":
-			filename = self.__make_filename(parameter[0]['text'], '.tex')
-			with open(filename) as f:
-				subcontent = f.read()
-			subcontent += textwrap.dedent("""
-							%%=======================================================
-							%%== END FILE: %s
-							%%=======================================================
-							""") % (os.path.basename(filename))
-
-			parser.put_back(subcontent)
-			return textwrap.dedent("""
-					%%=======================================================
-					%%== BEGIN FILE: %s
-					%%=======================================================
-					""") % (os.path.basename(filename))
-		# Reply the raw text back to the generated TeX document.
+		if name.startswith('\\'):
+			callback_name = re.sub(r'\*', 'star', name[1:])
+			if callback_name in self.__expand_registry:
+				func = self.__expand_registry[callback_name]
+				r = func(self, parser, parameter)
+				if r is not None:
+					return str(r)
 		return raw_text
+
+	@expand_function
+	def _expand__includeanimatedfigure(self, parser : Parser, parameter : list[dict[str,Any]]) -> str | None:
+		return self._expand__includegraphics(parser, parameter)
+
+	@expand_function
+	def _expand__includeanimatedfigurewtex(self, parser : Parser, parameter : list[dict[str,Any]]) -> str | None:
+		return self._expand__includegraphics(parser, parameter)
+
+	@expand_function
+	def _expand__includefigurewtex(self, parser : Parser, parameter : list[dict[str,Any]]) -> str | None:
+		return self._expand__includegraphics(parser, parameter)
+
+	@expand_function
+	def _expand__includegraphicswtex(self, parser : Parser, parameter : list[dict[str,Any]]) -> str | None:
+		return self._expand__includegraphics(parser, parameter)
+
+	# noinspection PyUnusedLocal
+	@expand_function
+	def _expand__includegraphics(self, parser : Parser, parameter : list[dict[str,Any]]) -> str | None:
+		self.__find_picture(parameter[1]['text'])
+		return None
+
+	# noinspection PyUnusedLocal
+	@expand_function
+	def _expand__graphicspath(self, parser : Parser, parameter: list[dict[str, Any]]) -> str | None:
+		t = parameter[1]['text']
+		if t:
+			r = re.match(r'^\s*(?:\{([^}]+)}|([^,]+))\s*[,;]?\s*(.*)$', t)
+			while r:
+				path = r.group(1) or r.group(2)
+				if not os.path.isabs(path):
+					path = os.path.normpath(os.path.join(self.__directory_name, path))
+				t = r.group(3)
+				self.__include_paths.insert(0, path)
+				r = re.match(r'^\s*(?:\{([^}]+)}|([^,]+))\s*[,;]?\s*(.*)$', t) if t else None
+		return None
+
+	@expand_function
+	def _expand__mfigurestar(self, parser : Parser, parameter: list[dict[str, Any]]) -> str | None:
+		self._expand__mfigure(parser, parameter)
+		return None
+
+	@expand_function
+	def _expand__mfiguretex(self, parser : Parser, parameter: list[dict[str, Any]]) -> str | None:
+		return self._expand__mfigure(parser, parameter)
+
+	@expand_function
+	def _expand__mfiguretexstar(self, parser : Parser, parameter: list[dict[str, Any]]) -> str | None:
+		return self._expand__mfigure(parser, parameter)
+
+	# noinspection PyUnusedLocal
+	@expand_function
+	def _expand__mfigure(self, parser : Parser, parameter: list[dict[str, Any]]) -> str | None:
+		self.__find_picture(parameter[2]['text'])
+		return None
+
+	@expand_function
+	def _expand__msubfigurestar(self, parser : Parser, parameter: list[dict[str, Any]]) -> str | None:
+		return self._expand__msubfigurestar(parser, parameter)
+
+	# noinspection PyUnusedLocal
+	@expand_function
+	def _expand__msubfigure(self, parser : Parser, parameter: list[dict[str, Any]]) -> str | None:
+		self.__find_picture(parameter[2]['text'])
+		return None
+
+	# noinspection PyUnusedLocal
+	@expand_function
+	def _expand__pgfdeclareimage(self, parser : Parser, name: str, parameter: list[dict[str, Any]]) -> str | None:
+		self.__find_picture(parameter[2]['text'])
+		return None
+
+	@expand_function
+	def _expand__include(self, parser : Parser, parameter: list[dict[str, Any]]) -> str | None:
+		return self._expand__input(parser, parameter)
+
+	@expand_function
+	def _expand__input(self, parser : Parser, parameter: list[dict[str, Any]]) -> str | None:
+		self.__find_picture(parameter[2]['text'])
+		filename = self.__make_filename(parameter[0]['text'], '.tex')
+		with open(filename) as f:
+			subcontent = f.read()
+		subcontent += textwrap.dedent("""
+						%%=======================================================
+						%%== END FILE: %s
+						%%=======================================================
+						""") % (os.path.basename(filename))
+
+		parser.put_back(subcontent)
+		return textwrap.dedent("""
+				%%=======================================================
+				%%== BEGIN FILE: %s
+				%%=======================================================
+				""") % (os.path.basename(filename))
 
 	def __make_filename(self, basename : str, ext : str = None) -> str:
 		"""

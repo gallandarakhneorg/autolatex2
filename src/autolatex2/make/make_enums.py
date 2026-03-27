@@ -100,3 +100,4 @@ class FileType(IntEnum):
 	ind = 10
 	glo = 11
 	gls = 12
+	sty = 13

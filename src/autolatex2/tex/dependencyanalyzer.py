@@ -24,12 +24,40 @@ Tools that is extracting the dependencies of the TeX file.
 
 import os
 import re
-from typing import override, Any
+from typing import override, Any, Callable
 
 from autolatex2.tex.texobservers import Observer
 from autolatex2.tex.texparsers import Parser
 from autolatex2.tex.texparsers import TeXParser
 from autolatex2.tex import utils
+
+FULL_EXPAND_REGISTRY : dict[str, Callable[[Any, str, tuple[dict[str, Any], ...]], None]] = dict()
+
+PREFIX_EXPAND_REGISTRY : dict[str, Callable[[Any, str, tuple[dict[str, Any], ...]], None]] = dict()
+
+
+# noinspection DuplicatedCode
+def expand_function(start_symbol : bool):
+	"""
+	Decorator to register functions with __expand__ prefix.
+	:param start_symbol: Marks the function as associated to the prefix of a LaTeX macro name.
+	:type start_symbol: bool
+	:return: the decorator.
+	"""
+	def decorator(func: Callable) -> Callable:
+		# Store the function and its metadata
+		# Remove "_expand__" prefix
+		if not func.__name__.startswith('_expand__'):
+			raise NameError('Function name must start with \'_expand__\'')
+		func_name = str(func.__name__)[9:]
+		if start_symbol:
+			PREFIX_EXPAND_REGISTRY[func_name] = func
+		else:
+			FULL_EXPAND_REGISTRY[func_name] = func
+		return func
+	return decorator
+
+
 
 class DependencyAnalyzer(Observer):
 	"""
@@ -58,6 +86,8 @@ class DependencyAnalyzer(Observer):
 		:param root_directory: The name of the root directory.
 		:type root_directory: str
 		"""
+		self.__full_expand_registry = FULL_EXPAND_REGISTRY
+		self.__prefix_expand_registry = PREFIX_EXPAND_REGISTRY
 		self.__is_multibib = False
 		self.__is_biblatex = False
 		self.__is_biber = False
@@ -346,11 +376,11 @@ class DependencyAnalyzer(Observer):
 						else:
 							bib_file = svalue + '.bib'
 						if not os.path.isabs(bib_file):
-							bib_file = os.path.join(self.root_directory, bib_file)
+							bib_file = os.path.normpath(os.path.join(self.root_directory, bib_file))
 						if os.path.isfile(bib_file):
 							self.__add_bib_dependency('bib', bib_file, bib_db)
 
-	# noinspection DuplicatedCode
+	# noinspection PyCallingNonCallable
 	@override
 	def expand(self, parser : Parser, raw_text : str, name : str, *parameter : dict[str,Any]) -> str:
 		"""
@@ -366,129 +396,189 @@ class DependencyAnalyzer(Observer):
 		:return: the result of expansion of the macro, or None to not replace the macro by something (the macro is used as-is)
 		:rtype: str
 		"""
-		if name == '\\include' or name == '\\input':
-			for param in parameter:
-				value = param['text']
-				if value:
-					if utils.is_tex_document(value):
-						tex_file = value
-					else:
-						tex_file = value + utils.get_tex_file_extensions()[0]
-					if not os.path.isabs(tex_file):
-						tex_file = os.path.join(self.root_directory, tex_file)
-					if os.path.isfile(tex_file):
-						self.__add_dependency('tex', tex_file)
-		elif name == '\\makeindex' or name == '\\printindex':
-			self.is_makeindex = True
-		elif name == '\\makeglossaries' or name == '\\printglossaries' or name == '\\newglossaryentry':
-			self.is_glossary = True
-		elif name == '\\usepackage' or name == '\\RequirePackage':
-			sty = parameter[1]['text']
-			if sty.endswith('.sty'):
-				sty_file = sty
+		if name.startswith('\\'):
+			callback_name = name[1:]
+			if callback_name in self.__full_expand_registry:
+				func = self.__full_expand_registry[callback_name]
+				func(self, name, parameter)
 			else:
-				sty_file = sty + ".sty"
-			if sty_file == 'multibib.sty':
-				self.is_multibib = True
-			elif sty_file == 'biblatex.sty':
-				self.is_biblatex = True
-				# Parse the biblatex parameters
-				if parameter[0] and parameter[0]['text']:
-					params = re.split(r'\s*,\s*', (parameter[0]['text'] or '').strip())
-					for p in params:
-						r = re.match(r'^([^=]+)\s*=\s*(.*?)\s*$', p, re.DOTALL)
-						if r:
-							k = r.group(1)
-							v = r.group(2) or ''
-						else:
-							k = p
-							v = ''
-						if k == 'backend':
-							self.is_biber = (v == 'biber')
-						elif k == 'style':
-							if v.endswith('.bbx'):
-								bbx_file = v
-							else:
-								bbx_file = v + ".bbx"
-							if not os.path.isabs(bbx_file):
-								bbx_file = os.path.join(self.root_directory, bbx_file)
-							if os.path.isfile(bbx_file):
-								self.__add_bib_dependency('bbx', bbx_file)
-							if v.endswith('.cbx'):
-								cbx_file = v
-							else:
-								cbx_file = v + ".cbx"
-							if not os.path.isabs(cbx_file):
-								cbx_file = os.path.join(self.root_directory, cbx_file)
-							if os.path.isfile(cbx_file):
-								self.__add_bib_dependency('cbx', cbx_file)
-						elif k == 'bibstyle':
-							if v.endswith('.bbx'):
-								bbx_file = v
-							else:
-								bbx_file = v + ".bbx"
-							if not os.path.isabs(bbx_file):
-								bbx_file = os.path.join(self.root_directory, bbx_file)
-							if os.path.isfile(bbx_file):
-								self.__add_bib_dependency('bbx', bbx_file)
-						elif k == 'citestyle':
-							if v.endswith('.cbx'):
-								cbx_file = v
-							else:
-								cbx_file = v + '.cbx'
-							if not os.path.isabs(cbx_file):
-								cbx_file = os.path.join(self.root_directory, cbx_file)
-							if os.path.isfile(cbx_file):
-								self.__add_bib_dependency('cbx', cbx_file)
-			elif sty_file == 'indextools.sty':
-				if parameter[0] and parameter[0]['text'] and 'xindy' in parameter[0]['text']:
-					self.is_xindy_index = True
-			elif sty_file == 'glossaries.sty':
-				self.is_glossary = True
-			else:
-				if not os.path.isabs(sty_file):
-					sty_file = os.path.join(self.root_directory, sty_file)
-				if os.path.isfile(sty_file):
-					self.__add_dependency('sty', sty_file)
-		elif name == '\\documentclass':
-			cls = parameter[1]['text']
-			if cls.endswith('.cls'):
-				cls_file = cls
-			else:
-				cls_file = cls + '.cls'
-			if not os.path.isabs(cls_file):
-				cls_file = os.path.join(self.root_directory, cls_file)
-			if os.path.isfile(cls_file):
-				self.__add_dependency('cls', cls_file)
-		else:
-			if name.startswith('\\bibliographystyle'):
-				if not self.is_multibib:
-					bibdb = self.basename
-				else:
-					bibdb = name[18:] if len(name) > 18 else self.basename
-				for param in parameter:
-					value = param['text']
-					if value:
-						for svalue in re.split('\\s*,\\s*',value.strip()):
-							if svalue:
-								if svalue.endswith('.bst'):
-									bst_file = svalue
-								else:
-									bst_file = svalue + '.bst'
-								if not os.path.isabs(bst_file):
-									bst_file = os.path.join(self.root_directory, bst_file)
-								if os.path.isfile(bst_file):
-									self.__add_bib_dependency('bst', bst_file, bibdb)
-			elif name.startswith('\\bibliography'):
-				if not self.is_multibib:
-					bibdb = self.basename
-				else:
-					bibdb = name[13:] if len(name) > 13 else self.basename
-				self.__parse_bib_reference(bibdb, *parameter)
-			elif name == '\\addbibresource':
-				bibdb = self.basename
-				self.__parse_bib_reference(bibdb, *parameter)
+				largest_size = 0
+				largest_func = None
+				for prefix, func in self.__prefix_expand_registry.items():
+					if callback_name.startswith(prefix):
+						l = len(prefix)
+						if l > largest_size:
+							largest_size = l
+							largest_func = func
+				if largest_func is not None:
+					largest_func(self, name, parameter)
 		return ''
+
+	@expand_function(start_symbol=False)
+	def _expand__input(self, name : str, parameters : tuple[dict[str, Any],...]):
+		self._expand__include(name, parameters)
+
+	@expand_function(start_symbol=False)
+	def _expand__newglossaryentry(self, name : str, parameters : tuple[dict[str, Any],...]):
+		self._expand__makeglossaries(name, parameters)
+
+	@expand_function(start_symbol=False)
+	def _expand__printglossaries(self, name : str, parameters : tuple[dict[str, Any],...]):
+		self._expand__makeglossaries(name, parameters)
+
+	@expand_function(start_symbol=False)
+	def _expand__printindex(self, name : str, parameters : tuple[dict[str, Any],...]):
+		self._expand__makeindex(name, parameters)
+
+	# noinspection PyPep8Naming
+	@expand_function(start_symbol=False)
+	def _expand__RequirePackage(self, name : str, parameters : tuple[dict[str, Any],...]):
+		self._expand__usepackage(name, parameters)
+
+	# noinspection PyUnusedLocal
+	@expand_function(start_symbol = True)
+	def _expand__addbibresource(self, name : str, parameters : tuple[dict[str, Any],...]):
+		bibdb = self.basename
+		self.__parse_bib_reference(bibdb, *parameters)
+
+	@expand_function(start_symbol = True)
+	def _expand__bibliography(self, name : str, parameters : tuple[dict[str, Any],...]):
+		if not self.is_multibib:
+			bibdb = self.basename
+		else:
+			bibdb = name[13:] if len(name) > 13 else self.basename
+		self.__parse_bib_reference(bibdb, *parameters)
+
+	@expand_function(start_symbol = True)
+	def _expand__bibliographystyle(self, name : str, parameters : tuple[dict[str, Any],...]):
+		if not self.is_multibib:
+			bibdb = self.basename
+		else:
+			bibdb = name[18:] if len(name) > 18 else self.basename
+		for param in parameters:
+			value = param['text']
+			if value:
+				for svalue in re.split('\\s*,\\s*', value.strip()):
+					if svalue:
+						if svalue.endswith('.bst'):
+							bst_file = svalue
+						else:
+							bst_file = svalue + '.bst'
+						if not os.path.isabs(bst_file):
+							bst_file = os.path.normpath(os.path.join(self.root_directory, bst_file))
+						if os.path.isfile(bst_file):
+							self.__add_bib_dependency('bst', bst_file, bibdb)
+
+	# noinspection PyUnusedLocal
+	@expand_function(start_symbol=False)
+	def _expand__documentclass(self, name : str, parameters : tuple[dict[str, Any],...]):
+		cls = parameters[1]['text']
+		if cls.endswith('.cls'):
+			cls_file = cls
+		else:
+			cls_file = cls + '.cls'
+		if not os.path.isabs(cls_file):
+			cls_file = os.path.normpath(os.path.join(self.root_directory, cls_file))
+		if os.path.isfile(cls_file):
+			self.__add_dependency('cls', cls_file)
+
+	# noinspection PyUnusedLocal
+	@expand_function(start_symbol=False)
+	def _expand__include(self, name : str, parameters : tuple[dict[str, Any],...]):
+		for param in parameters:
+			value = param['text']
+			if value:
+				if utils.is_tex_document(value):
+					tex_file = value
+				else:
+					tex_file = value + utils.get_tex_file_extensions()[0]
+				if not os.path.isabs(tex_file):
+					tex_file = os.path.normpath(os.path.join(self.root_directory, tex_file))
+				if os.path.isfile(tex_file):
+					self.__add_dependency('tex', tex_file)
+
+	# noinspection PyUnusedLocal
+	@expand_function(start_symbol=False)
+	def _expand__makeglossaries(self, name : str, parameters : tuple[dict[str, Any],...]):
+		self.is_glossary = True
+
+	# noinspection PyUnusedLocal
+	@expand_function(start_symbol=False)
+	def _expand__makeindex(self, name : str, parameters : tuple[dict[str, Any],...]):
+		self.is_makeindex = True
+
+	# noinspection DuplicatedCode,PyUnusedLocal
+	@expand_function(start_symbol=False)
+	def _expand__usepackage(self, name : str, parameters : tuple[dict[str, Any],...]):
+		sty = parameters[1]['text']
+		if sty.endswith('.sty'):
+			sty_file = sty
+		else:
+			sty_file = sty + ".sty"
+		if sty_file == 'multibib.sty':
+			self.is_multibib = True
+		elif sty_file == 'bibunits.sty':
+			pass
+		elif sty_file == 'biblatex.sty':
+			self.is_biblatex = True
+			# Parse the biblatex parameters
+			if parameters[0] and parameters[0]['text']:
+				params = re.split(r'\s*,\s*', (parameters[0]['text'] or '').strip())
+				for p in params:
+					r = re.match(r'^([^=]+)\s*=\s*(.*?)\s*$', p, re.DOTALL)
+					if r:
+						k = r.group(1)
+						v = r.group(2) or ''
+					else:
+						k = p
+						v = ''
+					if k == 'backend':
+						self.is_biber = (v == 'biber')
+					elif k == 'style':
+						if v.endswith('.bbx'):
+							bbx_file = v
+						else:
+							bbx_file = v + ".bbx"
+						if not os.path.isabs(bbx_file):
+							bbx_file = os.path.normpath(os.path.join(self.root_directory, bbx_file))
+						if os.path.isfile(bbx_file):
+							self.__add_bib_dependency('bbx', bbx_file)
+						if v.endswith('.cbx'):
+							cbx_file = v
+						else:
+							cbx_file = v + ".cbx"
+						if not os.path.isabs(cbx_file):
+							cbx_file = os.path.normpath(os.path.join(self.root_directory, cbx_file))
+						if os.path.isfile(cbx_file):
+							self.__add_bib_dependency('cbx', cbx_file)
+					elif k == 'bibstyle':
+						if v.endswith('.bbx'):
+							bbx_file = v
+						else:
+							bbx_file = v + ".bbx"
+						if not os.path.isabs(bbx_file):
+							bbx_file = os.path.normpath(os.path.join(self.root_directory, bbx_file))
+						if os.path.isfile(bbx_file):
+							self.__add_bib_dependency('bbx', bbx_file)
+					elif k == 'citestyle':
+						if v.endswith('.cbx'):
+							cbx_file = v
+						else:
+							cbx_file = v + '.cbx'
+						if not os.path.isabs(cbx_file):
+							cbx_file = os.path.normpath(os.path.join(self.root_directory, cbx_file))
+						if os.path.isfile(cbx_file):
+							self.__add_bib_dependency('cbx', cbx_file)
+		elif sty_file == 'indextools.sty':
+			if parameters[0] and parameters[0]['text'] and 'xindy' in parameters[0]['text']:
+				self.is_xindy_index = True
+		elif sty_file == 'glossaries.sty':
+			self.is_glossary = True
+		else:
+			if not os.path.isabs(sty_file):
+				sty_file = os.path.normpath(os.path.join(self.root_directory, sty_file))
+			if os.path.isfile(sty_file):
+				self.__add_dependency('sty', sty_file)
 
 	@override
 	def find_macro(self, parser : Parser, name : str, special : bool, math : bool) -> str | None:
