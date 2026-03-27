@@ -144,6 +144,10 @@ Displays the configuration definitions read from the configuration files.
 
 Displays the list of configuration filenames read by AutoLaTeX.
 
+=item B<showdependencies>
+
+Displays the dependencies of the main LaTeX document in terms of included and used files.
+
 =item B<showimages>
 
 Displays the filenames of figures that should be processed by a translator. This command offers specific options to
@@ -576,6 +580,20 @@ Forces the use of an external BibTeX file (i.e., a .bib file) instead of inlinin
 =item B<--out F<directory>>
 
 Specifies the output directory for the flat version. The default directory name is F<flat_version>.
+
+=back
+
+=item I<showdependencies>
+
+=over 12
+
+=item B<--list>
+
+Display the dependencies in the form of list of filenames in place of the default tree of dependencies.
+
+=item B<--noauxfile>
+
+Prevents AutoLaTeX from reading the auxilliary files in order to extract file dependencies.
 
 =back
 

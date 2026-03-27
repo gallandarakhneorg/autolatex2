@@ -950,6 +950,7 @@ class AutoLaTeXMaker(Runner):
 			tex_file = tex_files[0]
 			tex_files = tex_files[1:]
 			if os.path.isfile(tex_file):
+				logging.debug(T("Computing dependencies for %s") % tex_file)
 				chg = self.__create_file_description(tex_file, FileType.tex, tex_file, None if tex_file == tex_root_filename else tex_root_filename)
 				changed = changed or chg
 				analyzer = DependencyAnalyzer(tex_file, root_dir)
@@ -959,7 +960,8 @@ class AutoLaTeXMaker(Runner):
 					deps = analyzer.get_dependencies(dep_type)
 					for dep in deps:
 						self.__create_file_description(dep, FileType[dep_type], dep, None if dep_type != 'tex' or dep == tex_root_filename else tex_root_filename)
-						self.__files[pdf_filename].dependencies.add(dep)
+						#self.__files[pdf_filename].dependencies.add(dep)
+						self.__files[tex_file].dependencies.add(dep)
 						changed = True
 						if dep_type == 'tex':
 							tex_files.append(dep)
@@ -992,6 +994,7 @@ class AutoLaTeXMaker(Runner):
 					idxfile = genutils.basename2(tex_root_filename, *texutils.get_tex_file_extensions()) + '.idx'
 					self.__create_file_description(idxfile, FileType.idx, tex_root_filename, tex_root_filename)
 					self.__files[idxfile].use_xindy = analyzer.is_xindy_index
+					self.__files[idxfile].dependencies.add(tex_file)
 					indfile = genutils.basename2(idxfile, '.idx') + '.ind'
 					self.__create_file_description(indfile, FileType.ind, idxfile, tex_root_filename)
 					self.__files[indfile].use_xindy = analyzer.is_xindy_index
@@ -1002,6 +1005,7 @@ class AutoLaTeXMaker(Runner):
 				if analyzer.is_glossary:
 					glofile = genutils.basename2(tex_root_filename, *texutils.get_tex_file_extensions()) + '.glo'
 					self.__create_file_description( glofile, FileType.glo, tex_root_filename, tex_root_filename)
+					self.__files[glofile].dependencies.add(tex_file)
 					glsfile = genutils.basename2(glofile, '.glo') + '.gls'
 					self.__create_file_description(glsfile, FileType.gls, tex_root_filename, tex_root_filename)
 					self.__files[glsfile].dependencies.add(glofile)
@@ -1326,7 +1330,8 @@ class AutoLaTeXMaker(Runner):
 			# Launch one LaTeX compilation to be sure that every files that are expected are generated
 			try:
 				self.run_latex(filename=root_file, loop=False)
-			except:
+			except BaseException as ex:
+				logging.debug(str(ex))
 				return False
 
 			# Compute the dependencies of the files

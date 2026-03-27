@@ -37,6 +37,7 @@ __all__ = [
 	'makeflat',
 	'showconfig',
 	'showconfigfiles',
+	'showdependencies',
 	'showimages',
 	'showinstalledtranslators',
 	'showloadedtranslators',
