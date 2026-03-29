@@ -121,13 +121,13 @@ def unlink(name : str):
 
 def basename(name : str, *ext : str) -> str:
 	"""
-	Replies the basename, with the given extensions.
+	Replies the basename, without the given extensions.
 	This function remove the directory name.
 	:param name: The filename.
 	:type name: str
 	:param ext: The extensions to remove.
 	:type ext: str
-	:return: The absolute path of the command, or None.
+	:return: The name.
 	:rtype: str
 	"""
 	bn = os.path.basename(name)
@@ -146,13 +146,14 @@ def basename(name : str, *ext : str) -> str:
 
 def basename2(name : str, *ext : str) -> str:
 	"""
-	Replies the basename, with the given extensions.
+	Replies the basename, without the given extensions.
 	This function mimics the 'basename' command on Unix systems.
+	This function does not remove the directory part.
 	:param name: The filename.
 	:type name: str
 	:param ext: The extensions to remove.
-	:type ext: str
-	:return: The absolute path of the command, or None.
+	:type ext: list[str]
+	:return: The name.
 	:rtype: str
 	"""
 	bn = basename(name,  *ext)
@@ -160,6 +161,22 @@ def basename2(name : str, *ext : str) -> str:
 	if dn:
 		return os.path.join(dn,  bn)
 	return bn
+
+def get_filename_extension_from(name : str, *ext : str) -> str|None:
+	"""
+	Replies the filename extension from the given filename that is one of the provided extensions.
+	:param name: The filename.
+	:type name: str
+	:param ext: The extensions to search for.
+	:type ext: list[str]
+	:return: The extension, or None if no extension was found.
+	:rtype: str|None
+	"""
+	for extension in ext:
+		if name.endswith(extension):
+			return extension
+	return None
+
 
 TO = TypeVar('TO')
 def first_of(*values : list[TO]) -> TO:

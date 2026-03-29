@@ -195,6 +195,23 @@ class TestUtils(AbstractBaseTest):
 		self.assertListEqual([ 'abc', '--def', '${b}bc', 'ghi' ], genutils.parse_cli('abc --def ${b}bc ghi', environment, exception))
 		self.assertListEqual([ 'abc', os.path.expanduser('~') ], genutils.parse_cli('abc $HOME', environment, exception))
 
+	def test_get_filename_extension_from_w_ext_w_exts(self):
+		self.assertEqual(".tex", genutils.get_filename_extension_from('the_filename.tex', 'ltx', '.tex'))
+
+	def test_get_filename_extension_from_w_otherext_w_exts(self):
+		self.assertIsNone(genutils.get_filename_extension_from('the_filename.txt', 'ltx', '.tex'))
+
+	def test_get_filename_extension_from_wo_ext_w_exts(self):
+		self.assertIsNone(genutils.get_filename_extension_from('the_filename', 'ltx', '.tex'))
+
+	def test_get_filename_extension_from_w_ext_wo_exts(self):
+		self.assertIsNone(genutils.get_filename_extension_from('the_filename.tex'))
+
+	def test_get_filename_extension_from_w_otherext_wo_exts(self):
+		self.assertIsNone(genutils.get_filename_extension_from('the_filename.txt'))
+
+	def test_get_filename_extension_from_wo_ext_wo_exts(self):
+		self.assertIsNone(genutils.get_filename_extension_from('the_filename'))
 
 if __name__ == '__main__':
 	unittest.main()

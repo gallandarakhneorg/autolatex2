@@ -55,8 +55,12 @@ class AbstractBaseTest(unittest.TestCase,ABC):
 	@override
 	def shortDescription(self) -> str | None:
 		# Return a custom name based on the test method's docstring or logic
-		super().shortDescription()
-		return self._testMethodDoc or self._testMethodName
+		name = super().shortDescription()
+		if not name:
+			name = self._testMethodName
+		if name.startswith('test_'):
+			name = name[5:]
+		return name
 
 	def _create_temp_directory(self, delete : bool = False) -> tempfile.TemporaryDirectory:
 		"""
