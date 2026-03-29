@@ -65,17 +65,26 @@ class DependencyAnalyzer(Observer):
 	"""
 
 	__MACROS : dict[str,str] = {
+		# TeX
 		'input'						: '!{}',
 		'include'					: '!{}',
-		'makeindex'					: '',
-		'printindex'				: '',
 		'usepackage'				: '![]!{}',
 		'RequirePackage'			: '![]!{}',
 		'documentclass'				: '![]!{}',
-		'addbibresource'			: '![]!{}',
+		# Index
+		'makeindex'					: '',
+		'printindex'				: '',
+		# Glossaries
 		'makeglossaries'			: '',
-		'printglossaries'			:'',
-		'newglossaryentry'			:'![]!{}',
+		'printglossaries'			: '',
+		'newglossaryentry'			: '![]!{}',
+		# BibTeX
+		'addbibresource'			: '![]!{}',
+		'begin'						: '[]!{}',
+		'putbib'					: '![]',
+		'bibliographyslide'			: '',
+		'defaultbibliography'		: '!{}',
+		'defaultbibliographystyle'	: '!{}',
 	}
 
 	def __init__(self, filename : str, root_directory : str):
@@ -89,6 +98,7 @@ class DependencyAnalyzer(Observer):
 		self.__full_expand_registry = FULL_EXPAND_REGISTRY
 		self.__prefix_expand_registry = PREFIX_EXPAND_REGISTRY
 		self.__is_multibib = False
+		self.__is_bibunits = False
 		self.__is_biblatex = False
 		self.__is_biber = False
 		self.__is_index = False
@@ -98,6 +108,10 @@ class DependencyAnalyzer(Observer):
 		self.__filename = filename
 		self.__basename = os.path.basename(os.path.splitext(filename)[0])
 		self.__root_directory = root_directory
+		self.__explicit_bibliography = False
+		self.__explicit_bibliography_style = False
+		self.__default_bibliography = dict()
+		self.__default_bibliography_style = dict()
 
 	@property
 	def root_directory(self) -> str:
@@ -170,6 +184,24 @@ class DependencyAnalyzer(Observer):
 		:type enable: bool
 		"""
 		self.__is_multibib = enable
+
+	@property
+	def is_bibunits(self) -> bool:
+		"""
+		Replies the Bibunits support is enable
+		:return: True if the Bibunits support is enabled.
+		:rtype: bool
+		"""
+		return self.__is_bibunits
+
+	@is_bibunits.setter
+	def is_bibunits(self, enable : bool):
+		"""
+		Set if the Bibunits support is enable
+		:param enable: True if the Bibunits support is enabled.
+		:type enable: bool
+		"""
+		self.__is_bibunits = enable
 
 	@property
 	def is_biblatex(self) -> bool:
@@ -357,7 +389,7 @@ class DependencyAnalyzer(Observer):
 			the_set = hash2[bib_type]
 		the_set.add(dependency_file)
 
-	def __parse_bib_reference(self, bib_db : str, *files : dict[str,Any]):
+	def __parse_bib_references(self, bib_db : str, *files : dict[str,Any]):
 		"""
 		Add a dependency to a BibTeX database.
 		:param bib_db: the BibTeX database.
@@ -371,6 +403,7 @@ class DependencyAnalyzer(Observer):
 			if value:
 				for svalue in re.split(r'\s*,\s*', value):
 					if svalue:
+						self.__explicit_bibliography = True
 						if svalue.endswith('.bib'):
 							bib_file = svalue
 						else:
@@ -400,7 +433,7 @@ class DependencyAnalyzer(Observer):
 			callback_name = name[1:]
 			if callback_name in self.__full_expand_registry:
 				func = self.__full_expand_registry[callback_name]
-				func(self, name, parameter)
+				func(self, name, list(parameter))
 			else:
 				largest_size = 0
 				largest_func = None
@@ -411,55 +444,79 @@ class DependencyAnalyzer(Observer):
 							largest_size = l
 							largest_func = func
 				if largest_func is not None:
-					largest_func(self, name, parameter)
+					largest_func(self, name, list(parameter))
 		return ''
 
 	@expand_function(start_symbol=False)
-	def _expand__input(self, name : str, parameters : tuple[dict[str, Any],...]):
+	def _expand__input(self, name : str, parameters : list[dict[str, Any],...]):
 		self._expand__include(name, parameters)
 
 	@expand_function(start_symbol=False)
-	def _expand__newglossaryentry(self, name : str, parameters : tuple[dict[str, Any],...]):
+	def _expand__newglossaryentry(self, name : str, parameters : list[dict[str, Any],...]):
 		self._expand__makeglossaries(name, parameters)
 
 	@expand_function(start_symbol=False)
-	def _expand__printglossaries(self, name : str, parameters : tuple[dict[str, Any],...]):
+	def _expand__printglossaries(self, name : str, parameters : list[dict[str, Any],...]):
 		self._expand__makeglossaries(name, parameters)
 
 	@expand_function(start_symbol=False)
-	def _expand__printindex(self, name : str, parameters : tuple[dict[str, Any],...]):
+	def _expand__printindex(self, name : str, parameters : list[dict[str, Any],...]):
 		self._expand__makeindex(name, parameters)
 
 	# noinspection PyPep8Naming
 	@expand_function(start_symbol=False)
-	def _expand__RequirePackage(self, name : str, parameters : tuple[dict[str, Any],...]):
+	def _expand__RequirePackage(self, name : str, parameters : list[dict[str, Any],...]):
 		self._expand__usepackage(name, parameters)
 
 	# noinspection PyUnusedLocal
-	@expand_function(start_symbol = True)
-	def _expand__addbibresource(self, name : str, parameters : tuple[dict[str, Any],...]):
+	@expand_function(start_symbol = False)
+	def _expand__addbibresource(self, name : str, parameters : list[dict[str, Any],...]):
 		bibdb = self.basename
-		self.__parse_bib_reference(bibdb, *parameters)
+		self.__parse_bib_references(bibdb, *parameters)
 
 	@expand_function(start_symbol = True)
-	def _expand__bibliography(self, name : str, parameters : tuple[dict[str, Any],...]):
-		if not self.is_multibib:
-			bibdb = self.basename
-		else:
+	def _expand__bibliography(self, name : str, parameters : list[dict[str, Any],...]):
+		if self.is_multibib:
 			bibdb = name[13:] if len(name) > 13 else self.basename
-		self.__parse_bib_reference(bibdb, *parameters)
+		else:
+			bibdb = self.basename
+		self.__parse_bib_references(bibdb, *parameters)
+
+	# noinspection PyUnusedLocal
+	@expand_function(start_symbol = False)
+	def _expand__putbib(self, name : str, parameters : list[dict[str, Any],...]):
+		bibdb = self.basename
+		if len(parameters) > 0 and parameters[0] and 'text' in parameters[0] and parameters[0]['text']:
+			self.__parse_bib_references(bibdb, *parameters)
+		elif '\\defaultbibliography' not in self.__default_bibliography:
+			self.__default_bibliography['\\defaultbibliography'] = [ {'text': self.basename} ]
+
+	# noinspection PyUnusedLocal
+	@expand_function(start_symbol = False)
+	def _expand__bibliographyslide(self, name : str, parameters : list[dict[str, Any],...]):
+		bibdb = self.basename
+		self.__parse_bib_references(bibdb, {'text': 'biblio'})
+
+	# noinspection PyUnusedLocal
+	@expand_function(start_symbol = False)
+	def _expand__begin(self, name : str, parameters : list[dict[str, Any],...]):
+		tex_name = parameters[1]['text']
+		if tex_name == 'bibliographysection':
+			bibdb = self.basename
+			self.__parse_bib_references(bibdb, {'text': 'biblio'})
 
 	@expand_function(start_symbol = True)
-	def _expand__bibliographystyle(self, name : str, parameters : tuple[dict[str, Any],...]):
-		if not self.is_multibib:
-			bibdb = self.basename
-		else:
+	def _expand__bibliographystyle(self, name : str, parameters : list[dict[str, Any],...]):
+		if self.is_multibib:
 			bibdb = name[18:] if len(name) > 18 else self.basename
+		else:
+			bibdb = self.basename
 		for param in parameters:
 			value = param['text']
 			if value:
 				for svalue in re.split('\\s*,\\s*', value.strip()):
 					if svalue:
+						self.__explicit_bibliography_style = True
 						if svalue.endswith('.bst'):
 							bst_file = svalue
 						else:
@@ -471,7 +528,7 @@ class DependencyAnalyzer(Observer):
 
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol=False)
-	def _expand__documentclass(self, name : str, parameters : tuple[dict[str, Any],...]):
+	def _expand__documentclass(self, name : str, parameters : list[dict[str, Any],...]):
 		cls = parameters[1]['text']
 		if cls.endswith('.cls'):
 			cls_file = cls
@@ -484,7 +541,7 @@ class DependencyAnalyzer(Observer):
 
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol=False)
-	def _expand__include(self, name : str, parameters : tuple[dict[str, Any],...]):
+	def _expand__include(self, name : str, parameters : list[dict[str, Any],...]):
 		for param in parameters:
 			value = param['text']
 			if value:
@@ -499,17 +556,17 @@ class DependencyAnalyzer(Observer):
 
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol=False)
-	def _expand__makeglossaries(self, name : str, parameters : tuple[dict[str, Any],...]):
+	def _expand__makeglossaries(self, name : str, parameters : list[dict[str, Any],...]):
 		self.is_glossary = True
 
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol=False)
-	def _expand__makeindex(self, name : str, parameters : tuple[dict[str, Any],...]):
+	def _expand__makeindex(self, name : str, parameters : list[dict[str, Any],...]):
 		self.is_makeindex = True
 
 	# noinspection DuplicatedCode,PyUnusedLocal
 	@expand_function(start_symbol=False)
-	def _expand__usepackage(self, name : str, parameters : tuple[dict[str, Any],...]):
+	def _expand__usepackage(self, name : str, parameters : list[dict[str, Any],...]):
 		sty = parameters[1]['text']
 		if sty.endswith('.sty'):
 			sty_file = sty
@@ -518,7 +575,7 @@ class DependencyAnalyzer(Observer):
 		if sty_file == 'multibib.sty':
 			self.is_multibib = True
 		elif sty_file == 'bibunits.sty':
-			pass
+			self.is_bibunits = True
 		elif sty_file == 'biblatex.sty':
 			self.is_biblatex = True
 			# Parse the biblatex parameters
@@ -580,6 +637,17 @@ class DependencyAnalyzer(Observer):
 			if os.path.isfile(sty_file):
 				self.__add_dependency('sty', sty_file)
 
+	# noinspection DuplicatedCode,PyUnusedLocal
+	@expand_function(start_symbol=False)
+	def _expand__defaultbibliography(self, name : str, parameters : list[dict[str, Any],...]):
+		self.__default_bibliography[name] = parameters
+
+	# noinspection DuplicatedCode,PyUnusedLocal
+	@expand_function(start_symbol=False)
+	def _expand__defaultbibliographystyle(self, name : str, parameters : list[dict[str, Any],...]):
+		self.__default_bibliography_style[name] = parameters
+
+
 	@override
 	def find_macro(self, parser : Parser, name : str, special : bool, math : bool) -> str | None:
 		"""
@@ -619,6 +687,15 @@ class DependencyAnalyzer(Observer):
 			parser.add_math_mode_macro(k, v)
 
 		parser.parse(content)
+
+		if not self.__explicit_bibliography and self.__default_bibliography:
+			for name, parameters in self.__default_bibliography.items():
+				self._expand__bibliography(name, parameters)
+
+		if not self.__explicit_bibliography_style and self.__default_bibliography_style:
+			for name, parameters in self.__default_bibliography_style.items():
+				self._expand__bibliographystyle(name, parameters)
+
 
 	@override
 	def text(self, parser: Parser, text: str):

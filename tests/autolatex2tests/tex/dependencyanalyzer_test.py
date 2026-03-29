@@ -21,6 +21,7 @@
 import unittest
 import tempfile
 import os
+import re
 import logging
 import pathlib
 from typing import override
@@ -50,12 +51,14 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		f.seek(0)
 		f.close
 		for filename in filenames:
-			pathlib.Path(os.path.join(self.__lastDirname, filename)).touch()
+			fn = re.sub(r'\?\?\?', self.__lastFilename, filename)
+			pathlib.Path(os.path.join(self.__lastDirname, fn)).touch()
 		analyzer = dependencyanalyzer.DependencyAnalyzer(name, self.__lastDirname)
 		analyzer.run()
 		os.remove(name)
 		for filename in filenames:
-			os.remove(os.path.join(self.__lastDirname, filename))
+			fn = re.sub(r'\?\?\?', self.__lastFilename, filename)
+			os.remove(os.path.join(self.__lastDirname, fn))
 		return analyzer
 
 	def test_emptyString(self):
@@ -65,6 +68,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertEqual(self.__lastBasename, analyzer.basename)
 		self.assertEqual(self.__lastFilename, analyzer.filename)
 		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
 		self.assertFalse(analyzer.is_biblatex)
 		self.assertFalse(analyzer.is_biber)
 		self.assertFalse(analyzer.is_makeindex)
@@ -81,6 +85,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertEqual(self.__lastBasename, analyzer.basename)
 		self.assertEqual(self.__lastFilename, analyzer.filename)
 		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
 		self.assertFalse(analyzer.is_biblatex)
 		self.assertFalse(analyzer.is_biber)
 		self.assertFalse(analyzer.is_makeindex)
@@ -97,6 +102,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertEqual(self.__lastBasename, analyzer.basename)
 		self.assertEqual(self.__lastFilename, analyzer.filename)
 		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
 		self.assertFalse(analyzer.is_biblatex)
 		self.assertFalse(analyzer.is_biber)
 		self.assertFalse(analyzer.is_makeindex)
@@ -116,6 +122,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertEqual(self.__lastBasename, analyzer.basename)
 		self.assertEqual(self.__lastFilename, analyzer.filename)
 		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
 		self.assertFalse(analyzer.is_biblatex)
 		self.assertFalse(analyzer.is_biber)
 		self.assertFalse(analyzer.is_makeindex)
@@ -132,6 +139,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertEqual(self.__lastBasename, analyzer.basename)
 		self.assertEqual(self.__lastFilename, analyzer.filename)
 		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
 		self.assertFalse(analyzer.is_biblatex)
 		self.assertFalse(analyzer.is_biber)
 		self.assertFalse(analyzer.is_makeindex)
@@ -151,6 +159,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertEqual(self.__lastBasename, analyzer.basename)
 		self.assertEqual(self.__lastFilename, analyzer.filename)
 		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
 		self.assertFalse(analyzer.is_biblatex)
 		self.assertFalse(analyzer.is_biber)
 		self.assertTrue(analyzer.is_makeindex)
@@ -167,6 +176,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertEqual(self.__lastBasename, analyzer.basename)
 		self.assertEqual(self.__lastFilename, analyzer.filename)
 		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
 		self.assertFalse(analyzer.is_biblatex)
 		self.assertFalse(analyzer.is_biber)
 		self.assertTrue(analyzer.is_makeindex)
@@ -183,6 +193,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertEqual(self.__lastBasename, analyzer.basename)
 		self.assertEqual(self.__lastFilename, analyzer.filename)
 		self.assertTrue(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
 		self.assertFalse(analyzer.is_biblatex)
 		self.assertFalse(analyzer.is_biber)
 		self.assertFalse(analyzer.is_makeindex)
@@ -199,6 +210,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertEqual(self.__lastBasename, analyzer.basename)
 		self.assertEqual(self.__lastFilename, analyzer.filename)
 		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
 		self.assertTrue(analyzer.is_biblatex)
 		self.assertFalse(analyzer.is_biber)
 		self.assertFalse(analyzer.is_makeindex)
@@ -215,6 +227,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertEqual(self.__lastBasename, analyzer.basename)
 		self.assertEqual(self.__lastFilename, analyzer.filename)
 		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
 		self.assertTrue(analyzer.is_biblatex)
 		self.assertTrue(analyzer.is_biber)
 		self.assertFalse(analyzer.is_makeindex)
@@ -231,6 +244,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertEqual(self.__lastBasename, analyzer.basename)
 		self.assertEqual(self.__lastFilename, analyzer.filename)
 		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
 		self.assertFalse(analyzer.is_biblatex)
 		self.assertFalse(analyzer.is_biber)
 		self.assertFalse(analyzer.is_makeindex)
@@ -248,6 +262,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertEqual(self.__lastFilename, analyzer.filename)
 		self.assertFalse(analyzer.is_multibib)
 		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_bibunits)
 		self.assertFalse(analyzer.is_biber)
 		self.assertFalse(analyzer.is_makeindex)
 
@@ -266,6 +281,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertEqual(self.__lastBasename, analyzer.basename)
 		self.assertEqual(self.__lastFilename, analyzer.filename)
 		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
 		self.assertFalse(analyzer.is_biblatex)
 		self.assertFalse(analyzer.is_biber)
 		self.assertFalse(analyzer.is_makeindex)
@@ -282,6 +298,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertEqual(self.__lastBasename, analyzer.basename)
 		self.assertEqual(self.__lastFilename, analyzer.filename)
 		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
 		self.assertFalse(analyzer.is_biblatex)
 		self.assertFalse(analyzer.is_biber)
 		self.assertFalse(analyzer.is_makeindex)
@@ -301,6 +318,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertEqual(self.__lastBasename, analyzer.basename)
 		self.assertEqual(self.__lastFilename, analyzer.filename)
 		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
 		self.assertFalse(analyzer.is_biblatex)
 		self.assertFalse(analyzer.is_biber)
 		self.assertFalse(analyzer.is_makeindex)
@@ -317,6 +335,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertEqual(self.__lastBasename, analyzer.basename)
 		self.assertEqual(self.__lastFilename, analyzer.filename)
 		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
 		self.assertFalse(analyzer.is_biblatex)
 		self.assertFalse(analyzer.is_biber)
 		self.assertFalse(analyzer.is_makeindex)
@@ -336,6 +355,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertEqual(self.__lastBasename, analyzer.basename)
 		self.assertEqual(self.__lastFilename, analyzer.filename)
 		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
 		self.assertFalse(analyzer.is_biblatex)
 		self.assertFalse(analyzer.is_biber)
 		self.assertFalse(analyzer.is_makeindex)
@@ -352,6 +372,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertEqual(self.__lastBasename, analyzer.basename)
 		self.assertEqual(self.__lastFilename, analyzer.filename)
 		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
 		self.assertFalse(analyzer.is_biblatex)
 		self.assertFalse(analyzer.is_biber)
 		self.assertFalse(analyzer.is_makeindex)
@@ -365,6 +386,29 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertEqual(1, len(dbs))
 		self.assertEqual({os.path.join(self.__lastDirname, "mybib.bib")}, dbs)
 
+	def test_bibliography_files(self):
+		analyzer = self.___run('\\documentclass{article}\\begin{document}\\bibliography{mybib,mybib1}\\end{document}',
+							   'mybib.bib', 'mybib1.bib')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(1, len(types))
+		self.assertTrue(self.__lastBasename in types)
+		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		self.assertEqual(2, len(dbs))
+		self.assertTrue(os.path.join(self.__lastDirname, "mybib.bib") in dbs)
+		self.assertTrue(os.path.join(self.__lastDirname, "mybib1.bib") in dbs)
+
 	def test_bibliographyXXX_nomultibib_nofile(self):
 		analyzer = self.___run('\\documentclass{article}\\begin{document}\\bibliographyXXX{mybib}\\end{document}')
 
@@ -372,6 +416,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertEqual(self.__lastBasename, analyzer.basename)
 		self.assertEqual(self.__lastFilename, analyzer.filename)
 		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
 		self.assertFalse(analyzer.is_biblatex)
 		self.assertFalse(analyzer.is_biber)
 		self.assertFalse(analyzer.is_makeindex)
@@ -388,6 +433,25 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertEqual(self.__lastBasename, analyzer.basename)
 		self.assertEqual(self.__lastFilename, analyzer.filename)
 		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(0, len(types))
+
+	def test_bibliographyXXX_nomultibib_files(self):
+		analyzer = self.___run('\\documentclass{article}\\begin{document}\\bibliographyXXX{mybib,mybib1}\\end{document}',
+							   'mybib.cls','mybib1.cls')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
 		self.assertFalse(analyzer.is_biblatex)
 		self.assertFalse(analyzer.is_biber)
 		self.assertFalse(analyzer.is_makeindex)
@@ -404,6 +468,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertEqual(self.__lastBasename, analyzer.basename)
 		self.assertEqual(self.__lastFilename, analyzer.filename)
 		self.assertTrue(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
 		self.assertFalse(analyzer.is_biblatex)
 		self.assertFalse(analyzer.is_biber)
 		self.assertFalse(analyzer.is_makeindex)
@@ -420,6 +485,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertEqual(self.__lastBasename, analyzer.basename)
 		self.assertEqual(self.__lastFilename, analyzer.filename)
 		self.assertTrue(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
 		self.assertFalse(analyzer.is_biblatex)
 		self.assertFalse(analyzer.is_biber)
 		self.assertFalse(analyzer.is_makeindex)
@@ -433,6 +499,29 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertEqual(1, len(dbs))
 		self.assertEqual({os.path.join(self.__lastDirname, "mybib.bib")}, dbs)
 
+	def test_bibliographyXXX_multibib_files(self):
+		analyzer = self.___run('\\documentclass{article}\\usepackage{multibib}\\begin{document}\\bibliographyXXX{mybib,mybib1}\\end{document}',
+							   'mybib.bib', 'mybib1.bib')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertTrue(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(1, len(types))
+		self.assertTrue('XXX' in types)
+		dbs = analyzer.get_bib_dependencies('bib', 'XXX')
+		self.assertEqual(2, len(dbs))
+		self.assertTrue(os.path.join(self.__lastDirname, "mybib.bib") in dbs)
+		self.assertTrue(os.path.join(self.__lastDirname, "mybib1.bib") in dbs)
+
 	def test_bibliographystyle_nofile(self):
 		analyzer = self.___run('\\documentclass{article}\\begin{document}\\bibliographystyle{mystyle}\\end{document}')
 
@@ -440,6 +529,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertEqual(self.__lastBasename, analyzer.basename)
 		self.assertEqual(self.__lastFilename, analyzer.filename)
 		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
 		self.assertFalse(analyzer.is_biblatex)
 		self.assertFalse(analyzer.is_biber)
 		self.assertFalse(analyzer.is_makeindex)
@@ -456,6 +546,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertEqual(self.__lastBasename, analyzer.basename)
 		self.assertEqual(self.__lastFilename, analyzer.filename)
 		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
 		self.assertFalse(analyzer.is_biblatex)
 		self.assertFalse(analyzer.is_biber)
 		self.assertFalse(analyzer.is_makeindex)
@@ -469,7 +560,700 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertEqual(1, len(dbs))
 		self.assertEqual({os.path.join(self.__lastDirname, "mystyle.bst")}, dbs)
 
+	def test_bibliographysection_nofile(self):
+		analyzer = self.___run('\\documentclass{article}\\usepackage{bibunits}\\begin{document}\\begin{bibliographysection}blablabla\\end{bibliographysection}\\end{document}')
 
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertTrue(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(0, len(types))
+		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		self.assertEqual(0, len(dbs))
+
+	def test_bibliographysection_otherfile(self):
+		analyzer = self.___run('\\documentclass{article}\\usepackage{bibunits}\\begin{document}\\begin{bibliographysection}blablabla\\end{bibliographysection}\\end{document}', 'mybib.bib')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertTrue(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(0, len(types))
+		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		self.assertEqual(0, len(dbs))
+
+	def test_bibliographysection_file(self):
+		analyzer = self.___run('\\documentclass{article}\\usepackage{bibunits}\\begin{document}\\begin{bibliographysection}blablabla\\end{bibliographysection}\\end{document}', 'biblio.bib')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertTrue(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(1, len(types))
+		self.assertTrue(self.__lastBasename in types)
+		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		self.assertEqual(1, len(dbs))
+		self.assertTrue(os.path.join(self.__lastDirname, "biblio.bib") in dbs)
+
+	def test_bibliographysection_files(self):
+		analyzer = self.___run('\\documentclass{article}\\usepackage{bibunits}\\begin{document}\\begin{bibliographysection}blablabla\\end{bibliographysection}\\end{document}', 'biblio.bib', 'mybib.bib')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertTrue(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(1, len(types))
+		self.assertTrue(self.__lastBasename in types)
+		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		self.assertEqual(1, len(dbs))
+		self.assertTrue(os.path.join(self.__lastDirname, "biblio.bib") in dbs)
+
+	def test_bibliographyslide_nofile(self):
+		analyzer = self.___run('\\documentclass{article}\\usepackage{bibunits}\\begin{document}\\bibliographyslide\\end{document}')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertTrue(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(0, len(types))
+		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		self.assertEqual(0, len(dbs))
+
+	def test_bibliographyslide_otherfile(self):
+		analyzer = self.___run('\\documentclass{article}\\usepackage{bibunits}\\begin{document}\\bibliographyslide\\end{document}', 'mybiblio.bib')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertTrue(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(0, len(types))
+		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		self.assertEqual(0, len(dbs))
+
+	def test_bibliographyslide_file(self):
+		analyzer = self.___run('\\documentclass{article}\\usepackage{bibunits}\\begin{document}\\bibliographyslide\\end{document}', 'biblio.bib')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertTrue(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(1, len(types))
+		self.assertTrue(self.__lastBasename in types)
+		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		self.assertEqual(1, len(dbs))
+		self.assertTrue(os.path.join(self.__lastDirname, "biblio.bib") in dbs)
+
+	def test_bibliographyslide_files(self):
+		analyzer = self.___run('\\documentclass{article}\\usepackage{bibunits}\\begin{document}\\bibliographyslide\\end{document}', 'biblio.bib', 'mybiblio.bib')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertTrue(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(1, len(types))
+		self.assertTrue(self.__lastBasename in types)
+		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		self.assertEqual(1, len(dbs))
+		self.assertTrue(os.path.join(self.__lastDirname, "biblio.bib") in dbs)
+
+	def test_putbib_param_nofile(self):
+		analyzer = self.___run('\\documentclass{article}\\usepackage{bibunits}\\begin{document}\\putbib[mybiblio1]\\end{document}')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertTrue(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(0, len(types))
+		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		self.assertEqual(0, len(dbs))
+
+	def test_putbib_param_otherfile(self):
+		analyzer = self.___run('\\documentclass{article}\\usepackage{bibunits}\\begin{document}\\putbib[mybiblio1]\\end{document}', 'mybiblio0.bib', 'mybiblio2.bib')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertTrue(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(0, len(types))
+		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		self.assertEqual(0, len(dbs))
+
+	def test_putbib_param_file(self):
+		analyzer = self.___run('\\documentclass{article}\\usepackage{bibunits}\\begin{document}\\putbib[mybiblio1]\\end{document}', 'mybiblio0.bib', 'mybiblio1.bib', 'mybiblio2.bib')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertTrue(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(1, len(types))
+		self.assertTrue(self.__lastBasename in types)
+		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		self.assertEqual(1, len(dbs))
+		self.assertTrue(os.path.join(self.__lastDirname, "mybiblio1.bib") in dbs)
+
+	def test_putbib_param_files(self):
+		analyzer = self.___run('\\documentclass{article}\\usepackage{bibunits}\\begin{document}\\putbib[mybiblio1,mybiblio2]\\end{document}', 'mybiblio0.bib', 'mybiblio1.bib', 'mybiblio2.bib')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertTrue(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(1, len(types))
+		self.assertTrue(self.__lastBasename in types)
+		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		self.assertEqual(2, len(dbs))
+		self.assertTrue(os.path.join(self.__lastDirname, "mybiblio1.bib") in dbs)
+		self.assertTrue(os.path.join(self.__lastDirname, "mybiblio2.bib") in dbs)
+
+	def test_putbib_noparam_nofile(self):
+		analyzer = self.___run('\\documentclass{article}\\usepackage{bibunits}\\begin{document}\\putbib\\end{document}')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertTrue(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(0, len(types))
+		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		self.assertEqual(0, len(dbs))
+
+	def test_putbib_noparam_otherfile(self):
+		analyzer = self.___run('\\documentclass{article}\\usepackage{bibunits}\\begin{document}\\putbib\\end{document}', 'mybiblio0.bib')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertTrue(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(0, len(types))
+		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		self.assertEqual(0, len(dbs))
+
+	def test_putbib_noparam_file(self):
+		analyzer = self.___run('\\documentclass{article}\\usepackage{bibunits}\\begin{document}\\putbib\\end{document}',
+							   '???.bib')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertTrue(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(1, len(types))
+		self.assertTrue(self.__lastBasename in types)
+		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		self.assertEqual(1, len(dbs))
+		self.assertTrue(os.path.join(self.__lastDirname, self.__lastBasename + ".bib") in dbs)
+
+
+	def test_putbib_noparam_nofile_dflt(self):
+		analyzer = self.___run('\\documentclass{article}\\usepackage{bibunits}\\defaultbibliography{mybib.bib}\\begin{document}\\putbib\\end{document}')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertTrue(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(0, len(types))
+		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		self.assertEqual(0, len(dbs))
+
+	def test_putbib_noparam_otherfile_dflt(self):
+		analyzer = self.___run('\\documentclass{article}\\usepackage{bibunits}\\defaultbibliography{mybib.bib}\\begin{document}\\putbib\\end{document}', 'mybiblio0.bib')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertTrue(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(0, len(types))
+		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		self.assertEqual(0, len(dbs))
+
+	def test_putbib_noparam_file_dflt(self):
+		analyzer = self.___run('\\documentclass{article}\\usepackage{bibunits}\\defaultbibliography{mybib}\\begin{document}\\putbib\\end{document}',
+							   'mybib.bib')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertTrue(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(1, len(types))
+		self.assertTrue(self.__lastBasename in types)
+		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		self.assertEqual(1, len(dbs))
+		self.assertTrue(os.path.join(self.__lastDirname, "mybib.bib") in dbs)
+
+
+	def test_defaultbibliography__noexplicit_nofile(self):
+		analyzer = self.___run('\\documentclass{article}\\begin{document}\\defaultbibliography{mybib}\\end{document}')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(0, len(types))
+		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		self.assertEqual(0, len(dbs))
+
+
+	def test_defaultbibliography__noexplicit_otherfile(self):
+		analyzer = self.___run('\\documentclass{article}\\begin{document}\\defaultbibliography{mybib}\\end{document}', 'mybib1.bib')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(0, len(types))
+		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		self.assertEqual(0, len(dbs))
+
+
+	def test_defaultbibliography__noexplicit_file(self):
+		analyzer = self.___run('\\documentclass{article}\\begin{document}\\defaultbibliography{mybib}\\end{document}', 'mybib.bib')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(1, len(types))
+		self.assertTrue(self.__lastBasename in types)
+		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		self.assertEqual(1, len(dbs))
+		self.assertTrue(os.path.join(self.__lastDirname, "mybib.bib") in dbs)
+
+	def test_defaultbibliography__noexplicit_files(self):
+		analyzer = self.___run('\\documentclass{article}\\begin{document}\\defaultbibliography{mybib,mybib1,mybib2}\\end{document}', 'mybib.bib', 'mybib1.bib')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(1, len(types))
+		self.assertTrue(self.__lastBasename in types)
+		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		self.assertEqual(2, len(dbs))
+		self.assertTrue(os.path.join(self.__lastDirname, "mybib.bib") in dbs)
+		self.assertTrue(os.path.join(self.__lastDirname, "mybib1.bib") in dbs)
+
+	def test_defaultbibliography__explicit_nofile(self):
+		analyzer = self.___run('\\documentclass{article}\\bibliography{mybib2}\\begin{document}\\defaultbibliography{mybib}\\end{document}')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(0, len(types))
+		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		self.assertEqual(0, len(dbs))
+
+
+	def test_defaultbibliography__explicit_otherfile(self):
+		analyzer = self.___run('\\documentclass{article}\\bibliography{mybib2}\\begin{document}\\defaultbibliography{mybib}\\end{document}', 'mybib1.bib')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(0, len(types))
+		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		self.assertEqual(0, len(dbs))
+
+
+	def test_defaultbibliography__explicit_file(self):
+		analyzer = self.___run('\\documentclass{article}\\bibliography{mybib2}\\begin{document}\\defaultbibliography{mybib}\\end{document}', 'mybib2.bib', 'mybib1.bib', 'mybib.bib')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(1, len(types))
+		self.assertTrue(self.__lastBasename in types)
+		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		self.assertEqual(1, len(dbs))
+		self.assertTrue(os.path.join(self.__lastDirname, "mybib2.bib") in dbs)
+
+
+	def test_defaultbibliography__explicit_files(self):
+		analyzer = self.___run('\\documentclass{article}\\bibliography{mybib2}\\begin{document}\\defaultbibliography{mybib,mybib1}\\end{document}', 'mybib2.bib', 'mybib1.bib', 'mybib.bib')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(1, len(types))
+		self.assertTrue(self.__lastBasename in types)
+		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		self.assertEqual(1, len(dbs))
+		self.assertTrue(os.path.join(self.__lastDirname, "mybib2.bib") in dbs)
+
+
+	def test_defaultbibliographystyle__noexplicit_nofile(self):
+		analyzer = self.___run('\\documentclass{article}\\begin{document}\\defaultbibliographystyle{mybib}\\end{document}')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(0, len(types))
+		dbs = analyzer.get_bib_dependencies('bst', self.__lastBasename)
+		self.assertEqual(0, len(dbs))
+
+
+	def test_defaultbibliographystyle__noexplicit_otherfile(self):
+		analyzer = self.___run('\\documentclass{article}\\begin{document}\\defaultbibliographystyle{mybib}\\end{document}', 'mybib1.bst')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(0, len(types))
+		dbs = analyzer.get_bib_dependencies('bst', self.__lastBasename)
+		self.assertEqual(0, len(dbs))
+
+
+	def test_defaultbibliographystyle__noexplicit_file(self):
+		analyzer = self.___run('\\documentclass{article}\\begin{document}\\defaultbibliographystyle{mybib}\\end{document}', 'mybib.bst')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(1, len(types))
+		self.assertTrue(self.__lastBasename in types)
+		dbs = analyzer.get_bib_dependencies('bst', self.__lastBasename)
+		self.assertEqual(1, len(dbs))
+		self.assertTrue(os.path.join(self.__lastDirname, "mybib.bst") in dbs)
+
+	def test_defaultbibliographystyle__noexplicit_files(self):
+		analyzer = self.___run('\\documentclass{article}\\begin{document}\\defaultbibliographystyle{mybib}\\end{document}', 'mybib.bst', 'mybib1.bst')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(1, len(types))
+		self.assertTrue(self.__lastBasename in types)
+		dbs = analyzer.get_bib_dependencies('bst', self.__lastBasename)
+		self.assertEqual(1, len(dbs))
+		self.assertTrue(os.path.join(self.__lastDirname, "mybib.bst") in dbs)
+
+	def test_defaultbibliographystyle__explicit_nofile(self):
+		analyzer = self.___run('\\documentclass{article}\\bibliographystyle{mybib2}\\begin{document}\\defaultbibliographystyle{mybib}\\end{document}')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(0, len(types))
+		dbs = analyzer.get_bib_dependencies('bst', self.__lastBasename)
+		self.assertEqual(0, len(dbs))
+
+
+	def test_defaultbibliographystyle__explicit_otherfile(self):
+		analyzer = self.___run('\\documentclass{article}\\bibliographystyle{mybib2}\\begin{document}\\defaultbibliographystyle{mybib}\\end{document}', 'mybib1.bst')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(0, len(types))
+		dbs = analyzer.get_bib_dependencies('bst', self.__lastBasename)
+		self.assertEqual(0, len(dbs))
+
+
+	def test_defaultbibliographystyle__explicit_file(self):
+		analyzer = self.___run('\\documentclass{article}\\bibliographystyle{mybib2}\\begin{document}\\defaultbibliographystyle{mybib}\\end{document}', 'mybib2.bst', 'mybib.bst')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(1, len(types))
+		self.assertTrue(self.__lastBasename in types)
+		dbs = analyzer.get_bib_dependencies('bst', self.__lastBasename)
+		self.assertEqual(1, len(dbs))
+		self.assertTrue(os.path.join(self.__lastDirname, "mybib2.bst") in dbs)
+
+
+	def test_defaultbibliographystyle__explicit_files(self):
+		analyzer = self.___run('\\documentclass{article}\\bibliographystyle{mybib2}\\begin{document}\\defaultbibliographystyle{mybib}\\end{document}', 'mybib2.bst', 'mybib.bst')
+
+		self.assertEqual(self.__lastDirname, analyzer.root_directory)
+		self.assertEqual(self.__lastBasename, analyzer.basename)
+		self.assertEqual(self.__lastFilename, analyzer.filename)
+		self.assertFalse(analyzer.is_multibib)
+		self.assertFalse(analyzer.is_bibunits)
+		self.assertFalse(analyzer.is_biblatex)
+		self.assertFalse(analyzer.is_biber)
+		self.assertFalse(analyzer.is_makeindex)
+
+		types = analyzer.get_dependency_types()
+		self.assertEqual(0, len(types))
+		types = analyzer.get_bib_databases()
+		self.assertEqual(1, len(types))
+		self.assertTrue(self.__lastBasename in types)
+		dbs = analyzer.get_bib_dependencies('bst', self.__lastBasename)
+		self.assertEqual(1, len(dbs))
+		self.assertTrue(os.path.join(self.__lastDirname, "mybib2.bst") in dbs)
 
 
 if __name__ == '__main__':

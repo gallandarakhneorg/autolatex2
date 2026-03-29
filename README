@@ -144,6 +144,10 @@ COMMANDS
     showconfigfiles
         Displays the list of configuration filenames read by AutoLaTeX.
 
+    showdependencies
+        Displays the dependencies of the main LaTeX document in terms of
+        included and used files.
+
     showimages
         Displays the filenames of figures that should be processed by a
         translator. This command offers specific options to control the type
@@ -486,6 +490,14 @@ OPTIONS FOR COMMANDS
         --out directory
                     Specifies the output directory for the flat version. The
                     default directory name is flat_version.
+
+    *showdependencies*
+
+        --list      Display the dependencies in the form of list of
+                    filenames in place of the default tree of dependencies.
+
+        --noauxfile Prevents AutoLaTeX from reading the auxilliary files in
+                    order to extract file dependencies.
 
     *showimages*
 
