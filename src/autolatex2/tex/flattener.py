@@ -71,25 +71,37 @@ class Flattener(Observer):
 	"""
 
 	__MACROS : dict[str,str] = {
+		# TeX
 		'input'							: '!{}',
 		'include'						: '!{}',
 		'usepackage'					: '![]!{}',
 		'RequirePackage'				: '![]!{}',
 		'documentclass'					: '![]!{}',
+		# Figures
+		'includegraphics'				: '![]!{}',
+		'graphicspath'					: '![]!{}',
+		'pgfdeclareimage'				: '![]!{}!{}',
+		# S. Galland Figures
 		'includeanimatedfigure'			: '![]!{}',
 		'includeanimatedfigurewtex'		: '![]!{}',
 		'includefigurewtex'				: '![]!{}',
-		'includegraphics'				: '![]!{}',
 		'includegraphicswtex'			: '![]!{}',
-		'graphicspath'					: '![]!{}',
 		'mfigure'						: '![]!{}!{}!{}!{}',
 		'mfigure*'						: '![]!{}!{}!{}!{}',
 		'msubfigure'					: '![]!{}!{}!{}',
 		'msubfigure*'					: '![]!{}!{}!{}',
 		'mfiguretex'					: '![]!{}!{}!{}!{}',
 		'mfiguretex*'					: '![]!{}!{}!{}!{}',
-		'pgfdeclareimage'				: '![]!{}!{}',
+		# Biblatex
 		'addbibresource'				: '![]!{}',
+		'printbibliography'				: '![]',
+		# bibunits
+		'putbib'						: '![]',
+		# S. Galland Templates
+		'bibliographyslide'				: '',
+		# BibTeX and other files
+		'defaultbibliography'			: '!{}',
+		'defaultbibliographystyle'		: '!{}',
 		'begin'							: '![]!{}',
 		'end'							: '![]!{}',
 	}
@@ -115,6 +127,13 @@ class Flattener(Observer):
 		self.__use_biblio = False
 		self.__init()
 		self.__included_sty = dict()
+		self.__bibunits_aux_index = 0
+		self.__in_bibunit = False
+		self.__explicit_bibliography = False
+		self.__explicit_bibliography_files = list()
+		self.__default_bibliography = list()
+		self.__explicit_bibliography_style = False
+		self.__default_bibliography_style = None
 
 
 	def __init(self) :
@@ -361,40 +380,56 @@ class Flattener(Observer):
 
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol=False)
-	def _expand__begin(self, parser : Parser, name : str, parameter : list[dict[str,Any]]) -> str:
-		tex_name = parameter[1]['text']
+	def _expand__begin(self, parser : Parser, name : str, parameters : list[dict[str,Any]]) -> str:
+		tex_name = parameters[1]['text']
 		if tex_name == 'filecontents*':
 			self.__file_content_counter = self.__file_content_counter + 1
+		elif tex_name == 'bibliographysection' or tex_name == 'bibunit':
+			self.__in_bibunit = True
+			self.__bibunits_aux_index = self.__bibunits_aux_index + 1
+			if not self.use_biblio:
+				return ''
 		ret = name
-		if parameter[0]['text']:
-			ret += "[%s]" % parameter[0]['text']
+		if parameters[0]['text']:
+			ret += "[%s]" % parameters[0]['text']
 		ret += "{%s}" % tex_name
 		return ret
 
 	@expand_function(start_symbol=False)
-	def _expand__end(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
-		tex_name = parameter[1]['text']
+	def _expand__end(self, parser: Parser, name: str, parameters: list[dict[str,Any]]) -> str:
+		tex_name = parameters[1]['text']
 		if tex_name == 'filecontents*':
 			self.__file_content_counter = self.__file_content_counter - 1
 			if self.__file_content_counter <= 0:
 				for key,  value in self.__embedded_files.items():
 					parser.put_back(value)
 				self.__embedded_files = dict()
+		elif tex_name == 'bibliographysection':
+			self._expand__putbib(parser, name, [{'text': 'biblio'}])
+			self.__in_bibunit = False
+			if not self.use_biblio:
+				return '\\bibliographyslide'
+		elif tex_name == 'bibunit':
+			self.__in_bibunit = False
+			if not self.use_biblio:
+				return ''
 		ret = name
-		if parameter[0]['text']:
-			ret += "[%s]" % parameter[0]['text']
+		if parameters[0]['text']:
+			ret += "[%s]" % parameters[0]['text']
 		ret += "{%s}" % tex_name
 		return ret
 
 	# noinspection PyPep8Naming
 	@expand_function(start_symbol=False)
-	def _expand__RequirePackage(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
-		return self._expand__usepackage(parser, name, parameter)
+	def _expand__RequirePackage(self, parser: Parser, name: str, parameters: list[dict[str,Any]]) -> str:
+		return self._expand__usepackage(parser, name, parameters)
 
 	# noinspection DuplicatedCode
 	@expand_function(start_symbol=False)
-	def _expand__usepackage(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
-		tex_name = parameter[1]['text']
+	def _expand__usepackage(self, parser: Parser, name: str, parameters: list[dict[str,Any]]) -> str:
+		tex_name = parameters[1]['text']
+		if tex_name == 'bibunits' and not self.use_biblio:
+			return ''
 		filename = self.__make_filename(tex_name, '.sty')
 		added_file = ''
 		if tex_name == 'biblatex':
@@ -437,8 +472,8 @@ class Flattener(Observer):
 					%%=======================================================
 					""") % (basename, basename, content)
 		ret = name
-		if parameter[0]['text']:
-			ret += "[%s]" % parameter[0]['text']
+		if parameters[0]['text']:
+			ret += "[%s]" % parameters[0]['text']
 		ret += "{%s}" % tex_name
 		if added_file:
 			if 	self.__file_content_counter <= 0:
@@ -452,48 +487,48 @@ class Flattener(Observer):
 
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol=False)
-	def _expand__documentclass(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
-		tex_name = parameter[1]['text']
+	def _expand__documentclass(self, parser: Parser, name: str, parameters: list[dict[str,Any]]) -> str:
+		tex_name = parameters[1]['text']
 		filename = self.__make_filename(tex_name, '.cls')
 		if self.__is_document_file(filename):
 			tex_name = self.__create_mapping(filename, '.cls')
 			self.__files_to_copy.add(filename)
 		ret = name
-		if parameter[0]['text']:
-			ret += "[%s]" % parameter[0]['text']
+		if parameters[0]['text']:
+			ret += "[%s]" % parameters[0]['text']
 		ret += "{%s}\n\n%%========= AUTOLATEX PREAMBLE\n\n" % tex_name
 		return ret
 
 	@expand_function(start_symbol=False)
-	def _expand__includeanimatedfigure(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
-		return self._expand__includegraphics(parser, name, parameter)
+	def _expand__includeanimatedfigure(self, parser: Parser, name: str, parameters: list[dict[str,Any]]) -> str:
+		return self._expand__includegraphics(parser, name, parameters)
 
 	@expand_function(start_symbol=False)
-	def _expand__includeanimatedfigurewtex(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
-		return self._expand__includegraphics(parser, name, parameter)
+	def _expand__includeanimatedfigurewtex(self, parser: Parser, name: str, parameters: list[dict[str,Any]]) -> str:
+		return self._expand__includegraphics(parser, name, parameters)
 
 	@expand_function(start_symbol=False)
-	def _expand__includefigurewtex(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
-		return self._expand__includegraphics(parser, name, parameter)
+	def _expand__includefigurewtex(self, parser: Parser, name: str, parameters: list[dict[str,Any]]) -> str:
+		return self._expand__includegraphics(parser, name, parameters)
 
 	@expand_function(start_symbol=False)
-	def _expand__includegraphicswtex(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
-		return self._expand__includegraphics(parser, name, parameter)
+	def _expand__includegraphicswtex(self, parser: Parser, name: str, parameters: list[dict[str,Any]]) -> str:
+		return self._expand__includegraphics(parser, name, parameters)
 
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol=False)
-	def _expand__includegraphics(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
-		tex_name, prefix = self.__find_picture(parameter[1]['text'])
+	def _expand__includegraphics(self, parser: Parser, name: str, parameters: list[dict[str,Any]]) -> str:
+		tex_name, prefix = self.__find_picture(parameters[1]['text'])
 		ret = prefix + name
-		if parameter[0]['text']:
-			ret += "[%s]" % parameter[0]['text']
+		if parameters[0]['text']:
+			ret += "[%s]" % parameters[0]['text']
 		ret += "{%s}" % tex_name
 		return ret
 
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol=False)
-	def _expand__graphicspath(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
-		t = parameter[1]['text']
+	def _expand__graphicspath(self, parser: Parser, name: str, parameters: list[dict[str,Any]]) -> str:
+		t = parameters[1]['text']
 		if t:
 			r = re.match(r'^\s*(?:\{([^}]+)}|([^,]+))\s*[,;]?\s*(.*)$', t)
 			while r:
@@ -506,59 +541,59 @@ class Flattener(Observer):
 		return "\\graphicspath{{./}}"
 
 	@expand_function(start_symbol=False)
-	def _expand__mfigurestar(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
-		return self._expand__mfigure(parser, name, parameter)
+	def _expand__mfigurestar(self, parser: Parser, name: str, parameters: list[dict[str,Any]]) -> str:
+		return self._expand__mfigure(parser, name, parameters)
 
 	@expand_function(start_symbol=False)
-	def _expand__mfiguretex(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
-		return self._expand__mfigure(parser, name, parameter)
+	def _expand__mfiguretex(self, parser: Parser, name: str, parameters: list[dict[str,Any]]) -> str:
+		return self._expand__mfigure(parser, name, parameters)
 
 	@expand_function(start_symbol=False)
-	def _expand__mfiguretexstar(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
-		return self._expand__mfigure(parser, name, parameter)
-
-	# noinspection PyUnusedLocal
-	@expand_function(start_symbol=False)
-	def _expand__mfigure(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
-		tex_name, prefix = self.__find_picture(parameter[2]['text'])
-		ret = prefix + name
-		if parameter[0]['text']:
-			ret += "[%s]" % parameter[0]['text']
-		ret += "{%s}{%s}{%s}{%s}" % (parameter[1]['text'], tex_name, parameter[3]['text'], parameter[4]['text'])
-		return ret
-
-	@expand_function(start_symbol=False)
-	def _expand__msubfigurestar(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
-		return self._expand__msubfigure(parser, name, parameter)
+	def _expand__mfiguretexstar(self, parser: Parser, name: str, parameters: list[dict[str,Any]]) -> str:
+		return self._expand__mfigure(parser, name, parameters)
 
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol=False)
-	def _expand__msubfigure(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
-		tex_name, prefix = self.__find_picture(parameter[2]['text'])
+	def _expand__mfigure(self, parser: Parser, name: str, parameters: list[dict[str,Any]]) -> str:
+		tex_name, prefix = self.__find_picture(parameters[2]['text'])
 		ret = prefix + name
-		if parameter[0]['text']:
-			ret += "[%s]" % parameter[0]['text']
-		ret += "{%s}{%s}{%s}" % (parameter[1]['text'], tex_name, parameter[3]['text'])
+		if parameters[0]['text']:
+			ret += "[%s]" % parameters[0]['text']
+		ret += "{%s}{%s}{%s}{%s}" % (parameters[1]['text'], tex_name, parameters[3]['text'], parameters[4]['text'])
+		return ret
+
+	@expand_function(start_symbol=False)
+	def _expand__msubfigurestar(self, parser: Parser, name: str, parameters: list[dict[str,Any]]) -> str:
+		return self._expand__msubfigure(parser, name, parameters)
+
+	# noinspection PyUnusedLocal
+	@expand_function(start_symbol=False)
+	def _expand__msubfigure(self, parser: Parser, name: str, parameters: list[dict[str,Any]]) -> str:
+		tex_name, prefix = self.__find_picture(parameters[2]['text'])
+		ret = prefix + name
+		if parameters[0]['text']:
+			ret += "[%s]" % parameters[0]['text']
+		ret += "{%s}{%s}{%s}" % (parameters[1]['text'], tex_name, parameters[3]['text'])
 		return ret
 
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol=False)
-	def _expand__pgfdeclareimage(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
-		tex_name, prefix = self.__find_picture(parameter[2]['text'])
+	def _expand__pgfdeclareimage(self, parser: Parser, name: str, parameters: list[dict[str,Any]]) -> str:
+		tex_name, prefix = self.__find_picture(parameters[2]['text'])
 		ret = prefix + name
-		if parameter[0]['text']:
-			ret += "[%s]" % parameter[0]['text']
-		ret += "{%s}{%s}" % (parameter[1]['text'], tex_name)
+		if parameters[0]['text']:
+			ret += "[%s]" % parameters[0]['text']
+		ret += "{%s}{%s}" % (parameters[1]['text'], tex_name)
 		return ret
 
 	@expand_function(start_symbol=False)
-	def _expand__include(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
-		return self._expand__input(parser, name, parameter)
+	def _expand__include(self, parser: Parser, name: str, parameters: list[dict[str,Any]]) -> str:
+		return self._expand__input(parser, name, parameters)
 
 	# noinspection PyUnusedLocal,DuplicatedCode
 	@expand_function(start_symbol=False)
-	def _expand__input(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
-		filename = self.__make_filename(parameter[0]['text'], '.tex')
+	def _expand__input(self, parser: Parser, name: str, parameters: list[dict[str,Any]]) -> str:
+		filename = self.__make_filename(parameters[0]['text'], '.tex')
 		with open(filename) as f:
 			subcontent = f.read()
 		subcontent += textwrap.dedent("""
@@ -576,9 +611,11 @@ class Flattener(Observer):
 
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol=True)
-	def _expand__bibliographystyle(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
+	def _expand__bibliographystyle(self, parser: Parser, name: str, parameters: list[dict[str,Any]]) -> str:
+		self.__explicit_bibliography_style = True
+		self.__explicit_bibliography_style = parameters[0]['text']
 		if self.use_biblio:
-			tex_name = parameter[0]['text']
+			tex_name = parameters[0]['text']
 			filename = self.__make_filename(tex_name, '.bst')
 			if self.__is_document_file(filename):
 				tex_name = self.__create_mapping(filename, '.bst')
@@ -586,50 +623,155 @@ class Flattener(Observer):
 			return "%s{%s}" % (name, tex_name)
 		return ''
 
-	# noinspection PyUnusedLocal
-	@expand_function(start_symbol=True)
-	def _expand__bibliography(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
+	# noinspection PyUnusedLocal,DuplicatedCode
+	@expand_function(start_symbol=False)
+	def _expand__defaultbibliographystyle(self, parser: Parser, name: str, parameters: list[dict[str, Any]]) -> str:
+		self.__default_bibliography_style = parameters[0]['text']
 		if self.use_biblio:
-			tex_name = parameter[0]['text']
-			filename = self.__make_filename(tex_name, '.bib')
+			tex_name = parameters[0]['text']
+			filename = self.__make_filename(tex_name, '.bst')
+			if self.__is_document_file(filename):
+				tex_name = self.__create_mapping(filename, '.bst')
+				self.__files_to_copy.add(filename)
+			return "%s{%s}" % (name, tex_name)
+		return ''
+
+	# noinspection DuplicatedCode
+	def __flatten_biblio_file(self, macro_name : str, files : list[str], add_parameter : int = 1) -> str:
+		"""
+		Do the bibliography output by considering that the biblio is stored in a local bib file.
+		:param macro_name: The name of the TeX macro that should be used for including the bibliography.
+		:type macro_name: str
+		:param files: A list of bibliography file to use for rendering the bibliography.
+		:type files: list[str]
+		:param add_parameters: Indicates if the files are added as parameter of the macro. 0 means no parameter.
+		1 means one regular parameter. 2 means optional parameter. Default is 1.
+		:type add_parameters: int
+		:return: the text to be put back in the flattened version of the document.
+		:rtype: str
+		"""
+		assert self.use_biblio
+		new_tex_names = list()
+		for file in files:
+			filename = self.__make_filename(file, '.bib')
 			if self.__is_document_file(filename):
 				tex_name = self.__create_mapping(filename, '.bib')
 				self.__files_to_copy.add(filename)
-			return "%s{%s}" % (name, tex_name)
+				new_tex_names.append(tex_name)
+			else:
+				logging.warning(T('File not found in document folder: %s'), filename)
+				new_tex_names.append(file)
+		if add_parameter == 1:
+			return "%s{%s}" % (macro_name, ','.join(new_tex_names))
+		elif add_parameter == 2:
+			return "%s[%s]" % (macro_name, ','.join(new_tex_names))
 		else:
-			if len(name) > 13:
-				bibdb = name[13:]
+			return macro_name
+
+	def __flatten_embedded_format(self) -> str:
+		"""
+		Do the bibliography output by output the BBL content in the TeX file.
+		:return: the text to be put back in the flattened version of the document.
+		:rtype: str
+		"""
+		assert not self.use_biblio
+		if self.__in_bibunit:
+			bbl_name = self.basename + '.' + str(self.__bibunits_aux_index)
+		else:
+			bbl_name = self.basename
+		bbl_file = self.__make_filename(bbl_name, '.bbl')
+		if os.path.isfile(bbl_file):
+			with open(bbl_file) as f:
+				content = f.read()
+			return textwrap.dedent("""
+					%%=======================================================
+					%%== BEGIN FILE: %s
+					%%=======================================================
+					%s
+					%%=======================================================
+					""") % (os.path.basename(bbl_file), content)
+		else:
+			logging.error(T('File not found: %s'), bbl_file)
+			return ''
+
+	# noinspection PyUnusedLocal,DuplicatedCode
+	@expand_function(start_symbol=True)
+	def _expand__bibliography(self, parser: Parser, name: str, parameters: list[dict[str,Any]]) -> str:
+		if len(parameters) > 0 and parameters[0] and 'text' in parameters[0] and parameters[0]['text']:
+			files = re.split(r'\s*,\s*', parameters[0]['text'])
+			self.__explicit_bibliography = True
+			self.__explicit_bibliography_files = files
+			if self.use_biblio:
+				return self.__flatten_biblio_file(name, files)
 			else:
-				bibdb = self.basename
-			bbl_file = bibdb + ".bbl"
-			if not os.path.isabs(bbl_file):
-				bbl_file = os.path.join(self.dirname, bbl_file)
-			if os.path.isfile(bbl_file):
-				with open(bbl_file) as f:
-					content = f.read()
-				return textwrap.dedent("""
-						%%=======================================================
-						%%== BEGIN FILE: %s
-						%%=======================================================
-						%s
-						%%=======================================================
-						""") % (os.path.basename(bbl_file), content)
-			else:
-				logging.error(T('File not found: %s'), bbl_file)
-				return "%s{%s}" % (name, parameter[0]['text'])
+				ret = self.__flatten_embedded_format()
+				if ret:
+					return ret
+				return "%s{%s}" % (name, ','.join(files))
+		return '%s{}' % name
 
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol=False)
-	def _expand__addbibresource(self, parser: Parser, name: str, parameter: list[dict[str, Any]]) -> str:
-		if self.use_biblio:
-			tex_name = parameter[1]['text']
-			filename = self.__make_filename(tex_name, '.bib')
-			if self.__is_document_file(filename):
-				tex_name = self.__create_mapping(filename, '.bib')
-				self.__files_to_copy.add(filename)
-			return "%s{%s}" % (name, tex_name)
+	def _expand__addbibresource(self, parser: Parser, name: str, parameters: list[dict[str, Any]]) -> str:
+		if len(parameters) > 1 and parameters[1] and 'text' in parameters[1] and parameters[1]['text']:
+			self.__explicit_bibliography = True
+			files = re.split(r'\s*,\s*', parameters[1]['text'])
+			self.__explicit_bibliography_files = files
+			if self.use_biblio:
+				return self.__flatten_biblio_file(name, files)
+		return ''
+
+	# noinspection PyUnusedLocal
+	@expand_function(start_symbol=False)
+	def _expand__printbibliography(self, parser: Parser, name: str, parameters: list[dict[str, Any]]) -> str:
+		if self.__explicit_bibliography:
+			if self.__explicit_bibliography_files:
+				if self.use_biblio:
+					return name
+				else:
+					return self.__flatten_embedded_format()
 		else:
-			return ''
+			if self.__default_bibliography:
+				if self.use_biblio:
+					return self.__flatten_biblio_file(name, self.__default_bibliography, add_parameter=0)
+				else:
+					return self.__flatten_embedded_format()
+		logging.error(T('No bibliography source provided'))
+		return ''
+
+	# noinspection DuplicatedCode,PyUnusedLocal
+	@expand_function(start_symbol=False)
+	def _expand__putbib(self, parser: Parser, name: str, parameters: list[dict[str, Any]]) -> str:
+		if len(parameters) > 0 and parameters[0] and 'text' in parameters[0] and parameters[0]['text']:
+			files = re.split(r'\s*,\s*', parameters[0]['text'])
+		elif self.__explicit_bibliography:
+			files = self.__explicit_bibliography_files
+		else:
+			files = self.__default_bibliography
+		if files:
+			if self.use_biblio:
+				return self.__flatten_biblio_file(name, files, add_parameter=2)
+		elif self.use_biblio:
+			return self.__flatten_biblio_file(name, [self.basename], add_parameter=2)
+		return self.__flatten_embedded_format()
+
+	# noinspection PyUnusedLocal
+	@expand_function(start_symbol=False)
+	def _expand__bibliographyslide(self, parser: Parser, name: str, parameters: list[dict[str, Any]]) -> str:
+		self._expand__putbib(parser, name, [{ 'text': 'biblio'}])
+		return name
+
+	# noinspection PyUnusedLocal,DuplicatedCode
+	@expand_function(start_symbol=False)
+	def _expand__defaultbibliography(self, parser: Parser, name: str, parameters: list[dict[str, Any]]) -> str:
+		if len(parameters) > 0 and parameters[0] and 'text' in parameters[0] and parameters[0]['text']:
+			lst = list()
+			for param in re.split(r'\s*,\s*', parameters[0]['text']):
+				bib_name = self.__make_filename(param, '.bib')
+				if self.__is_document_file(bib_name):
+					lst.append(bib_name)
+			self.__default_bibliography = lst if lst else None
+		return ''
 
 
 	def __make_filename(self, basename : str, *ext : str) -> str:

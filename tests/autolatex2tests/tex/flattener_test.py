@@ -64,26 +64,37 @@ class TestFlattener(AbstractBaseTest):
 	def flattener(self):
 		return self.__flattener
 
+	# noinspection PyMethodMayBeStatic
+	def __normalize(self, text : str) -> str:
+		content = list()
+		for line in text.split('\n'):
+			line = line.strip()
+			if line:
+				line = re.sub(r'\t+', ' ', line).strip()
+			if line:
+				content.append(line)
+		return '\n'.join(content).strip()
+
 	def assertFlat(self, input_file : str, use_biblio : bool = False):
 		with self._create_temp_directory(delete=True) as directory:
 			self.__tmpFolderName = directory
-			for k, v in self.__inputs.items():
+			for k, expected in self.__inputs.items():
 				odir = os.path.dirname(os.path.join(directory, k))
 				if not os.path.isdir(odir):
 					os.makedirs(odir)
 				with open(os.path.join(directory, k), 'w') as document:
-					document.write(v)
+					document.write(expected)
 					document.flush()
 			output = os.path.join(directory, 'output')
 			self.__flattener = flattener.Flattener(os.path.join(directory, input_file), output)
 			self.__flattener.use_biblio = use_biblio
 			self.__flattener.run()
-			for k, v in self.__outputs.items():
-				v = re.sub("\n[ \t]*", "\n", v, re.S)
-				v = v.replace('\t+', ' ').strip()
+			for k, expected in self.__outputs.items():
+				expected = self.__normalize(expected)
 				with open(os.path.join(output, k)) as out:
-					content = out.read()
-				self.assertEqual(v, content)
+					actual = out.read()
+				actual = self.__normalize(actual)
+				self.assertEqual(expected, actual)
 			for dirname, dirnames, filenames in os.walk(output):
 				for f in filenames:
 					self.assertIn(f, self.__outputs)
@@ -490,7 +501,6 @@ class TestFlattener(AbstractBaseTest):
 			\documentclass{myclass}
 			\usepackage{filecontents}
 			\begin{document}
-			
 			%=======================================================
 			%== BEGIN FILE: figure.pdf_tex
 			%=======================================================
@@ -536,7 +546,6 @@ class TestFlattener(AbstractBaseTest):
 			\documentclass{myclass}
 			\usepackage{filecontents}
 			\begin{document}
-			
 			%=======================================================
 			%== BEGIN FILE: figure.pdf_tex
 			%=======================================================
@@ -586,7 +595,6 @@ class TestFlattener(AbstractBaseTest):
 			\usepackage{filecontents}
 			\graphicspath{{./}}
 			\begin{document}
-			
 			%=======================================================
 			%== BEGIN FILE: figure.pdf_tex
 			%=======================================================
@@ -648,7 +656,6 @@ class TestFlattener(AbstractBaseTest):
 			\documentclass{myclass}
 			\usepackage{filecontents}
 			\begin{document}
-			
 			%=======================================================
 			%== BEGIN FILE: figure.pdf_tex
 			%=======================================================
@@ -694,7 +701,6 @@ class TestFlattener(AbstractBaseTest):
 			\documentclass{myclass}
 			\usepackage{filecontents}
 			\begin{document}
-			
 			%=======================================================
 			%== BEGIN FILE: figure.pdf_tex
 			%=======================================================
@@ -744,7 +750,6 @@ class TestFlattener(AbstractBaseTest):
 			\usepackage{filecontents}
 			\graphicspath{{./}}
 			\begin{document}
-			
 			%=======================================================
 			%== BEGIN FILE: figure.pdf_tex
 			%=======================================================
@@ -807,7 +812,6 @@ class TestFlattener(AbstractBaseTest):
 			\documentclass{myclass}
 			\usepackage{filecontents}
 			\begin{document}
-			
 			%=======================================================
 			%== BEGIN FILE: figure.pdf_tex
 			%=======================================================
@@ -853,7 +857,6 @@ class TestFlattener(AbstractBaseTest):
 			\documentclass{myclass}
 			\usepackage{filecontents}
 			\begin{document}
-			
 			%=======================================================
 			%== BEGIN FILE: figure.pdf_tex
 			%=======================================================
@@ -903,7 +906,6 @@ class TestFlattener(AbstractBaseTest):
 			\usepackage{filecontents}
 			\graphicspath{{./}}
 			\begin{document}
-			
 			%=======================================================
 			%== BEGIN FILE: figure.pdf_tex
 			%=======================================================
@@ -966,7 +968,6 @@ class TestFlattener(AbstractBaseTest):
 			\documentclass{myclass}
 			\usepackage{filecontents}
 			\begin{document}
-			
 			%=======================================================
 			%== BEGIN FILE: figure.pdf_tex
 			%=======================================================
@@ -1012,7 +1013,6 @@ class TestFlattener(AbstractBaseTest):
 			\documentclass{myclass}
 			\usepackage{filecontents}
 			\begin{document}
-			
 			%=======================================================
 			%== BEGIN FILE: figure.pdf_tex
 			%=======================================================
@@ -1062,7 +1062,6 @@ class TestFlattener(AbstractBaseTest):
 			\usepackage{filecontents}
 			\graphicspath{{./}}
 			\begin{document}
-			
 			%=======================================================
 			%== BEGIN FILE: figure.pdf_tex
 			%=======================================================
@@ -1593,12 +1592,6 @@ class TestFlattener(AbstractBaseTest):
 		self.assertFlat('doc.tex')
 
 
-#		'mfiguretex*'				: '![]!{}!{}!{}!{}',
-#		'addbibresource'			: '![]!{}',
-#		'bibliographystyle'			: '![]!{}',
-#		'bibliographystyleXXX'		: '![]!{}',
-#		'bibliography'				: '![]!{}',
-#		'bibliographyXXX'			: '![]!{}',
 
 	def test_mfiguretex_standard(self):
 		self.inputs = { 'doc.tex' : r'''
@@ -1647,7 +1640,6 @@ class TestFlattener(AbstractBaseTest):
 			\documentclass{myclass}
 			\usepackage{filecontents}
 			\begin{document}
-			
 			%=======================================================
 			%== BEGIN FILE: figure.pdf_tex
 			%=======================================================
@@ -1693,7 +1685,6 @@ class TestFlattener(AbstractBaseTest):
 			\documentclass{myclass}
 			\usepackage{filecontents}
 			\begin{document}
-			
 			%=======================================================
 			%== BEGIN FILE: figure.pdf_tex
 			%=======================================================
@@ -1796,7 +1787,6 @@ class TestFlattener(AbstractBaseTest):
 			\documentclass{myclass}
 			\usepackage{filecontents}
 			\begin{document}
-			
 			%=======================================================
 			%== BEGIN FILE: figure.pdf_tex
 			%=======================================================
@@ -1842,7 +1832,6 @@ class TestFlattener(AbstractBaseTest):
 			\documentclass{myclass}
 			\usepackage{filecontents}
 			\begin{document}
-			
 			%=======================================================
 			%== BEGIN FILE: figure.pdf_tex
 			%=======================================================
@@ -1898,7 +1887,7 @@ class TestFlattener(AbstractBaseTest):
 
 
 
-	def test_addbibresource_standard_nobib(self):
+	def test_addbibresource_onebase_noFile_nousebib(self):
 		self.inputs = { 'doc.tex' : r'''
 			\documentclass{article}
 			\begin{document}
@@ -1908,183 +1897,498 @@ class TestFlattener(AbstractBaseTest):
 		self.outputs = { 'doc.tex' : r'''
 			\documentclass{article}
 			\begin{document}
-
 			\end{document}
 			''' }
 		self.assertFlat('doc.tex')
 		self.assertFalse(self.flattener.use_biblio)
 
-
-
-	def test_addbibresource_local_noFile_nobib(self):
-		self.inputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
-			\begin{document}
-			\addbibresource{mybiblio}
-			\end{document}
-			''' }
-		self.outputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
-			\begin{document}
-
-			\end{document}
-			''' }
-		self.assertFlat('doc.tex')
-		self.assertFalse(self.flattener.use_biblio)
-
-
-
-	def test_addbibresource_local_file_nobib(self):
-		self.inputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
-			\begin{document}
-			\addbibresource{mybiblio}
-			\end{document}
-			''',
-			'mybiblio.bib' : r'''MYBIBLIO''' }
-		self.outputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
-			\begin{document}
-
-			\end{document}
-			''' }
-		self.assertFlat('doc.tex')
-		self.assertFalse(self.flattener.use_biblio)
-
-
-
-	def test_addbibresource_localsub1_noFile_nobib(self):
-		self.inputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
-			\begin{document}
-			\addbibresource{./biblio/mybiblio}
-			\end{document}
-			''' }
-		self.outputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
-			\begin{document}
-
-			\end{document}
-			''' }
-		self.assertFlat('doc.tex')
-		self.assertFalse(self.flattener.use_biblio)
-
-
-
-	def test_addbibresource_localsub1_file_nobib(self):
-		self.inputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
-			\begin{document}
-			\addbibresource{./biblio/mybiblio}
-			\end{document}
-			''',
-			'./biblio/mybiblio.bib' : r'''MYBIBLIO''' }
-		self.outputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
-			\begin{document}
-
-			\end{document}
-			''' }
-		self.assertFlat('doc.tex')
-		self.assertFalse(self.flattener.use_biblio)
-
-
-
-	def test_addbibresource_standard_bib(self):
+	def test_addbibresource_onebase_file_nousebib(self):
 		self.inputs = { 'doc.tex' : r'''
 			\documentclass{article}
 			\begin{document}
 			\addbibresource{mybiblio}
 			\end{document}
+			''',
+			'mybiblio.bib': 'BIBLIO'}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\begin{document}
+			\end{document}
+			''' }
+		self.assertFlat('doc.tex')
+		self.assertFalse(self.flattener.use_biblio)
+
+	def test_addbibresource_twobases_noFile_nousebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\begin{document}
+			\addbibresource{mybiblio,mybiblio2}
+			\end{document}
 			''' }
 		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\begin{document}
+			\end{document}
+			''' }
+		self.assertFlat('doc.tex')
+		self.assertFalse(self.flattener.use_biblio)
+
+	def test_addbibresource_twobases_file_nousebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\begin{document}
+			\addbibresource{mybiblio,mybiblio2}
+			\end{document}
+			''',
+			'mybiblio.bib': 'BIBLIO',
+			'mybiblio2.bib': 'BIBLIO2'}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\begin{document}
+			\end{document}
+			''' }
+		self.assertFlat('doc.tex')
+		self.assertFalse(self.flattener.use_biblio)
+
+	def test_addbibresource_twobases_sublocalfile_nousebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\begin{document}
+			\addbibresource{subfolder/mybiblio}
+			\end{document}
+			''',
+			'subfolder/mybiblio.bib': 'BIBLIO',
+			'mybiblio2.bib': 'BIBLIO2'}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\begin{document}
+			\end{document}
+			''' }
+		self.assertFlat('doc.tex')
+		self.assertFalse(self.flattener.use_biblio)
+
+	def test_addbibresource_onebase_noFile_usebib(self):
+		self.inputs = {'doc.tex': r'''
 			\documentclass{article}
 			\begin{document}
 			\addbibresource{mybiblio}
 			\end{document}
-			''' }
-		self.assertFlat('doc.tex', True)
-		self.assertTrue(self.flattener.use_biblio)
-
-
-
-	def test_addbibresource_local_noFile_bib(self):
-		self.inputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
+			'''}
+		self.outputs = {'doc.tex': r'''
+			\documentclass{article}
 			\begin{document}
 			\addbibresource{mybiblio}
 			\end{document}
-			''' }
-		self.outputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
-			\begin{document}
-			\addbibresource{mybiblio}
-			\end{document}
-			''' }
-		self.assertFlat('doc.tex', True)
+			'''}
+		self.assertFlat('doc.tex', use_biblio=True)
 		self.assertTrue(self.flattener.use_biblio)
 
-
-
-	def test_addbibresource_local_file_bib(self):
-		self.inputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
+	def test_addbibresource_onebase_file_usebib(self):
+		self.inputs = {'doc.tex': r'''
+			\documentclass{article}
 			\begin{document}
 			\addbibresource{mybiblio}
 			\end{document}
 			''',
-			'mybiblio.bib' : r'''MYBIBLIO''' }
-		self.outputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
+			'mybiblio.bib': 'BIBLIO'}
+		self.outputs = {'doc.tex': r'''
+			\documentclass{article}
 			\begin{document}
 			\addbibresource{mybiblio}
 			\end{document}
 			''',
-			'mybiblio.bib' : r'''MYBIBLIO''' }
-		self.assertFlat('doc.tex', True)
+			'mybiblio.bib': 'BIBLIO'}
+		self.assertFlat('doc.tex', use_biblio=True)
 		self.assertTrue(self.flattener.use_biblio)
 
-
-
-	def test_addbibresource_localsub1_noFile_bib(self):
-		self.inputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
+	def test_addbibresource_onebase_localsubfile_usebib(self):
+		self.inputs = {'doc.tex': r'''
+			\documentclass{article}
 			\begin{document}
-			\addbibresource{./biblio/mybiblio}
-			\end{document}
-			''' }
-		self.outputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
-			\begin{document}
-			\addbibresource{./biblio/mybiblio}
-			\end{document}
-			''' }
-		self.assertFlat('doc.tex', True)
-		self.assertTrue(self.flattener.use_biblio)
-
-
-
-	def test_addbibresource_localsub1_file_bib(self):
-		self.inputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
-			\begin{document}
-			\addbibresource{./biblio/mybiblio}
+			\addbibresource{myfolder/mybiblio}
 			\end{document}
 			''',
-			'./biblio/mybiblio.bib' : r'''MYBIBLIO''' }
-		self.outputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
+			'myfolder/mybiblio.bib': 'BIBLIO'}
+		self.outputs = {'doc.tex': r'''
+			\documentclass{article}
 			\begin{document}
 			\addbibresource{mybiblio}
 			\end{document}
 			''',
-			'mybiblio.bib' : r'''MYBIBLIO''' }
-		self.assertFlat('doc.tex', True)
+			'mybiblio.bib': 'BIBLIO'}
+		self.assertFlat('doc.tex', use_biblio=True)
+		self.assertTrue(self.flattener.use_biblio)
+
+	def test_addbibresource_twobases_noFile_usebib(self):
+		self.inputs = {'doc.tex': r'''
+			\documentclass{article}
+			\begin{document}
+			\addbibresource{mybiblio,mybiblio2}
+			\end{document}
+			'''}
+		self.outputs = {'doc.tex': r'''
+			\documentclass{article}
+			\begin{document}
+			\addbibresource{mybiblio,mybiblio2}
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex', use_biblio=True)
+		self.assertTrue(self.flattener.use_biblio)
+
+	def test_addbibresource_twobases_file_usebib(self):
+		self.inputs = {'doc.tex': r'''
+			\documentclass{article}
+			\begin{document}
+			\addbibresource{mybiblio,mybiblio2}
+			\end{document}
+			''',
+		   'mybiblio.bib': 'BIBLIO',
+		   'mybiblio2.bib': 'BIBLIO2'}
+		self.outputs = {'doc.tex': r'''
+			\documentclass{article}
+			\begin{document}
+			\addbibresource{mybiblio,mybiblio2}
+			\end{document}
+			''',
+			'mybiblio.bib': 'BIBLIO',
+			'mybiblio2.bib': 'BIBLIO2'}
+		self.assertFlat('doc.tex', use_biblio=True)
+		self.assertTrue(self.flattener.use_biblio)
+
+
+	def test_printbibliography_onebase_noFile_nousebib(self):
+		self.inputs = {'doc.tex': r'''
+			\documentclass{article}
+			\addbibresource{mybiblio}
+			\begin{document}
+			\printbibliography
+			\end{document}
+			'''}
+		self.outputs = {'doc.tex': r'''
+			\documentclass{article}
+			\begin{document}
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex')
+		self.assertFalse(self.flattener.use_biblio)
+
+	def test_printbibliography_onebase_file_nousebib(self):
+		self.inputs = {'doc.tex': r'''
+			\documentclass{article}
+			\addbibresource{mybiblio}
+			\begin{document}
+			\printbibliography
+			\end{document}
+			''',
+			'mybiblio.bib': 'BIBLIO',
+			'doc.bbl': 'BIBLIO ENTRIES'}
+		self.outputs = {'doc.tex': r'''
+			\documentclass{article}
+			\begin{document}
+			%=======================================================
+			%== BEGIN FILE: doc.bbl
+			%=======================================================
+			BIBLIO ENTRIES
+			%=======================================================
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex')
+		self.assertFalse(self.flattener.use_biblio)
+
+	def test_printbibliography_twobases_noFile_nousebib(self):
+		self.inputs = {'doc.tex': r'''
+			\documentclass{article}
+			\addbibresource{mybiblio,mybiblio2}
+			\begin{document}
+			\printbibliography
+			\end{document}
+			'''}
+		self.outputs = {'doc.tex': r'''
+			\documentclass{article}
+			\begin{document}
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex')
+		self.assertFalse(self.flattener.use_biblio)
+
+	def test_printbibliography_twobases_file_nousebib(self):
+		self.inputs = {'doc.tex': r'''
+			\documentclass{article}
+			\addbibresource{mybiblio,mybiblio2}
+			\begin{document}
+			\printbibliography
+			\end{document}
+			''',
+			'mybiblio.bib': 'BIBLIO',
+			'mybiblio2.bib': 'BIBLIO2',
+			'doc.bbl': 'BIBLIO ENTRIES'}
+		self.outputs = {'doc.tex': r'''
+			\documentclass{article}
+			\begin{document}
+			%=======================================================
+			%== BEGIN FILE: doc.bbl
+			%=======================================================
+			BIBLIO ENTRIES
+			%=======================================================
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex')
+		self.assertFalse(self.flattener.use_biblio)
+
+	def test_printbibliography_onebase_noFile_usebib(self):
+		self.inputs = {'doc.tex': r'''
+			\documentclass{article}
+			\addbibresource{mybiblio}
+			\begin{document}
+			\printbibliography
+			\end{document}
+			'''}
+		self.outputs = {'doc.tex': r'''
+			\documentclass{article}
+			\addbibresource{mybiblio}
+			\begin{document}
+			\printbibliography
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex', use_biblio=True)
+		self.assertTrue(self.flattener.use_biblio)
+
+	def test_printbibliography_onebase_file_usebib(self):
+		self.inputs = {'doc.tex': r'''
+			\documentclass{article}
+			\addbibresource{mybiblio}
+			\begin{document}
+			\printbibliography
+			\end{document}
+			''',
+			'mybiblio.bib': 'BIBLIO',
+			'doc.bbl': 'BIBLIO ENTRIES'}
+		self.outputs = {'doc.tex': r'''
+			\documentclass{article}
+			\addbibresource{mybiblio}
+			\begin{document}
+			\printbibliography
+			\end{document}
+			''',
+			'mybiblio.bib': 'BIBLIO'}
+		self.assertFlat('doc.tex', use_biblio=True)
+		self.assertTrue(self.flattener.use_biblio)
+
+	def test_printbibliography_twobases_noFile_usebib(self):
+		self.inputs = {'doc.tex': r'''
+			\documentclass{article}
+			\addbibresource{mybiblio,mybiblio2}
+			\begin{document}
+			\printbibliography
+			\end{document}
+			'''}
+		self.outputs = {'doc.tex': r'''
+			\documentclass{article}
+			\addbibresource{mybiblio,mybiblio2}
+			\begin{document}
+			\printbibliography
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex', use_biblio=True)
+		self.assertTrue(self.flattener.use_biblio)
+
+	def test_printbibliography_twobases_file_usebib(self):
+		self.inputs = {'doc.tex': r'''
+			\documentclass{article}
+			\addbibresource{mybiblio,mybiblio2}
+			\begin{document}
+			\printbibliography
+			\end{document}
+			''',
+			'mybiblio.bib': 'BIBLIO',
+			'mybiblio2.bib': 'BIBLIO2',
+			'doc.bbl': 'BIBLIO ENTRIES'}
+		self.outputs = {'doc.tex': r'''
+			\documentclass{article}
+			\addbibresource{mybiblio,mybiblio2}
+			\begin{document}
+			\printbibliography
+			\end{document}
+			''',
+			'mybiblio.bib': 'BIBLIO',
+			'mybiblio2.bib': 'BIBLIO2'}
+		self.assertFlat('doc.tex', use_biblio=True)
 		self.assertTrue(self.flattener.use_biblio)
 
 
 
-	def test_bibliography_standard_nobib(self):
+	def test_bibunit_nobase_noFile_nousebib(self):
+		self.inputs = {'doc.tex': r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\begin{document}
+			\begin{bibunit}
+			\putbib
+			\end{bibunit}
+			\end{document}
+			'''}
+		self.outputs = {'doc.tex': r'''
+			\documentclass{article}
+			\begin{document}
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex')
+		self.assertFalse(self.flattener.use_biblio)
+
+	def test_bibunit_nobase_file_nousebib(self):
+		self.inputs = {'doc.tex': r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\begin{document}
+			\begin{bibunit}
+			\putbib
+			\end{bibunit}
+			\end{document}
+			''',
+			'doc.bib': 'BIBLIO',
+			'doc.bbl': 'GENERAL BIBLIO ENTRIES',
+			'doc.1.bbl': 'SPECIFIC BIBLIO ENTRIES'}
+		self.outputs = {'doc.tex': r'''
+			\documentclass{article}
+			\begin{document}
+			%=======================================================
+			%== BEGIN FILE: doc.1.bbl
+			%=======================================================
+			SPECIFIC BIBLIO ENTRIES
+			%=======================================================
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex')
+		self.assertFalse(self.flattener.use_biblio)
+
+	def test_bibunit_onebase_noFile_nousebib(self):
+		self.inputs = {'doc.tex': r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\begin{document}
+			\begin{bibunit}
+			\putbib[mybiblio]
+			\end{bibunit}
+			\end{document}
+			'''}
+		self.outputs = {'doc.tex': r'''
+			\documentclass{article}
+			\begin{document}
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex')
+		self.assertFalse(self.flattener.use_biblio)
+
+	def test_bibunit_onebase_file_nousebib(self):
+		self.inputs = {'doc.tex': r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\begin{document}
+			\begin{bibunit}
+			\putbib[mybiblio]
+			\end{bibunit}
+			\end{document}
+			''',
+			'mybiblio.bib': 'BIBLIO',
+			'doc.bbl': 'GENERAL BIBLIO ENTRIES',
+			'doc.1.bbl': 'SPECIFIC BIBLIO ENTRIES'}
+		self.outputs = {'doc.tex': r'''
+			\documentclass{article}
+			\begin{document}
+			%=======================================================
+			%== BEGIN FILE: doc.1.bbl
+			%=======================================================
+			SPECIFIC BIBLIO ENTRIES
+			%=======================================================
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex')
+		self.assertFalse(self.flattener.use_biblio)
+
+	def test_bibunit_twobases_noFile_nousebib(self):
+		self.inputs = {'doc.tex': r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\begin{document}
+			\begin{bibunit}
+			\putbib[mybiblio,mybiblio2]
+			\end{bibunit}
+			\end{document}
+			'''}
+		self.outputs = {'doc.tex': r'''
+			\documentclass{article}
+			\begin{document}
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex')
+		self.assertFalse(self.flattener.use_biblio)
+
+	def test_bibunit_twobases_file_nousebib(self):
+		self.inputs = {'doc.tex': r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\begin{document}
+			\begin{bibunit}
+			\putbib[mybiblio,mybiblio2]
+			\end{bibunit}
+			\end{document}
+			''',
+			'mybiblio.bib': 'BIBLIO',
+			'mybiblio2.bib': 'BIBLIO2',
+			'doc.bbl': 'GENERAL BIBLIO ENTRIES',
+			'doc.1.bbl': 'SPECIFIC BIBLIO ENTRIES'}
+		self.outputs = {'doc.tex': r'''
+			\documentclass{article}
+			\begin{document}
+			%=======================================================
+			%== BEGIN FILE: doc.1.bbl
+			%=======================================================
+			SPECIFIC BIBLIO ENTRIES
+			%=======================================================
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex')
+		self.assertFalse(self.flattener.use_biblio)
+
+	def test_bibunit_twounits_nousebib(self):
+		self.inputs = {'doc.tex': r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\begin{document}
+			\begin{bibunit}
+			\putbib[mybiblio]
+			\end{bibunit}
+			\begin{bibunit}
+			\putbib[mybiblio2]
+			\end{bibunit}
+			\end{document}
+			''',
+			'mybiblio.bib': 'BIBLIO',
+			'mybiblio2.bib': 'BIBLIO2',
+			'doc.bbl': 'GENERAL BIBLIO ENTRIES',
+			'doc.1.bbl': 'SPECIFIC BIBLIO ENTRIES',
+			'doc.2.bbl': 'OTHER BIBLIO ENTRIES'}
+		self.outputs = {'doc.tex': r'''
+			\documentclass{article}
+			\begin{document}
+			%=======================================================
+			%== BEGIN FILE: doc.1.bbl
+			%=======================================================
+			SPECIFIC BIBLIO ENTRIES
+			%=======================================================
+			%=======================================================
+			%== BEGIN FILE: doc.2.bbl
+			%=======================================================
+			OTHER BIBLIO ENTRIES
+			%=======================================================
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex')
+		self.assertFalse(self.flattener.use_biblio)
+
+
+
+	def test_bibliography_nobibfile_nousebib(self):
 		self.inputs = { 'doc.tex' : r'''
 			\documentclass{article}
 			\begin{document}
@@ -2100,36 +2404,16 @@ class TestFlattener(AbstractBaseTest):
 		self.assertFlat('doc.tex')
 		self.assertFalse(self.flattener.use_biblio)
 
-
-
-	def test_bibliography_local_noFile_nobib(self):
+	def test_bibliography_nobblfile_nousebib(self):
 		self.inputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
-			\begin{document}
-			\bibliography{mybiblio}
-			\end{document}
-			''' }
-		self.outputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
-			\begin{document}
-			\bibliography{mybiblio}
-			\end{document}
-			''' }
-		self.assertFlat('doc.tex')
-		self.assertFalse(self.flattener.use_biblio)
-
-
-
-	def test_bibliography_local_file_nobib(self):
-		self.inputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
+			\documentclass{article}
 			\begin{document}
 			\bibliography{mybiblio}
 			\end{document}
 			''',
-			'mybiblio.bbl' : r'''MYBIBLIO''' }
+			'mybiblio.bib': 'BIBLIO'}
 		self.outputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
+			\documentclass{article}
 			\begin{document}
 			\bibliography{mybiblio}
 			\end{document}
@@ -2137,46 +2421,51 @@ class TestFlattener(AbstractBaseTest):
 		self.assertFlat('doc.tex')
 		self.assertFalse(self.flattener.use_biblio)
 
-
-
-	def test_bibliography_localsub1_noFile_nobib(self):
+	def test_bibliography_file_nousebib(self):
 		self.inputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
+			\documentclass{article}
 			\begin{document}
-			\bibliography{./biblio/mybiblio}
-			\end{document}
-			''' }
-		self.outputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
-			\begin{document}
-			\bibliography{./biblio/mybiblio}
-			\end{document}
-			''' }
-		self.assertFlat('doc.tex')
-		self.assertFalse(self.flattener.use_biblio)
-
-
-
-	def test_bibliography_localsub1_file_nobib(self):
-		self.inputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
-			\begin{document}
-			\bibliography{./biblio/mybiblio}
+			\bibliography{mybiblio}
 			\end{document}
 			''',
-			'./biblio/mybiblio.bbl' : r'''MYBIBLIO''' }
+			'mybiblio.bib': 'BIBLIO',
+			'doc.bbl': 'BIBLIO ENTRIES'}
 		self.outputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
+			\documentclass{article}
 			\begin{document}
-			\bibliography{./biblio/mybiblio}
+			%=======================================================
+			%== BEGIN FILE: doc.bbl
+			%=======================================================
+			BIBLIO ENTRIES
+			%=======================================================
 			\end{document}
 			''' }
 		self.assertFlat('doc.tex')
 		self.assertFalse(self.flattener.use_biblio)
 
+	def test_bibliography_subfile_nousebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\begin{document}
+			\bibliography{mysubfolder/mybiblio}
+			\end{document}
+			''',
+			'mysubfolder/mybiblio.bib': 'BIBLIO',
+			'doc.bbl': 'BIBLIO ENTRIES'}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\begin{document}
+			%=======================================================
+			%== BEGIN FILE: doc.bbl
+			%=======================================================
+			BIBLIO ENTRIES
+			%=======================================================
+			\end{document}
+			''' }
+		self.assertFlat('doc.tex')
+		self.assertFalse(self.flattener.use_biblio)
 
-
-	def test_bibliography_standard_bib(self):
+	def test_bibliography_nobibfile_usebib(self):
 		self.inputs = { 'doc.tex' : r'''
 			\documentclass{article}
 			\begin{document}
@@ -2189,88 +2478,68 @@ class TestFlattener(AbstractBaseTest):
 			\bibliography{mybiblio}
 			\end{document}
 			''' }
-		self.assertFlat('doc.tex', True)
+		self.assertFlat('doc.tex', use_biblio=True)
 		self.assertTrue(self.flattener.use_biblio)
 
-
-
-	def test_bibliography_local_noFile_bib(self):
+	def test_bibliography_nobblfile_usebib(self):
 		self.inputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
-			\begin{document}
-			\bibliography{mybiblio}
-			\end{document}
-			''' }
-		self.outputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
-			\begin{document}
-			\bibliography{mybiblio}
-			\end{document}
-			''' }
-		self.assertFlat('doc.tex', True)
-		self.assertTrue(self.flattener.use_biblio)
-
-
-
-	def test_bibliography_local_file_bib(self):
-		self.inputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
+			\documentclass{article}
 			\begin{document}
 			\bibliography{mybiblio}
 			\end{document}
 			''',
-			'mybiblio.bib' : r'''MYBIBLIO''' }
+			'mybiblio.bib': 'BIBLIO'}
 		self.outputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
+			\documentclass{article}
 			\begin{document}
 			\bibliography{mybiblio}
 			\end{document}
 			''',
-			'mybiblio.bib' : r'''MYBIBLIO''' }
-		self.assertFlat('doc.tex', True)
+			'mybiblio.bib': 'BIBLIO'}
+		self.assertFlat('doc.tex', use_biblio=True)
 		self.assertTrue(self.flattener.use_biblio)
 
-
-
-	def test_bibliography_localsub1_noFile_bib(self):
+	def test_bibliography_file_usebib(self):
 		self.inputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
-			\begin{document}
-			\bibliography{./biblio/mybiblio}
-			\end{document}
-			''' }
-		self.outputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
-			\begin{document}
-			\bibliography{./biblio/mybiblio}
-			\end{document}
-			''' }
-		self.assertFlat('doc.tex', True)
-		self.assertTrue(self.flattener.use_biblio)
-
-
-
-	def test_bibliography_localsub1_file_bib(self):
-		self.inputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
-			\begin{document}
-			\bibliography{./biblio/mybiblio}
-			\end{document}
-			''',
-			'./biblio/mybiblio.bib' : r'''MYBIBLIO''' }
-		self.outputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
+			\documentclass{article}
 			\begin{document}
 			\bibliography{mybiblio}
 			\end{document}
 			''',
-			'mybiblio.bib' : r'''MYBIBLIO''' }
-		self.assertFlat('doc.tex', True)
+			'mybiblio.bib': 'BIBLIO',
+			'doc.bbl': 'BIBLIO ENTRIES'}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\begin{document}
+			\bibliography{mybiblio}
+			\end{document}
+			''',
+			'mybiblio.bib': 'BIBLIO'}
+		self.assertFlat('doc.tex', use_biblio=True)
+		self.assertTrue(self.flattener.use_biblio)
+
+	def test_bibliography_subfile_usebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\begin{document}
+			\bibliography{mysubfolder/mybiblio}
+			\end{document}
+			''',
+			'mysubfolder/mybiblio.bib': 'BIBLIO',
+			'doc.bbl': 'BIBLIO ENTRIES'}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\begin{document}
+			\bibliography{mybiblio}
+			\end{document}
+			''',
+			'mybiblio.bib': 'BIBLIO'}
+		self.assertFlat('doc.tex', use_biblio=True)
 		self.assertTrue(self.flattener.use_biblio)
 
 
 
-	def test_bibliographyXXX_standard_nobib(self):
+	def test_bibliographyXXX_nobibfile_nousebib(self):
 		self.inputs = { 'doc.tex' : r'''
 			\documentclass{article}
 			\begin{document}
@@ -2286,36 +2555,16 @@ class TestFlattener(AbstractBaseTest):
 		self.assertFlat('doc.tex')
 		self.assertFalse(self.flattener.use_biblio)
 
-
-
-	def test_bibliographyXXX_local_noFile_nobib(self):
+	def test_bibliographyXXX_nobblfile_nousebib(self):
 		self.inputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
-			\begin{document}
-			\bibliographyXXX{mybiblio}
-			\end{document}
-			''' }
-		self.outputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
-			\begin{document}
-			\bibliographyXXX{mybiblio}
-			\end{document}
-			''' }
-		self.assertFlat('doc.tex')
-		self.assertFalse(self.flattener.use_biblio)
-
-
-
-	def test_bibliographyXXX_local_file_nobib(self):
-		self.inputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
+			\documentclass{article}
 			\begin{document}
 			\bibliographyXXX{mybiblio}
 			\end{document}
 			''',
-			'mybiblio.bbl' : r'''MYBIBLIO''' }
+			'mybiblio.bib': 'BIBLIO'}
 		self.outputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
+			\documentclass{article}
 			\begin{document}
 			\bibliographyXXX{mybiblio}
 			\end{document}
@@ -2323,46 +2572,51 @@ class TestFlattener(AbstractBaseTest):
 		self.assertFlat('doc.tex')
 		self.assertFalse(self.flattener.use_biblio)
 
-
-
-	def test_bibliographyXXX_localsub1_noFile_nobib(self):
+	def test_bibliographyXXX_file_nousebib(self):
 		self.inputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
+			\documentclass{article}
 			\begin{document}
-			\bibliographyXXX{./biblio/mybiblio}
-			\end{document}
-			''' }
-		self.outputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
-			\begin{document}
-			\bibliographyXXX{./biblio/mybiblio}
-			\end{document}
-			''' }
-		self.assertFlat('doc.tex')
-		self.assertFalse(self.flattener.use_biblio)
-
-
-
-	def test_bibliographyXXX_localsub1_file_nobib(self):
-		self.inputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
-			\begin{document}
-			\bibliographyXXX{./biblio/mybiblio}
+			\bibliographyXXX{mybiblio}
 			\end{document}
 			''',
-			'./biblio/mybiblio.bbl' : r'''MYBIBLIO''' }
+			'mybiblio.bib': 'BIBLIO',
+			'doc.bbl': 'BIBLIO ENTRIES'}
 		self.outputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
+			\documentclass{article}
 			\begin{document}
-			\bibliographyXXX{./biblio/mybiblio}
+			%=======================================================
+			%== BEGIN FILE: doc.bbl
+			%=======================================================
+			BIBLIO ENTRIES
+			%=======================================================
 			\end{document}
 			''' }
 		self.assertFlat('doc.tex')
 		self.assertFalse(self.flattener.use_biblio)
 
+	def test_bibliographyXXX_subfile_nousebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\begin{document}
+			\bibliographyXXX{mysubfolder/mybiblio}
+			\end{document}
+			''',
+			'mysubfolder/mybiblio.bib': 'BIBLIO',
+			'doc.bbl': 'BIBLIO ENTRIES'}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\begin{document}
+			%=======================================================
+			%== BEGIN FILE: doc.bbl
+			%=======================================================
+			BIBLIO ENTRIES
+			%=======================================================
+			\end{document}
+			''' }
+		self.assertFlat('doc.tex')
+		self.assertFalse(self.flattener.use_biblio)
 
-
-	def test_bibliographyXXX_standard_bib(self):
+	def test_bibliographyXXX_nobibfile_usebib(self):
 		self.inputs = { 'doc.tex' : r'''
 			\documentclass{article}
 			\begin{document}
@@ -2375,84 +2629,66 @@ class TestFlattener(AbstractBaseTest):
 			\bibliographyXXX{mybiblio}
 			\end{document}
 			''' }
-		self.assertFlat('doc.tex', True)
+		self.assertFlat('doc.tex', use_biblio=True)
 		self.assertTrue(self.flattener.use_biblio)
 
-
-
-	def test_bibliographyXXX_local_noFile_bib(self):
+	def test_bibliographyXXX_nobblfile_usebib(self):
 		self.inputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
-			\begin{document}
-			\bibliographyXXX{mybiblio}
-			\end{document}
-			''' }
-		self.outputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
-			\begin{document}
-			\bibliographyXXX{mybiblio}
-			\end{document}
-			''' }
-		self.assertFlat('doc.tex', True)
-		self.assertTrue(self.flattener.use_biblio)
-
-
-
-	def test_bibliographyXXX_local_file_bib(self):
-		self.inputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
+			\documentclass{article}
 			\begin{document}
 			\bibliographyXXX{mybiblio}
 			\end{document}
 			''',
-			'mybiblio.bib' : r'''MYBIBLIO''' }
+			'mybiblio.bib': 'BIBLIO'}
 		self.outputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
+			\documentclass{article}
 			\begin{document}
 			\bibliographyXXX{mybiblio}
 			\end{document}
 			''',
-			'mybiblio.bib' : r'''MYBIBLIO''' }
-		self.assertFlat('doc.tex', True)
+			'mybiblio.bib': 'BIBLIO'}
+		self.assertFlat('doc.tex', use_biblio=True)
 		self.assertTrue(self.flattener.use_biblio)
 
-
-
-	def test_bibliographyXXX_localsub1_noFile_bib(self):
+	def test_bibliographyXXX_file_usebib(self):
 		self.inputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
-			\begin{document}
-			\bibliographyXXX{./biblio/mybiblio}
-			\end{document}
-			''' }
-		self.outputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
-			\begin{document}
-			\bibliographyXXX{./biblio/mybiblio}
-			\end{document}
-			''' }
-		self.assertFlat('doc.tex', True)
-		self.assertTrue(self.flattener.use_biblio)
-
-
-
-	def test_bibliographyXXX_localsub1_file_bib(self):
-		self.inputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
-			\begin{document}
-			\bibliographyXXX{./biblio/mybiblio}
-			\end{document}
-			''',
-			'./biblio/mybiblio.bib' : r'''MYBIBLIO''' }
-		self.outputs = { 'doc.tex' : r'''
-			\documentclass{myclass}
+			\documentclass{article}
 			\begin{document}
 			\bibliographyXXX{mybiblio}
 			\end{document}
 			''',
-			'mybiblio.bib' : r'''MYBIBLIO''' }
-		self.assertFlat('doc.tex', True)
+			'mybiblio.bib': 'BIBLIO',
+			'doc.bbl': 'BIBLIO ENTRIES'}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\begin{document}
+			\bibliographyXXX{mybiblio}
+			\end{document}
+			''',
+			'mybiblio.bib': 'BIBLIO'}
+		self.assertFlat('doc.tex', use_biblio=True)
 		self.assertTrue(self.flattener.use_biblio)
+
+	def test_bibliographyXXX_subfile_usebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\begin{document}
+			\bibliographyXXX{mysubfolder/mybiblio}
+			\end{document}
+			''',
+			'mysubfolder/mybiblio.bib': 'BIBLIO',
+			'doc.bbl': 'BIBLIO ENTRIES'}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\begin{document}
+			\bibliographyXXX{mybiblio}
+			\end{document}
+			''',
+			'mybiblio.bib': 'BIBLIO'}
+		self.assertFlat('doc.tex', use_biblio=True)
+		self.assertTrue(self.flattener.use_biblio)
+
+
 
 
 
@@ -2827,6 +3063,586 @@ class TestFlattener(AbstractBaseTest):
 		self.assertTrue(self.flattener.use_biblio)
 
 
+
+	def test_bibliographyslide_nofile_nousebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\begin{document}
+			\begin{bibunit}
+			\bibliographyslide
+			\end{bibunit}
+			\end{document}
+			'''}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\begin{document}
+			\bibliographyslide
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex')
+		self.assertFalse(self.flattener.use_biblio)
+
+	def test_bibliographyslide_file_nousebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\begin{document}
+			\begin{bibunit}
+			\bibliographyslide
+			\end{bibunit}
+			\end{document}
+			''',
+			'biblio.bib': 'BIBLIO ENTRIES',
+			'doc.1.bbl': 'SPECIFIC BIBLIO ENTRIES'}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\begin{document}
+			\bibliographyslide
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex')
+		self.assertFalse(self.flattener.use_biblio)
+
+	def test_bibliographyslide_nofile_usebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\begin{document}
+			\begin{bibunit}
+			\bibliographyslide
+			\end{bibunit}
+			\end{document}
+			'''}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\begin{document}
+			\begin{bibunit}
+			\bibliographyslide
+			\end{bibunit}
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex', use_biblio=True)
+		self.assertTrue(self.flattener.use_biblio)
+
+	def test_bibliographyslide_file_usebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\begin{document}
+			\begin{bibunit}
+			\bibliographyslide
+			\end{bibunit}
+			\end{document}
+			''',
+			'biblio.bib': 'BIBLIO ENTRIES'}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\begin{document}
+			\begin{bibunit}
+			\bibliographyslide
+			\end{bibunit}
+			\end{document}
+			''',
+			'biblio.bib': 'BIBLIO ENTRIES'}
+		self.assertFlat('doc.tex', use_biblio=True)
+		self.assertTrue(self.flattener.use_biblio)
+
+
+
+	def test_bibliographysection_nofile_nousebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\begin{document}
+			\begin{bibliographysection}
+			Text
+			\end{bibliographysection}
+			\end{document}
+			'''}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\begin{document}
+			Text
+			\bibliographyslide
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex')
+		self.assertFalse(self.flattener.use_biblio)
+
+	def test_bibliographysection_file_nousebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\begin{document}
+			\begin{bibliographysection}
+			Text
+			\end{bibliographysection}
+			\end{document}
+			''',
+			'biblio.bib': 'BIBLIO ENTRIES',
+			'doc.1.bbl': 'SPECIFIC BIBLIO ENTRIES'}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\begin{document}
+			Text
+			\bibliographyslide
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex')
+		self.assertFalse(self.flattener.use_biblio)
+
+	def test_bibliographysection_nofile_usebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\begin{document}
+			\begin{bibliographysection}
+			Text
+			\end{bibliographysection}
+			\end{document}
+			'''}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\begin{document}
+			\begin{bibliographysection}
+			Text
+			\end{bibliographysection}
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex', use_biblio=True)
+		self.assertTrue(self.flattener.use_biblio)
+
+	def test_bibliographysection_file_usebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\begin{document}
+			\begin{bibliographysection}
+			Text
+			\end{bibliographysection}
+			\end{document}
+			''',
+			'biblio.bib': 'BIBLIO ENTRIES'}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\begin{document}
+			\begin{bibliographysection}
+			Text
+			\end{bibliographysection}
+			\end{document}
+			''',
+			'biblio.bib': 'BIBLIO ENTRIES'}
+		self.assertFlat('doc.tex', use_biblio=True)
+		self.assertTrue(self.flattener.use_biblio)
+
+
+
+
+	def test_defaultbibliography_nodft_nofile_nousebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\begin{document}
+			\begin{bibunit}
+			\putbib
+			\end{bibunit}
+			\end{document}
+			'''}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\begin{document}
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex')
+		self.assertFalse(self.flattener.use_biblio)
+
+	def test_defaultbibliography_dft_nofile_nousebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\defaultbibliography{mybiblio}
+			\begin{document}
+			\begin{bibunit}
+			\putbib
+			\end{bibunit}
+			\end{document}
+			'''}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\begin{document}
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex')
+		self.assertFalse(self.flattener.use_biblio)
+
+	def test_defaultbibliography_nodft_file_nousebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\begin{document}
+			\begin{bibunit}
+			\putbib
+			\end{bibunit}
+			\end{document}
+			''',
+			'mybiblio.bib': 'BIBLIO ENTRIES',
+			'doc.1.bbl': 'SPECIFIC BIBLIO ENTRIES',
+			'doc.bbl': 'RAW BIBLIO ENTRIES'}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\begin{document}
+			%=======================================================
+			%== BEGIN FILE: doc.1.bbl
+			%=======================================================
+			SPECIFIC BIBLIO ENTRIES
+			%=======================================================
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex')
+		self.assertFalse(self.flattener.use_biblio)
+
+	def test_defaultbibliography_dft_file_nousebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\defaultbibliography{mybiblio}
+			\begin{document}
+			\begin{bibunit}
+			\putbib
+			\end{bibunit}
+			\end{document}
+			''',
+			'mybiblio.bib': 'BIBLIO ENTRIES',
+			'doc.1.bbl': 'SPECIFIC BIBLIO ENTRIES',
+			'doc.bbl': 'RAW BIBLIO ENTRIES'}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\begin{document}
+			%=======================================================
+			%== BEGIN FILE: doc.1.bbl
+			%=======================================================
+			SPECIFIC BIBLIO ENTRIES
+			%=======================================================
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex')
+		self.assertFalse(self.flattener.use_biblio)
+
+	def test_defaultbibliography_dft_subfile_nousebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\defaultbibliography{subfolder/mybiblio}
+			\begin{document}
+			\begin{bibunit}
+			\putbib
+			\end{bibunit}
+			\end{document}
+			''',
+			'subfolder/mybiblio.bib': 'BIBLIO ENTRIES',
+			'doc.1.bbl': 'SPECIFIC BIBLIO ENTRIES',
+			'doc.bbl': 'RAW BIBLIO ENTRIES'}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\begin{document}
+			%=======================================================
+			%== BEGIN FILE: doc.1.bbl
+			%=======================================================
+			SPECIFIC BIBLIO ENTRIES
+			%=======================================================
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex')
+		self.assertFalse(self.flattener.use_biblio)
+
+	def test_defaultbibliography_nodft_nofile_usebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\begin{document}
+			\begin{bibunit}
+			\putbib
+			\end{bibunit}
+			\end{document}
+			'''}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\begin{document}
+			\begin{bibunit}
+			\putbib[doc]
+			\end{bibunit}
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex', use_biblio=True)
+		self.assertTrue(self.flattener.use_biblio)
+
+	def test_defaultbibliography_dft_nofile_usebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\defaultbibliography{mybiblio}
+			\begin{document}
+			\begin{bibunit}
+			\putbib
+			\end{bibunit}
+			\end{document}
+			'''}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\begin{document}
+			\begin{bibunit}
+			\putbib[doc]
+			\end{bibunit}
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex', use_biblio=True)
+		self.assertTrue(self.flattener.use_biblio)
+
+	def test_defaultbibliography_nodft_file_usebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\begin{document}
+			\begin{bibunit}
+			\putbib
+			\end{bibunit}
+			\end{document}
+			''',
+			'mybiblio.bib': 'BIBLIO ENTRIES',
+			'doc.1.bbl': 'SPECIFIC BIBLIO ENTRIES',
+			'doc.bbl': 'RAW BIBLIO ENTRIES'}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\begin{document}
+			\begin{bibunit}
+			\putbib[doc]
+			\end{bibunit}
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex', use_biblio=True)
+		self.assertTrue(self.flattener.use_biblio)
+
+	def test_defaultbibliography_dft_file_usebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\defaultbibliography{mybiblio}
+			\begin{document}
+			\begin{bibunit}
+			\putbib
+			\end{bibunit}
+			\end{document}
+			''',
+			'mybiblio.bib': 'BIBLIO ENTRIES',
+			'doc.1.bbl': 'SPECIFIC BIBLIO ENTRIES',
+			'doc.bbl': 'RAW BIBLIO ENTRIES'}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\begin{document}
+			\begin{bibunit}
+			\putbib[mybiblio]
+			\end{bibunit}
+			\end{document}
+			''',
+			'mybiblio.bib': 'BIBLIO ENTRIES'}
+		self.assertFlat('doc.tex', use_biblio=True)
+		self.assertTrue(self.flattener.use_biblio)
+
+	def test_defaultbibliography_dft_subfile_usebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\defaultbibliography{subfolder/mybiblio}
+			\begin{document}
+			\begin{bibunit}
+			\putbib
+			\end{bibunit}
+			\end{document}
+			''',
+			'subfolder/mybiblio.bib': 'BIBLIO ENTRIES',
+			'doc.1.bbl': 'SPECIFIC BIBLIO ENTRIES',
+			'doc.bbl': 'RAW BIBLIO ENTRIES'}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\begin{document}
+			\begin{bibunit}
+			\putbib[mybiblio]
+			\end{bibunit}
+			\end{document}
+			''',
+			'mybiblio.bib': 'BIBLIO ENTRIES'}
+		self.assertFlat('doc.tex', use_biblio=True)
+		self.assertTrue(self.flattener.use_biblio)
+
+
+
+
+	def test_defaultbibliographystyle_nofile_nousebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\defaultbibliographystyle{mybiblio}
+			\begin{document}
+			\begin{bibunit}
+			\putbib
+			\end{bibunit}
+			\end{document}
+			'''}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\begin{document}
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex')
+		self.assertFalse(self.flattener.use_biblio)
+
+	def test_defaultbibliographystyle_file_nousebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\defaultbibliographystyle{mybiblio}
+			\begin{document}
+			\begin{bibunit}
+			\putbib
+			\end{bibunit}
+			\end{document}
+			''',
+			'mybiblio.bib': 'BIBLIO ENTRIES',
+			'mybiblio.bst': 'MY STYLE',
+			'doc.1.bbl': 'SPECIFIC BIBLIO ENTRIES',
+			'doc.bbl': 'RAW BIBLIO ENTRIES'}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\begin{document}
+			%=======================================================
+			%== BEGIN FILE: doc.1.bbl
+			%=======================================================
+			SPECIFIC BIBLIO ENTRIES
+			%=======================================================
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex')
+		self.assertFalse(self.flattener.use_biblio)
+
+	def test_defaultbibliographystyle_subfile_nousebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\defaultbibliographystyle{subfolder/mybiblio}
+			\begin{document}
+			\begin{bibunit}
+			\putbib
+			\end{bibunit}
+			\end{document}
+			''',
+			'mybiblio.bib': 'BIBLIO ENTRIES',
+			'subfolder/mybiblio.bst': 'MY STYLE',
+			'doc.1.bbl': 'SPECIFIC BIBLIO ENTRIES',
+			'doc.bbl': 'RAW BIBLIO ENTRIES'}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\begin{document}
+			%=======================================================
+			%== BEGIN FILE: doc.1.bbl
+			%=======================================================
+			SPECIFIC BIBLIO ENTRIES
+			%=======================================================
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex')
+		self.assertFalse(self.flattener.use_biblio)
+
+	def test_defaultbibliographystyle_nofile_usebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\defaultbibliographystyle{mybiblio}
+			\begin{document}
+			\begin{bibunit}
+			\putbib
+			\end{bibunit}
+			\end{document}
+			'''}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\defaultbibliographystyle{mybiblio}
+			\begin{document}
+			\begin{bibunit}
+			\putbib[doc]
+			\end{bibunit}
+			\end{document}
+			'''}
+		self.assertFlat('doc.tex', use_biblio=True)
+		self.assertTrue(self.flattener.use_biblio)
+
+	def test_defaultbibliographystyle_file_usebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\defaultbibliographystyle{mybiblio}
+			\begin{document}
+			\begin{bibunit}
+			\putbib
+			\end{bibunit}
+			\end{document}
+			''',
+			'mybiblio.bib': 'BIBLIO ENTRIES',
+			'mybiblio.bst': 'MY STYLE',
+			'doc.1.bbl': 'SPECIFIC BIBLIO ENTRIES',
+			'doc.bbl': 'RAW BIBLIO ENTRIES'}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\defaultbibliographystyle{mybiblio}
+			\begin{document}
+			\begin{bibunit}
+			\putbib[doc]
+			\end{bibunit}
+			\end{document}
+			''',
+			'mybiblio.bst': 'MY STYLE'}
+		self.assertFlat('doc.tex', use_biblio=True)
+		self.assertTrue(self.flattener.use_biblio)
+
+	def test_defaultbibliographystyle_subfile_usebib(self):
+		self.inputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\defaultbibliographystyle{subfolder/mybiblio}
+			\begin{document}
+			\begin{bibunit}
+			\putbib
+			\end{bibunit}
+			\end{document}
+			''',
+			'mybiblio.bib': 'BIBLIO ENTRIES',
+			'subfolder/mybiblio.bst': 'MY STYLE',
+			'doc.1.bbl': 'SPECIFIC BIBLIO ENTRIES',
+			'doc.bbl': 'RAW BIBLIO ENTRIES'}
+		self.outputs = { 'doc.tex' : r'''
+			\documentclass{article}
+			\usepackage{bibunits}
+			\defaultbibliographystyle{mybiblio}
+			\begin{document}
+			\begin{bibunit}
+			\putbib[doc]
+			\end{bibunit}
+			\end{document}
+			''',
+			'mybiblio.bst': 'MY STYLE'}
+		self.assertFlat('doc.tex', use_biblio=True)
+		self.assertTrue(self.flattener.use_biblio)
 
 
 if __name__ == '__main__':
