@@ -29,10 +29,10 @@ translator_python_dependencies:
     - import autolatex2.utils.utilfunctions as genutils
 translator_function: |
     dot_file = genutils.basename2(_out,  _outexts) + '.dot'
-    sout, serr, sex, retcode = Runner.run_command('gxl2dot', '-d', '-o', dot_file, _in)
-    Runner.check_runner_status(serr, sex, retcode)
+    runner_output = Runner.run_command('gxl2dot', '-d', '-o', dot_file, _in)
+    Runner.check_runner_status(runner_output)
     try:
-    	_runner.generate_image(translator_name = 'dot2pdf',  in_file = dot_file, out_file = _out, pdf_mode = _pdfmode, only_more_recent = False,  ignore_debug_feature = True)
+    	_runner.generate_image(translator_name = 'dot2pdf',  in_file = dot_file, out_file = _out, pdf_mode = _pdfmode, only_more_recent = False)
     finally:
     	genutils.unlink(dot_file)
 ...

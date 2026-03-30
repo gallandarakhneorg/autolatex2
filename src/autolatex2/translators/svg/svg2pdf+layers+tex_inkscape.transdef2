@@ -93,8 +93,8 @@ translator_function: |
     				    overlay_spec = r.group(1)
     			outputbasename = _outwoext + "_" + id
     			figureFile = os.path.join(_outdir, outputbasename + ext2)
-    			(sout, serr, sex, retcode) = Runner.run_command('inkscape', '--export-id', id, '--export-id-only', '--export-area-page', opt, '--export-filename=' + figureFile, '--export-latex', "--file=" + _in)
-    			Runner.check_runner_status(serr, sex, retcode)
+    			runner_output = Runner.run_command('inkscape', '--export-id', id, '--export-id-only', '--export-area-page', opt, '--export-filename=' + figureFile, '--export-latex', "--file=" + _in)
+    			Runner.check_runner_status(runner_output)
     			texFile = os.path.join(_outdir, outputbasename + ext3)
     			imageinclusions.append("\\node<" + str(overlay_spec) + "> (X) {\\input{" + str(texFile) + "}};%")
     			layerIndex = layerIndex + 1

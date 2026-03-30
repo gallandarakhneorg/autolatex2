@@ -77,22 +77,18 @@ class TestDependenciesMaker(AbstractBaseTest):
 		self.__maker = AutoLaTeXMaker.create(self.__config)
 		os.chdir(self.__tmp_folder_name)
 
-
-	def ___printlogs(self):
-		with open(os.path.normpath(os.path.join(self.__tmp_folder_name, 'rootfile.log'))) as file:
-			print(file.read())
-
+	# noinspection PyUnusedLocal
 	def __assertDependencies(self, name : str, expected : dict, actual : FileDescription):
-		self.assertEqual(expected['output_filename'], actual.output_filename)
-		self.assertEqual(expected['input_filename'], actual.input_filename)
-		self.assertEqual(set(expected['dependencies']), set(actual.dependencies))
+		self.assertEqual(expected['output_filename'], actual.output_filename, 'Invalid output files for %s' % name)
+		self.assertEqual(expected['input_filename'], actual.input_filename, 'Invalid input files for %s' % name)
+		self.assertEqual(set(expected['dependencies']), set(actual.dependencies), 'Invalid dependencies for %s' % name)
 
 	def assertDependencies(self, expected : dict, actual : dict):
 		for fn, expectedItem in expected.copy().items():
 			if fn in actual:
 				del expected[fn]
-				actualItem = actual[fn]
-				self.__assertDependencies(fn, expectedItem, actualItem)
+				actual_item = actual[fn]
+				self.__assertDependencies(fn, expectedItem, actual_item)
 			else:
 				self.fail('Unexpected dependency file: ' + fn) 
 		self.assertEqual(0, len(expected))
@@ -100,8 +96,10 @@ class TestDependenciesMaker(AbstractBaseTest):
 
 
 	def test_compute_dependencies_wo_aux(self):
+		"""
+		Compute dependencies only from TeX sources
+		"""
 		(pdf_file,  files) = self.__maker.compute_dependencies(self.__root_file, read_aux_file= False)
-		#self.___printlogs()
 		self.assertEqual(self.__pdf_file, pdf_file)
 		self.assertDependencies({
 			self.__pdf_file: {
@@ -111,8 +109,6 @@ class TestDependenciesMaker(AbstractBaseTest):
 					self.__gls_file,
 					self.__ind_file,
 					self.__root_file,
-					self.__texa_file,
-					self.__texb_file,
 					self.__bbl_file
 				]
 			},
@@ -120,6 +116,8 @@ class TestDependenciesMaker(AbstractBaseTest):
 				"output_filename": self.__root_file,
 				"input_filename": self.__root_file,
 				"dependencies": [
+					self.__texa_file,
+					self.__texb_file,
 				]
 			},
 			self.__texa_file: {
@@ -146,6 +144,7 @@ class TestDependenciesMaker(AbstractBaseTest):
 				"output_filename": self.__idx_file,
 				"input_filename": self.__root_file,
 				"dependencies": [
+					self.__root_file,
 				]
 			},
 			self.__ind_file: {
@@ -159,6 +158,7 @@ class TestDependenciesMaker(AbstractBaseTest):
 				"output_filename": self.__glo_file,
 				"input_filename": self.__root_file,
 				"dependencies": [
+					self.__root_file,
 				]
 			},
 			self.__gls_file: {
@@ -173,8 +173,10 @@ class TestDependenciesMaker(AbstractBaseTest):
 
 
 	def test_compute_dependencies_w_aux(self):
+		"""
+		Compute dependencies from TeX sources and auxilliary files
+		"""
 		(pdf_file,  files) = self.__maker.compute_dependencies(self.__root_file, read_aux_file= True)
-		#self.___printlogs()
 		self.assertEqual(self.__pdf_file, pdf_file)
 		self.assertDependencies({
 			self.__pdf_file: {
@@ -184,8 +186,6 @@ class TestDependenciesMaker(AbstractBaseTest):
 					self.__gls_file,
 					self.__ind_file,
 					self.__root_file,
-					self.__texa_file,
-					self.__texb_file,
 					self.__bbl_file
 				]
 			},
@@ -193,6 +193,8 @@ class TestDependenciesMaker(AbstractBaseTest):
 				"output_filename": self.__root_file,
 				"input_filename": self.__root_file,
 				"dependencies": [
+					self.__texa_file,
+					self.__texb_file,
 				]
 			},
 			self.__texa_file: {
@@ -219,6 +221,7 @@ class TestDependenciesMaker(AbstractBaseTest):
 				"output_filename": self.__idx_file,
 				"input_filename": self.__root_file,
 				"dependencies": [
+					self.__root_file,
 				]
 			},
 			self.__ind_file: {
@@ -232,6 +235,7 @@ class TestDependenciesMaker(AbstractBaseTest):
 				"output_filename": self.__glo_file,
 				"input_filename": self.__root_file,
 				"dependencies": [
+					self.__root_file,
 				]
 			},
 			self.__gls_file: {

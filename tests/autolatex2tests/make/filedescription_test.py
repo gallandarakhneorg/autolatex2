@@ -23,7 +23,7 @@ import logging
 from typing import override
 
 from autolatex2.make.filedescription import FileDescription
-from autolatex2.make.make_enums import FileType
+from autolatex2.tex.utils import FileType
 from autolatex2tests.abstract_base_test import AbstractBaseTest
 
 class TestMakeFileDescription(AbstractBaseTest):

@@ -30,35 +30,35 @@ class GenerationConfig:
 	"""
 
 	def __init__(self):
-		self.__is_pdf_mode = True
-		self.__extended_warnings = True
-		self.__makeindex = True
-		self.__biblio = True
-		self.__synctex = False
-		self.__latex_compiler = None
-		self.__latex_cli = list()
-		self.__latex_flags = list()
-		self.__bibtex_cli = list()
-		self.__bibtex_flags = list()
-		self.__biber_cli = list()
-		self.__biber_flags = list()
-		self.__makeindex_cli = list()
-		self.__makeindex_flags = list()
-		self.__makeindex_style_filename = None
-		self.__texindy_cli = list()
-		self.__texindy_flags = list()
-		self.__makeglossary_cli = list()
-		self.__makeglossary_flags = list()
-		self.__dvips_cli = list()
-		self.__dvips_flags = list()
-		self.__use_biber = False
-		self.__use_biblatex = False
-		self.__use_makeindex = False
-		self.__use_texindy = False
-		self.__use_multibib = False
-		self.__enable_biblio = True
-		self.__enable_index = True
-		self.__enable_glossary = True
+		self.__is_pdf_mode : bool = True
+		self.__extended_warnings : bool = True
+		self.__makeindex : bool = True
+		self.__biblio : bool = True
+		self.__synctex : bool = False
+		self.__latex_compiler : str = ''
+		self.__latex_cli : list[str] = list()
+		self.__latex_flags : list[str] = list()
+		self.__bibtex_cli : list[str] = list()
+		self.__bibtex_flags : list[str] = list()
+		self.__biber_cli : list[str] = list()
+		self.__biber_flags : list[str] = list()
+		self.__makeindex_cli : list[str] = list()
+		self.__makeindex_flags : list[str] = list()
+		self.__makeindex_style_filename : str | None = None
+		self.__texindy_cli : list[str] = list()
+		self.__texindy_flags : list[str] = list()
+		self.__makeglossary_cli : list[str] = list()
+		self.__makeglossary_flags : list[str] = list()
+		self.__dvips_cli : list[str] = list()
+		self.__dvips_flags : list[str] = list()
+		self.__use_biber : bool = False
+		self.__use_biblatex : bool = False
+		self.__use_makeindex : bool = False
+		self.__use_texindy : bool = False
+		self.__use_multibib : bool = False
+		self.__enable_biblio : bool = True
+		self.__enable_index : bool = True
+		self.__enable_glossary : bool = True
 
 	def reset_internal_attributes(self):
 		"""
@@ -69,7 +69,7 @@ class GenerationConfig:
 		self.__makeindex = True
 		self.__biblio = True
 		self.__synctex = False
-		self.__latex_compiler = None
+		self.__latex_compiler = ''
 		self.__latex_cli = list()
 		self.__latex_flags = list()
 		self.__bibtex_cli = list()
@@ -110,7 +110,7 @@ class GenerationConfig:
 		:param mode: True if the generated file is PDF. False if it is Postscript.
 		:type mode: bool
 		"""
-		self.__is_pdf_mode = bool(mode)
+		self.__is_pdf_mode = mode
 
 	@property
 	def extended_warnings(self) -> bool:
@@ -128,7 +128,7 @@ class GenerationConfig:
 		:param enable: True if the extended warning feature is used.
 		:type enable: bool
 		"""
-		self.__extended_warnings = bool(enable)
+		self.__extended_warnings = enable
 
 	@property
 	def makeindex(self) -> bool:
@@ -146,7 +146,7 @@ class GenerationConfig:
 		:param enable: True if 'makeindex' should be invoked when necessary.
 		:type enable: bool
 		"""
-		self.__makeindex = bool(enable)
+		self.__makeindex = enable
 
 	@property
 	def biblio(self) -> bool:
@@ -164,7 +164,7 @@ class GenerationConfig:
 		:param enable: True if 'bibliography' should be invoked when necessary.
 		:type enable: bool
 		"""
-		self.__biblio = bool(enable)
+		self.__biblio = enable
 
 	@property
 	def synctex(self) -> bool:
@@ -182,7 +182,7 @@ class GenerationConfig:
 		:param enable: True if synctex enabled.
 		:type enable: bool
 		"""
-		self.__synctex = bool(enable)
+		self.__synctex = enable
 
 	@property
 	def latex_compiler(self) -> str:
@@ -206,7 +206,7 @@ class GenerationConfig:
 	def latex_cli(self) -> list[str]:
 		"""
 		Replies the command-line for latex.
-		:rtype: list
+		:rtype: list[str]
 		"""
 		return self.__latex_cli
 
@@ -214,7 +214,9 @@ class GenerationConfig:
 	def latex_cli(self, cli : list[str] | str | None):
 		"""
 		Set the command-line for latex.
-		:type cli: str or list
+		:param cli: The CLI. If it is None, the CLI is set to empty. If it is a single string, then this string is
+		parsed using the genutils.parse_cli() method.
+		:type cli: list[str] | str | None
 		"""
 		if cli is None:
 			self.__latex_cli = list()
@@ -227,7 +229,7 @@ class GenerationConfig:
 	def latex_flags(self) -> list[str]:
 		"""
 		Replies additional flags for the latex compiler.
-		:rtype: list
+		:rtype: list[str]
 		"""
 		return self.__latex_flags
 
@@ -235,7 +237,9 @@ class GenerationConfig:
 	def latex_flags(self, flags : list[str] | str | None):
 		"""
 		Set additional flags for the latex compiler.
-		:type flags: str or list
+		:param flags: The CLI. If it is None, the CLI is set to empty. If it is a single string, then this string is
+		parsed using the genutils.parse_cli() method.
+		:type flags: list[str] | str | None
 		"""
 		if flags is None:
 			self.__latex_flags = list()
@@ -248,7 +252,7 @@ class GenerationConfig:
 	def bibtex_cli(self) -> list[str]:
 		"""
 		Replies the command-line for bibtex.
-		:rtype: list
+		:rtype: list[str]
 		"""
 		return self.__bibtex_cli
 
@@ -256,7 +260,9 @@ class GenerationConfig:
 	def bibtex_cli(self, cli : list[str] | str | None):
 		"""
 		Set the command-line for bibtex.
-		:type cli: str or list
+		:param cli: The CLI. If it is None, the CLI is set to empty. If it is a single string, then this string is
+		parsed using the genutils.parse_cli() method.
+		:type cli: list[str] | str | None
 		"""
 		if cli is None:
 			self.__bibtex_cli = list()
@@ -269,7 +275,7 @@ class GenerationConfig:
 	def bibtex_flags(self) -> list[str]:
 		"""
 		Replies additional flags for the bibtex compiler.
-		:rtype: list
+		:rtype: list[str]
 		"""
 		return self.__bibtex_flags
 
@@ -277,7 +283,9 @@ class GenerationConfig:
 	def bibtex_flags(self, flags : list[str] | str | None):
 		"""
 		Set additional flags for the bibtex compiler.
-		:type flags: str or list
+		:param flags: The CLI. If it is None, the CLI is set to empty. If it is a single string, then this string is
+		parsed using the genutils.parse_cli() method.
+		:type flags: list[str] | str | None
 		"""
 		if flags is None:
 			self.__bibtex_flags = list()
@@ -290,7 +298,7 @@ class GenerationConfig:
 	def biber_cli(self) -> list[str]:
 		"""
 		Replies the command-line for biber.
-		:rtype: list
+		:rtype: list[str]
 		"""
 		return self.__biber_cli
 
@@ -298,7 +306,9 @@ class GenerationConfig:
 	def biber_cli(self, cli : list[str] | str | None):
 		"""
 		Set the command-line for biber.
-		:type cli: str or list
+		:param cli: The CLI. If it is None, the CLI is set to empty. If it is a single string, then this string is
+		parsed using the genutils.parse_cli() method.
+		:type cli: list[str] | str | None
 		"""
 		if cli is None:
 			self.__biber_cli = list()
@@ -311,7 +321,7 @@ class GenerationConfig:
 	def biber_flags(self) -> list[str]:
 		"""
 		Replies additional flags for the biber compiler.
-		:rtype: list
+		:rtype: list[str]
 		"""
 		return self.__biber_flags
 
@@ -319,7 +329,9 @@ class GenerationConfig:
 	def biber_flags(self, flags : list[str] | str | None):
 		"""
 		Set additional flags for the biber compiler.
-		:type flags: str or list
+		:param flags: The CLI. If it is None, the CLI is set to empty. If it is a single string, then this string is
+		parsed using the genutils.parse_cli() method.
+		:type flags: list[str] | str | None
 		"""
 		if flags is None:
 			self.__biber_flags = list()
@@ -460,7 +472,7 @@ class GenerationConfig:
 	def makeglossary_cli(self) -> list[str]:
 		"""
 		Replies the command-line for makeglossary.
-		:rtype: list
+		:rtype: list[str]
 		"""
 		return self.__makeglossary_cli
 
@@ -468,7 +480,9 @@ class GenerationConfig:
 	def makeglossary_cli(self, cli : list[str] | str | None):
 		"""
 		Set the command-line for makeglossary.
-		:type cli: str or list
+		:param cli: The CLI. If it is None, the CLI is set to empty. If it is a single string, then this string is
+		parsed using the genutils.parse_cli() method.
+		:type cli: list[str] | str | None
 		"""
 		if cli is None:
 			self.__makeglossary_cli = list()
@@ -481,7 +495,7 @@ class GenerationConfig:
 	def makeglossary_flags(self) -> list[str]:
 		"""
 		Replies additional flags for the makeglossary compiler.
-		:rtype: list
+		:rtype: list[str]
 		"""
 		return self.__makeglossary_flags
 
@@ -489,7 +503,9 @@ class GenerationConfig:
 	def makeglossary_flags(self, flags : list[str] | str | None):
 		"""
 		Set additional flags for the makeglossary compiler.
-		:type flags: str or list
+		:param flags: The CLI. If it is None, the CLI is set to empty. If it is a single string, then this string is
+		parsed using the genutils.parse_cli() method.
+		:type flags: list[str] | str | None
 		"""
 		if flags is None or isinstance(flags, list):
 			self.__makeglossary_flags = flags
@@ -500,7 +516,7 @@ class GenerationConfig:
 	def makeindex_cli(self) -> list[str]:
 		"""
 		Replies the command-line for makeindex.
-		:rtype: list
+		:rtype: list[str]
 		"""
 		return self.__makeindex_cli
 
@@ -508,7 +524,9 @@ class GenerationConfig:
 	def makeindex_cli(self, cli : list[str] | str | None):
 		"""
 		Set the command-line for makeindex.
-		:type cli: str or list
+		:param cli: The CLI. If it is None, the CLI is set to empty. If it is a single string, then this string is
+		parsed using the genutils.parse_cli() method.
+		:type cli: list[str] | str | None
 		"""
 		if cli is None:
 			self.__makeindex_cli = list()
@@ -521,7 +539,7 @@ class GenerationConfig:
 	def makeindex_flags(self) -> list[str]:
 		"""
 		Replies additional flags for the makeindex compiler.
-		:rtype: list
+		:rtype: list[str]
 		"""
 		return self.__makeindex_flags
 
@@ -529,7 +547,9 @@ class GenerationConfig:
 	def makeindex_flags(self, flags : list[str] | str | None):
 		"""
 		Set additional flags for the makeindex compiler.
-		:type flags: str or list
+		:param flags: The CLI. If it is None, the CLI is set to empty. If it is a single string, then this string is
+		parsed using the genutils.parse_cli() method.
+		:type flags: list[str] | str | None
 		"""
 		if flags is None:
 			self.__makeindex_flags = list()
@@ -542,7 +562,7 @@ class GenerationConfig:
 	def texindy_cli(self) -> list[str]:
 		"""
 		Replies the command-line for texindy.
-		:rtype: list
+		:rtype: list[str]
 		"""
 		return self.__texindy_cli
 
@@ -550,7 +570,9 @@ class GenerationConfig:
 	def texindy_cli(self, cli : list[str] | str | None):
 		"""
 		Set the command-line for texindy.
-		:type cli: str or list
+		:param cli: The CLI. If it is None, the CLI is set to empty. If it is a single string, then this string is
+		parsed using the genutils.parse_cli() method.
+		:type cli: list[str] | str | None
 		"""
 		if cli is None:
 			self.__texindy_cli = list()
@@ -563,7 +585,7 @@ class GenerationConfig:
 	def texindy_flags(self) -> list[str]:
 		"""
 		Replies additional flags for the texindy compiler.
-		:rtype: list
+		:rtype: list[str]
 		"""
 		return self.__texindy_flags
 
@@ -571,7 +593,9 @@ class GenerationConfig:
 	def texindy_flags(self, flags : list[str] | str | None):
 		"""
 		Set additional flags for the texindy compiler.
-		:type flags: str or list
+		:param flags: The CLI. If it is None, the CLI is set to empty. If it is a single string, then this string is
+		parsed using the genutils.parse_cli() method.
+		:type flags: list[str] | str | None
 		"""
 		if flags is None:
 			self.__texindy_flags = list()
@@ -600,7 +624,7 @@ class GenerationConfig:
 	def dvips_cli(self) -> list[str]:
 		"""
 		Replies the command-line for dvi2ps.
-		:rtype: list
+		:rtype: list[str]
 		"""
 		return self.__dvips_cli
 
@@ -608,7 +632,9 @@ class GenerationConfig:
 	def dvips_cli(self, cli : list[str] | str | None):
 		"""
 		Set the command-line for dvips.
-		:type cli: str or list
+		:param cli: The CLI. If it is None, the CLI is set to empty. If it is a single string, then this string is
+		parsed using the genutils.parse_cli() method.
+		:type cli: list[str] | str | None
 		"""
 		if cli is None:
 			self.__dvips_cli = list()
@@ -621,7 +647,7 @@ class GenerationConfig:
 	def dvips_flags(self) -> list[str]:
 		"""
 		Replies additional flags for the dvips compiler.
-		:rtype: list
+		:rtype: list[str]
 		"""
 		return self.__dvips_flags
 
@@ -629,9 +655,13 @@ class GenerationConfig:
 	def dvips_flags(self, flags : list[str] | str | None):
 		"""
 		Set additional flags for the dvips compiler.
-		:type flags: str or list
+		:param flags: The CLI. If it is None, the CLI is set to empty. If it is a single string, then this string is
+		parsed using the genutils.parse_cli() method.
+		:type flags: list[str] | str | None
 		"""
-		if flags is None or isinstance(flags, list):
+		if flags is None:
+			self.__dvips_flags = list()
+		elif isinstance(flags, list):
 			self.__dvips_flags = flags
 		else:
 			self.__dvips_flags = genutils.parse_cli(flags)

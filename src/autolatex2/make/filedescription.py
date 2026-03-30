@@ -26,7 +26,7 @@ import json
 from typing import override
 from sortedcontainers import SortedSet
 
-from autolatex2.make.make_enums import FileType
+from autolatex2.tex.utils import FileType
 from autolatex2.utils import utilfunctions as genutils
 
 
@@ -53,7 +53,8 @@ class FileDescription:
 		self.__input_filename = input_filename
 		self.__main_file = main_filename
 		self.__dependencies = SortedSet()
-		self.__change = genutils.get_file_last_change(self.__output_filename)
+		self.__has_change_date = False
+		self.__change_date = None
 		self.__use_biber = False
 		self.__use_xindy = False
 
@@ -64,15 +65,15 @@ class FileDescription:
 	@override
 	def __repr__(self):
 		js = dict()
-		js['output_filename'] = self.__output_filename
-		js['input_filename'] = self.__input_filename
-		js['type'] = self.__type
-		js['mainfile'] = self.__main_file
-		js['change'] = self.__change
-		js['use_biber'] = self.__use_biber
-		js['use_xindy'] = self.__use_xindy
+		js['output_filename'] = self.output_filename
+		js['input_filename'] = self.input_filename
+		js['type'] = self.file_type
+		js['mainfile'] = self.main_filename
+		js['change'] = self.change
+		js['use_biber'] = self.use_biber
+		js['use_xindy'] = self.use_xindy
 		js['dependencies'] = list()
-		for dep in self.__dependencies:
+		for dep in self.dependencies:
 			js['dependencies'].append(dep)
 		return json.dumps(js,  indent = 4)
 
@@ -122,7 +123,10 @@ class FileDescription:
 		Replies the date of the last change of the file.
 		:rtype: float|None
 		"""
-		return self.__change
+		if not self.__has_change_date:
+			self.__has_change_date = True
+			self.__change_date = genutils.get_file_last_change(self.__output_filename)
+		return self.__change_date
 
 	@property
 	def use_biber(self) -> bool:

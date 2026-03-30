@@ -29,6 +29,7 @@ from typing import override
 from autolatex2.tex.mathmode import MathMode
 from autolatex2.tex.parser import Parser
 from autolatex2.tex.texobservers import Observer
+from autolatex2.tex.utils import TeXMacroParameter
 from autolatex2.utils.i18n import T
 
 
@@ -50,29 +51,29 @@ class TeXParser(Parser):
 		"""
 		Constructor.
 		"""
-		self.__put_back_text = ''
-		self.__default_text_mode_macros = None
-		self.__default_math_mode_macros = None
-		self.__default_text_mode_active_characters = None
-		self.__default_math_mode_active_characters = None
-		self.__default_comment_characters = None
-		self.__observer = None
-		self.__filename = None
-		self.__math_mode = None
-		self.__text_mode_macros = None
-		self.__math_mode_macros = None
-		self.__text_mode_active_characters = None
-		self.__math_mode_active_characters = None
-		self.__comment_characters = None
-		self.__separators = []
-		self.__stop_parsing = False
+		self.__put_back_text : str | None = ''
+		self.__default_text_mode_macros : dict[str,str] | None = None
+		self.__default_math_mode_macros : dict[str,str] | None  = None
+		self.__default_text_mode_active_characters : dict[str,str] | None = None
+		self.__default_math_mode_active_characters : dict[str,str] | None = None
+		self.__default_comment_characters : list[str] | None = None
+		self.__observer : Observer | None = None
+		self.__filename : str | None = None
+		self.__math_mode : MathMode | None = None
+		self.__text_mode_macros : dict[str,str] | None = None
+		self.__math_mode_macros : dict[str,str] | None = None
+		self.__text_mode_active_characters : dict[str,str] | None = None
+		self.__math_mode_active_characters : dict[str,str] | None = None
+		self.__comment_characters : list[str] | None = None
+		self.__separators : list[str] = []
+		self.__stop_parsing : bool = False
 
 	@property
-	def default_text_mode_macros(self) -> dict:
+	def default_text_mode_macros(self) -> dict[str,str]:
 		"""
 		Definition of the default text-mode macros.
 		:return: the macros in text mode.
-		:rtype: dict[str : str]
+		:rtype: dict[str,str]
 		"""
 		if self.__default_text_mode_macros is None:
 			self.__default_text_mode_macros = {
@@ -224,11 +225,11 @@ class TeXParser(Parser):
 		return self.__default_text_mode_macros
 
 	@property
-	def default_math_mode_macros(self) -> dict:
+	def default_math_mode_macros(self) -> dict[str,str]:
 		"""
 		Definition of the default math-mode macros.
 		:return: the macros in math mode.
-		:rtype: dict[str : str]
+		:rtype: dict[str,str]
 		"""
 		if self.__default_math_mode_macros is None:
 			self.__default_math_mode_macros = {
@@ -364,22 +365,22 @@ class TeXParser(Parser):
 		return self.__default_math_mode_macros
 
 	@property
-	def default_text_mode_active_characters(self) -> dict:
+	def default_text_mode_active_characters(self) -> dict[str,str]:
 		"""
 		Definitions of the default active characters in text mode.
 		:return: the active characters in text mode.
-		:rtype: dict[str : str]
+		:rtype: dict[str,str]
 		"""
 		if self.__default_text_mode_active_characters is None:
 			self.__default_text_mode_active_characters = dict()
 		return self.__default_text_mode_active_characters
 
 	@property
-	def default_math_mode_active_characters(self) -> dict:
+	def default_math_mode_active_characters(self) -> dict[str,str]:
 		"""
 		Definitions of the default active characters in math mode.
 		:return: the active characters in math mode.
-		:rtype: dict[str : str]
+		:rtype: dict[str,str]
 		"""
 		if self.__default_math_mode_active_characters is None:
 			self.__default_math_mode_active_characters = {
@@ -389,7 +390,7 @@ class TeXParser(Parser):
 		return self.__default_math_mode_active_characters
 
 	@property
-	def default_comment_characters(self) -> list:
+	def default_comment_characters(self) -> list[str]:
 		"""
 		Definition of the default characters for comments.
 		:return: the list of comment characters.
@@ -429,20 +430,20 @@ class TeXParser(Parser):
 
 	@property
 	@override
-	def math_mode(self) -> MathMode:
+	def math_mode(self) -> MathMode | None:
 		"""
 		Replies if the math mode is active.
 		:return: The math mode.
-		:rtype: MathMode
+		:rtype: MathMode | None
 		"""
 		return self.__math_mode
 
 	@math_mode.setter
-	def math_mode(self, mode : MathMode):
+	def math_mode(self, mode : MathMode | None):
 		"""
 		Set if the math mode is active.
 		:param mode: The math mode or None if the parser must be in text mode.
-		:type mode: MathMode
+		:type mode: MathMode | None
 		"""
 		self.__math_mode = mode
 
@@ -452,7 +453,7 @@ class TeXParser(Parser):
 		List of the macros in text mode.
 		See the explanation in the class documentation for the format of the macro prototype.
 		:return: the dictionary of macros; keys are macro names; values are macro prototype.
-		:rtype: dict[str : str]
+		:rtype: dict[str,str]
 		"""
 		self.__ensure_text_mode_macros()
 		return self.__text_mode_macros
@@ -537,7 +538,7 @@ class TeXParser(Parser):
 		List of the active characters in math mode.
 		See the explanation in the class documentation for the format of the macro prototype.
 		:return: the dictionary of macros; keys are active characters; values are macro prototype.
-		:rtype: dict[str : str]
+		:rtype: dict[str,str]
 		"""
 		self.__ensure_math_mode_active_characters()
 		return self.__math_mode_active_characters
@@ -936,7 +937,7 @@ class TeXParser(Parser):
 			expand_to = self.observer.expand(self, name, name)
 		return expand_to, text
 
-	def __eat_cmd_parameters(self, p_params : str, text : str, macro : str, lineno : int) -> tuple[str,list[str],str]:
+	def __eat_cmd_parameters(self, p_params : str, text : str, macro : str, lineno : int) -> tuple[str,list[TeXMacroParameter],str]:
 		"""
 		Eat the parameters for a macro.
 		:param p_params: The description of the parameters to eat.
@@ -948,10 +949,11 @@ class TeXParser(Parser):
 		:param lineno: The line number.
 		:type lineno: int
 		:return: The tuple (the rest of the text, the array of parameters, the raw representation of the parameters)
-		:rtype: tuple[str,list[dict[str,Any]],str]
+		:rtype: tuple[str,list[TexMacroParameter],str]
 		"""
-		params = []
+		extracted_parameters : list[TeXMacroParameter] = list()
 		raw_params = ''
+		param_index = 0
 		logging.debug(T("Macro prototype of '%s': %s (%s:%d)") % (macro, p_params, self.filename, lineno))
 		for p in re.findall(r'(!?\{}|!?\[[^]]*]|-|\\)', p_params, re.DOTALL):
 			# Eats no significant white spaces
@@ -962,31 +964,47 @@ class TeXParser(Parser):
 				text = text[1:]
 				if prem == '{':
 					context, text = self.__eat_context(text, '\\}')
-					params.append({
-						'eval' : optional != '!',
-						'text' : context })
+					extracted_parameters.append(
+						TeXMacroParameter(
+							index=param_index,
+							macro_name=False,
+							optional=False,
+							evaluable=optional != '!',
+							text=context))
 					raw_params += "{" + context + "}"
 				elif prem == '\\':
 					if optional != '!':
 						# The following macro is expandable
 						c, text = self.__parse_cmd(text, lineno, '\\')
-						params.append({
-							'eval' : True,
-							'text' : c })
+						extracted_parameters.append(
+							TeXMacroParameter(
+								index=param_index,
+								macro_name=True,
+								optional=False,
+								evaluable=True,
+								text=c))
 						raw_params += c
 					else:
 						# The following macro is not expandable
 						r = re.match(r'^([a-zA-Z]+\*?|.)(.*)$', text, re.DOTALL)
 						c = r.group(1)
 						text = r.group(2)
-						params.append({
-							'eval' : False,
-							'text' : c })
+						extracted_parameters.append(
+							TeXMacroParameter(
+								index=param_index,
+								macro_name=True,
+								optional=False,
+								evaluable=False,
+								text=c))
 						raw_params += "\\" + c
 				else:
-					params.append({
-						'eval' : (optional != '!'),
-						'text' : prem })
+					extracted_parameters.append(
+						TeXMacroParameter(
+							index=param_index,
+							macro_name=False,
+							optional=False,
+							evaluable=optional != '!',
+							text=prem))
 					raw_params += prem
 			else:
 				r = re.match(r'^(!?)\[([^]]*)]', p, re.DOTALL)
@@ -996,41 +1014,63 @@ class TeXParser(Parser):
 					prem = text[0:1]
 					if prem == '[':
 						context, text = self.__eat_context(text[1:], ']')
-						params.append({
-								'eval' : (optional != '!'),
-								'text' : context })
+						extracted_parameters.append(
+							TeXMacroParameter(
+								index=param_index,
+								macro_name=False,
+								optional=True,
+								evaluable=optional != '!',
+								text=context))
 						raw_params += "[" + context + "]"
 					else:
-						params.append({
-								'eval' : (optional != '!'),
-								'text' : default_val })
+						# Assume default value
+						extracted_parameters.append(
+							TeXMacroParameter(
+								index=param_index,
+								macro_name=False,
+								optional=True,
+								evaluable=optional != '!',
+								text=default_val))
 				elif p == '\\': # Eats a TeX command name
 					r = re.match(r'^\\([a-zA-Z]+\*?|.)(.*)$', text, re.DOTALL)
 					if r:
 						n = r.group(1)
 						text = r.group(2)
-						params.append({
-								'eval' : True,
-								'text' : n })
+						extracted_parameters.append(
+							TeXMacroParameter(
+								index=param_index,
+								macro_name=True,
+								optional=False,
+								evaluable=True,
+								text=n))
 						raw_params += "\\" + n
 					else:
 						msg = text[0:50]
 						msg = re.sub('[\n\r]', '\\n', msg, 0, re.DOTALL)
 						msg = msg.replace("\t", "\\t")
 						logging.warning(T("expected a TeX macro for expanding the macro %s, here: '%s' (%s:%d)") % (macro, msg, self.filename, lineno))
-						params.append({
-								'eval' : 1,
-								'text' : '' })
+						extracted_parameters.append(
+							TeXMacroParameter(
+								index=param_index,
+								macro_name=True,
+								optional=False,
+								evaluable=True,
+								text=''))
 						raw_params += "\\"
 				elif p == '-': # Eats until the end of the current context
 					context, text = self.__eat_context(text, '\\}')
-					params.append({
-							'eval' : True,
-							'text' : context })
+					extracted_parameters.append(
+						TeXMacroParameter(
+							index=param_index,
+							macro_name=False,
+							optional=False,
+							evaluable=True,
+							text=context))
 					raw_params += context
 				else:
 					raise Exception(T("unable to recognize the following argument specification: %s") % p)
-		return text, params, raw_params
+			param_index = param_index + 1
+		return text, extracted_parameters, raw_params
 
 
 	def __eat_context(self, text : str, end_delim : str) -> tuple[str,str]:

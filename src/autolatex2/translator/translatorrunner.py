@@ -31,10 +31,10 @@ from importlib import util as import_lib_util
 import glob
 from typing import override, Any
 
+from autolatex2.config.configobj import Config
 from autolatex2.translator.translatorobj import Translator
 from autolatex2.translator.translatorrepository import TranslatorRepository
 import autolatex2.utils.utilfunctions as genutils
-import autolatex2.translator.debugtranslator as debug_translator
 from autolatex2.utils.extlogging import LogLevel
 from autolatex2.utils.i18n import T
 
@@ -61,9 +61,9 @@ class TranslatorRunner:
 		:param repository: The repository of translators.
 		:type repository: TranslatorRepository
 		"""
-		self._repository = repository
-		self.configuration = repository.configuration
-		self.__images = None
+		self._repository : TranslatorRepository = repository
+		self.configuration : Config = repository.configuration
+		self.__images : set[str] | None = None
 
 	@property
 	def translators_repository(self) -> TranslatorRepository:
@@ -92,7 +92,7 @@ class TranslatorRunner:
 		if self.__images is None:
 			self.__images = set(filename)
 		else:
-			self.__images.add(filename)
+			self.__images.update(filename)
 
 	def get_source_images(self) -> set[str]:
 		"""
@@ -107,7 +107,7 @@ class TranslatorRunner:
 
 			# Detect the image formats
 			types = set()
-			for translator in self._repository.included_translators.values():
+			for translator in self._repository.included_translators.translators():
 				types.update(translator.get_input_extensions())
 			types = tuple(types)
 
@@ -145,8 +145,7 @@ class TranslatorRunner:
 			f0 = input_filename
 		candidate_extension = 0
 		candidates = list()
-		incl = self._repository.included_translators
-		for translator in incl.values():
+		for translator in self._repository.included_translators.translators():
 			exts = translator.get_input_extensions()
 			for extension in exts:
 				if f0.endswith(extension):
@@ -358,8 +357,7 @@ class TranslatorRunner:
 	# noinspection DuplicatedCode
 	def generate_image(self, *, in_file : str, translator_name : str = None, out_file : str = None, only_more_recent : bool = True,
 					   pdf_mode : bool = None,
-					   fail_on_error : bool = True,
-					   ignore_debug_feature : bool = False) -> str | None:
+					   fail_on_error : bool = True) -> str | None:
 		"""
 		Generate the image from the given source file by running the appropriate translator.
 		:param in_file: The name of the source file.
@@ -374,9 +372,6 @@ class TranslatorRunner:
 		:type pdf_mode: bool
 		:param fail_on_error: Indicates if the translator generates a Python exception on error during the run. Default value: True.
 		:type fail_on_error: bool
-		:param ignore_debug_feature: When the function is invoked in a debugging context, this parameter forces to ignore the debugging features of
-		 this function. Default value: False.
-		:type ignore_debug_feature: bool
 		:return: The output filename on success; otherwise None on error or if the file is up-to-date
 		:rtype: str | None
 		"""
@@ -470,12 +465,7 @@ class TranslatorRunner:
 		environment['outwoext'] = os.path.join(os.path.dirname(out_file), str(environment['outbasename']))
 		environment['outmode'] = 'pdf' if current_pdf_mode else 'eps'
 
-		if not ignore_debug_feature and debug_translator.python_translator_debugger_enable():
-			environment['runner'] = self
-			environment['python_script_dependencies'] = translator.get_python_dependencies()
-			environment['global_configuration'] = translator.configuration
-			return debug_translator.python_translator_debugger_code(self, environment)
-		elif command_line:
+		if command_line:
 			################################
 			# Run an external command line #
 			################################
@@ -538,9 +528,9 @@ class TranslatorRunner:
 					return None
 			
 			exec_env['interpreter_object'].global_variables.update(environment)
-			sout, serr, exception, retcode = exec_env['interpreter_object'].run(embedded_function)
-			if exception is not None or retcode != 0:
-				errmsg = T("%s\nReturn code: %s") % ((serr or ''), retcode)
+			interpreter_output = exec_env['interpreter_object'].run(embedded_function)
+			if interpreter_output.exception is not None or interpreter_output.return_code != 0:
+				errmsg = T("%s\nReturn code: %s") % ((interpreter_output.error_output or ''), interpreter_output.return_code)
 				if fail_on_error:
 					raise(TranslatorError(errmsg))
 				else:

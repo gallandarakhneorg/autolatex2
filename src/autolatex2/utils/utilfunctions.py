@@ -215,6 +215,10 @@ def get_file_last_change(filename : str) -> float | None:
 	try:
 		t1 = os.path.getmtime(filename)
 		t2 = os.path.getctime(filename)
+		if t1 is None:
+			return t2
+		if t2 is None:
+			return t1
 		return t1 if t1 >= t2 else t2
 	except:
 		return None

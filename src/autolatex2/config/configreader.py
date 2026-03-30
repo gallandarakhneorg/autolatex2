@@ -41,7 +41,7 @@ class OldStyleConfigReader:
 	"""
 	
 	def __init__(self):
-		self._base_dir = os.getcwd()
+		self._base_dir : str = os.getcwd()
 		ensure_autolatex_logging_levels()
 
 	def _read_viewer(self, content : Any, config : Config):
@@ -373,6 +373,7 @@ class OldStyleConfigReader:
 			return value.lower()
 		return default
 
+	# noinspection PyBroadException,DuplicatedCode
 	def read_system_config_safely(self, config : Config = None) -> Config:
 		"""
 		Read the configuration file at the system level without failing if the file does not exist.
@@ -391,6 +392,7 @@ class OldStyleConfigReader:
 				pass
 		return config
 
+	# noinspection PyBroadException,DuplicatedCode
 	def read_user_config_safely(self, config : Config = None) -> Config:
 		"""
 		Read the configuration file at the user level without failing if the file does not exist.
@@ -409,6 +411,7 @@ class OldStyleConfigReader:
 				pass
 		return config
 
+	# noinspection PyBroadException
 	def read_document_config_safely(self, filename : str, config : Config = None) -> Config:
 		"""
 		Read the configuration file at the document level without failing if the file does not exist.

@@ -28,6 +28,7 @@ from typing import override, Any
 
 from autolatex2.translator.interpreters.abstractinterpreter import AbstractTranslatorInterpreter
 from autolatex2.config.configobj import Config
+from autolatex2.utils.runner import ScriptOutput
 
 
 class TranslatorInterpreter(AbstractTranslatorInterpreter):
@@ -114,14 +115,14 @@ class TranslatorInterpreter(AbstractTranslatorInterpreter):
 		return "_%s" % name
 
 	@override
-	def run(self, code : str) -> tuple[str,str,Any,int]:
+	def run(self, code : str) -> ScriptOutput:
 		"""
 		Run the interpreter.
 		:param code: The Shell code to interpret.
 		:type code: int
-		:return: A quadruplet containing the standard output, the
+		:return: An output containing the standard output, the
 				 error output, the exception, the return code.
-		:rtype: tuple[str,str,Any,int]
+		:rtype: ScriptOutput
 		"""
 		full_code = "#!/usr/bin/env sh\n"
 		for name in self.global_variables:

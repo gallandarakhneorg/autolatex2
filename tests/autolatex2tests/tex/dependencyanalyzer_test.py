@@ -27,6 +27,7 @@ import pathlib
 from typing import override
 
 from autolatex2.tex import dependencyanalyzer
+from autolatex2.tex.utils import FileType
 from autolatex2tests.abstract_base_test import AbstractBaseTest
 
 class TestDependencyAnalyzer(AbstractBaseTest):
@@ -49,7 +50,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.__lastBasename = os.path.basename(name)
 		f.file.write(bytes(content, 'UTF-8'))
 		f.seek(0)
-		f.close
+		f.close()
 		for filename in filenames:
 			fn = re.sub(r'\?\?\?', self.__lastFilename, filename)
 			pathlib.Path(os.path.join(self.__lastDirname, fn)).touch()
@@ -75,7 +76,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
 
 	def test_input_nofile(self):
@@ -92,7 +93,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
 
 	def test_input_file(self):
@@ -109,10 +110,11 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(1, len(types))
-		self.assertTrue('tex' in types)
-		texDeps = analyzer.get_dependencies('tex')
-		self.assertEqual({os.path.join(self.__lastDirname, "myfile.tex")}, texDeps)
-		types = analyzer.get_bib_databases()
+		self.assertIn(FileType.tex, types)
+		tex_deps = analyzer.get_dependencies_for_type(FileType.tex)
+		self.assertEqual(1, len(tex_deps))
+		self.assertIn(os.path.join(self.__lastDirname, "myfile.tex"), tex_deps)
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
 
 	def test_include_nofile(self):
@@ -129,7 +131,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
 
 	def test_include_file(self):
@@ -146,10 +148,11 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(1, len(types))
-		self.assertTrue('tex' in types)
-		texDeps = analyzer.get_dependencies('tex')
-		self.assertEqual({os.path.join(self.__lastDirname, "myfile.tex")}, texDeps)
-		types = analyzer.get_bib_databases()
+		self.assertIn(FileType.tex, types)
+		tex_deps = analyzer.get_dependencies_for_type(FileType.tex)
+		self.assertEqual(1, len(tex_deps))
+		self.assertIn(os.path.join(self.__lastDirname, "myfile.tex"), tex_deps)
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
 
 	def test_makeindex(self):
@@ -166,7 +169,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
 
 	def test_printindex(self):
@@ -183,7 +186,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
 
 	def test_multibib(self):
@@ -200,7 +203,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
 
 	def test_biblatex(self):
@@ -217,7 +220,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
 
 	def test_biber(self):
@@ -234,7 +237,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
 
 	def test_usepackage_nofile(self):
@@ -251,7 +254,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
 
 	def test_usepackage_file(self):
@@ -268,10 +271,11 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(1, len(types))
-		self.assertTrue('sty' in types)
-		texDeps = analyzer.get_dependencies('sty')
-		self.assertEqual({os.path.join(self.__lastDirname, "mypackage.sty")}, texDeps)
-		types = analyzer.get_bib_databases()
+		self.assertIn(FileType.sty, types)
+		tex_deps = analyzer.get_dependencies_for_type(FileType.sty)
+		self.assertEqual(1, len(tex_deps))
+		self.assertIn(os.path.join(self.__lastDirname, "mypackage.sty"), tex_deps)
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
 
 	def test_requirepackage_nofile(self):
@@ -288,7 +292,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
 
 	def test_requirepackage_file(self):
@@ -305,10 +309,11 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(1, len(types))
-		self.assertTrue('sty' in types)
-		texDeps = analyzer.get_dependencies('sty')
-		self.assertEqual({os.path.join(self.__lastDirname, "mypackage.sty")}, texDeps)
-		types = analyzer.get_bib_databases()
+		self.assertIn(FileType.sty, types)
+		tex_deps = analyzer.get_dependencies_for_type(FileType.sty)
+		self.assertEqual(1, len(tex_deps))
+		self.assertIn(os.path.join(self.__lastDirname, "mypackage.sty"), tex_deps)
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
 
 	def test_documentclass_nofile(self):
@@ -325,7 +330,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
 
 	def test_documentclass_file(self):
@@ -342,10 +347,11 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(1, len(types))
-		self.assertTrue('cls' in types)
-		texDeps = analyzer.get_dependencies('cls')
-		self.assertEqual({os.path.join(self.__lastDirname, "myarticle.cls")}, texDeps)
-		types = analyzer.get_bib_databases()
+		self.assertIn(FileType.cls, types)
+		tex_deps = analyzer.get_dependencies_for_type(FileType.cls)
+		self.assertEqual(1, len(tex_deps))
+		self.assertIn(os.path.join(self.__lastDirname, "myarticle.cls"), tex_deps)
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
 
 	def test_bibliography_nofile(self):
@@ -362,7 +368,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
 
 	def test_bibliography_file(self):
@@ -378,13 +384,13 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertFalse(analyzer.is_makeindex)
 
 		types = analyzer.get_dependency_types()
-		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
 		self.assertEqual(1, len(types))
-		self.assertTrue(self.__lastBasename in types)
-		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		types = analyzer.get_bibliography_scopes()
+		self.assertEqual(1, len(types))
+		self.assertIn(self.__lastBasename, types)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, self.__lastBasename)
 		self.assertEqual(1, len(dbs))
-		self.assertEqual({os.path.join(self.__lastDirname, "mybib.bib")}, dbs)
+		self.assertIn(os.path.join(self.__lastDirname, "mybib.bib"), dbs)
 
 	def test_bibliography_files(self):
 		analyzer = self.___run('\\documentclass{article}\\begin{document}\\bibliography{mybib,mybib1}\\end{document}',
@@ -400,14 +406,14 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertFalse(analyzer.is_makeindex)
 
 		types = analyzer.get_dependency_types()
-		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
 		self.assertEqual(1, len(types))
-		self.assertTrue(self.__lastBasename in types)
-		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		types = analyzer.get_bibliography_scopes()
+		self.assertEqual(1, len(types))
+		self.assertIn(self.__lastBasename, types)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, self.__lastBasename)
 		self.assertEqual(2, len(dbs))
-		self.assertTrue(os.path.join(self.__lastDirname, "mybib.bib") in dbs)
-		self.assertTrue(os.path.join(self.__lastDirname, "mybib1.bib") in dbs)
+		self.assertIn(os.path.join(self.__lastDirname, "mybib.bib"), dbs)
+		self.assertIn(os.path.join(self.__lastDirname, "mybib1.bib"), dbs)
 
 	def test_bibliographyXXX_nomultibib_nofile(self):
 		analyzer = self.___run('\\documentclass{article}\\begin{document}\\bibliographyXXX{mybib}\\end{document}')
@@ -423,7 +429,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
 
 	def test_bibliographyXXX_nomultibib_file(self):
@@ -440,7 +446,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
 
 	def test_bibliographyXXX_nomultibib_files(self):
@@ -458,7 +464,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
 
 	def test_bibliographyXXX_multibib_nofile(self):
@@ -475,7 +481,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
 
 	def test_bibliographyXXX_multibib_file(self):
@@ -491,13 +497,13 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertFalse(analyzer.is_makeindex)
 
 		types = analyzer.get_dependency_types()
-		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
 		self.assertEqual(1, len(types))
-		self.assertTrue('XXX' in types)
-		dbs = analyzer.get_bib_dependencies('bib', 'XXX')
+		types = analyzer.get_bibliography_scopes()
+		self.assertEqual(1, len(types))
+		self.assertIn('XXX', types)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, 'XXX')
 		self.assertEqual(1, len(dbs))
-		self.assertEqual({os.path.join(self.__lastDirname, "mybib.bib")}, dbs)
+		self.assertIn(os.path.join(self.__lastDirname, "mybib.bib"), dbs)
 
 	def test_bibliographyXXX_multibib_files(self):
 		analyzer = self.___run('\\documentclass{article}\\usepackage{multibib}\\begin{document}\\bibliographyXXX{mybib,mybib1}\\end{document}',
@@ -513,14 +519,14 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertFalse(analyzer.is_makeindex)
 
 		types = analyzer.get_dependency_types()
-		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
 		self.assertEqual(1, len(types))
-		self.assertTrue('XXX' in types)
-		dbs = analyzer.get_bib_dependencies('bib', 'XXX')
+		types = analyzer.get_bibliography_scopes()
+		self.assertEqual(1, len(types))
+		self.assertIn('XXX', types)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, 'XXX')
 		self.assertEqual(2, len(dbs))
-		self.assertTrue(os.path.join(self.__lastDirname, "mybib.bib") in dbs)
-		self.assertTrue(os.path.join(self.__lastDirname, "mybib1.bib") in dbs)
+		self.assertIn(os.path.join(self.__lastDirname, "mybib.bib"), dbs)
+		self.assertIn(os.path.join(self.__lastDirname, "mybib1.bib"), dbs)
 
 	def test_bibliographystyle_nofile(self):
 		analyzer = self.___run('\\documentclass{article}\\begin{document}\\bibliographystyle{mystyle}\\end{document}')
@@ -536,7 +542,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
 
 	def test_bibliographystyle_file(self):
@@ -552,13 +558,13 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertFalse(analyzer.is_makeindex)
 
 		types = analyzer.get_dependency_types()
-		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
 		self.assertEqual(1, len(types))
-		self.assertTrue(self.__lastBasename in types)
-		dbs = analyzer.get_bib_dependencies('bst', self.__lastBasename)
+		types = analyzer.get_bibliography_scopes()
+		self.assertEqual(1, len(types))
+		self.assertIn(self.__lastBasename, types)
+		dbs = analyzer.get_dependencies_for_type(FileType.bst, self.__lastBasename)
 		self.assertEqual(1, len(dbs))
-		self.assertEqual({os.path.join(self.__lastDirname, "mystyle.bst")}, dbs)
+		self.assertIn(os.path.join(self.__lastDirname, "mystyle.bst"), dbs)
 
 	def test_bibliographysection_nofile(self):
 		analyzer = self.___run('\\documentclass{article}\\usepackage{bibunits}\\begin{document}\\begin{bibliographysection}blablabla\\end{bibliographysection}\\end{document}')
@@ -574,9 +580,9 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
-		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, self.__lastBasename)
 		self.assertEqual(0, len(dbs))
 
 	def test_bibliographysection_otherfile(self):
@@ -593,9 +599,9 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
-		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, self.__lastBasename)
 		self.assertEqual(0, len(dbs))
 
 	def test_bibliographysection_file(self):
@@ -611,13 +617,13 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertFalse(analyzer.is_makeindex)
 
 		types = analyzer.get_dependency_types()
-		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
 		self.assertEqual(1, len(types))
-		self.assertTrue(self.__lastBasename in types)
-		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		types = analyzer.get_bibliography_scopes()
+		self.assertEqual(1, len(types))
+		self.assertIn(self.__lastBasename, types)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, self.__lastBasename)
 		self.assertEqual(1, len(dbs))
-		self.assertTrue(os.path.join(self.__lastDirname, "biblio.bib") in dbs)
+		self.assertIn(os.path.join(self.__lastDirname, "biblio.bib"), dbs)
 
 	def test_bibliographysection_files(self):
 		analyzer = self.___run('\\documentclass{article}\\usepackage{bibunits}\\begin{document}\\begin{bibliographysection}blablabla\\end{bibliographysection}\\end{document}', 'biblio.bib', 'mybib.bib')
@@ -632,13 +638,13 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertFalse(analyzer.is_makeindex)
 
 		types = analyzer.get_dependency_types()
-		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
 		self.assertEqual(1, len(types))
-		self.assertTrue(self.__lastBasename in types)
-		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		types = analyzer.get_bibliography_scopes()
+		self.assertEqual(1, len(types))
+		self.assertIn(self.__lastBasename, types)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, self.__lastBasename)
 		self.assertEqual(1, len(dbs))
-		self.assertTrue(os.path.join(self.__lastDirname, "biblio.bib") in dbs)
+		self.assertIn(os.path.join(self.__lastDirname, "biblio.bib"), dbs)
 
 	def test_bibliographyslide_nofile(self):
 		analyzer = self.___run('\\documentclass{article}\\usepackage{bibunits}\\begin{document}\\bibliographyslide\\end{document}')
@@ -654,9 +660,9 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
-		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, self.__lastBasename)
 		self.assertEqual(0, len(dbs))
 
 	def test_bibliographyslide_otherfile(self):
@@ -673,9 +679,9 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
-		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, self.__lastBasename)
 		self.assertEqual(0, len(dbs))
 
 	def test_bibliographyslide_file(self):
@@ -691,13 +697,13 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertFalse(analyzer.is_makeindex)
 
 		types = analyzer.get_dependency_types()
-		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
 		self.assertEqual(1, len(types))
-		self.assertTrue(self.__lastBasename in types)
-		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		types = analyzer.get_bibliography_scopes()
+		self.assertEqual(1, len(types))
+		self.assertIn(self.__lastBasename, types)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, self.__lastBasename)
 		self.assertEqual(1, len(dbs))
-		self.assertTrue(os.path.join(self.__lastDirname, "biblio.bib") in dbs)
+		self.assertIn(os.path.join(self.__lastDirname, "biblio.bib"), dbs)
 
 	def test_bibliographyslide_files(self):
 		analyzer = self.___run('\\documentclass{article}\\usepackage{bibunits}\\begin{document}\\bibliographyslide\\end{document}', 'biblio.bib', 'mybiblio.bib')
@@ -712,13 +718,13 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertFalse(analyzer.is_makeindex)
 
 		types = analyzer.get_dependency_types()
-		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
 		self.assertEqual(1, len(types))
-		self.assertTrue(self.__lastBasename in types)
-		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		types = analyzer.get_bibliography_scopes()
+		self.assertEqual(1, len(types))
+		self.assertIn(self.__lastBasename, types)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, self.__lastBasename)
 		self.assertEqual(1, len(dbs))
-		self.assertTrue(os.path.join(self.__lastDirname, "biblio.bib") in dbs)
+		self.assertIn(os.path.join(self.__lastDirname, "biblio.bib"), dbs)
 
 	def test_putbib_param_nofile(self):
 		analyzer = self.___run('\\documentclass{article}\\usepackage{bibunits}\\begin{document}\\putbib[mybiblio1]\\end{document}')
@@ -734,9 +740,9 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
-		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, self.__lastBasename)
 		self.assertEqual(0, len(dbs))
 
 	def test_putbib_param_otherfile(self):
@@ -753,9 +759,9 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
-		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, self.__lastBasename)
 		self.assertEqual(0, len(dbs))
 
 	def test_putbib_param_file(self):
@@ -771,13 +777,13 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertFalse(analyzer.is_makeindex)
 
 		types = analyzer.get_dependency_types()
-		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
 		self.assertEqual(1, len(types))
-		self.assertTrue(self.__lastBasename in types)
-		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		types = analyzer.get_bibliography_scopes()
+		self.assertEqual(1, len(types))
+		self.assertIn(self.__lastBasename, types)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, self.__lastBasename)
 		self.assertEqual(1, len(dbs))
-		self.assertTrue(os.path.join(self.__lastDirname, "mybiblio1.bib") in dbs)
+		self.assertIn(os.path.join(self.__lastDirname, "mybiblio1.bib"), dbs)
 
 	def test_putbib_param_files(self):
 		analyzer = self.___run('\\documentclass{article}\\usepackage{bibunits}\\begin{document}\\putbib[mybiblio1,mybiblio2]\\end{document}', 'mybiblio0.bib', 'mybiblio1.bib', 'mybiblio2.bib')
@@ -792,14 +798,14 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertFalse(analyzer.is_makeindex)
 
 		types = analyzer.get_dependency_types()
-		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
 		self.assertEqual(1, len(types))
-		self.assertTrue(self.__lastBasename in types)
-		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		types = analyzer.get_bibliography_scopes()
+		self.assertEqual(1, len(types))
+		self.assertIn(self.__lastBasename, types)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, self.__lastBasename)
 		self.assertEqual(2, len(dbs))
-		self.assertTrue(os.path.join(self.__lastDirname, "mybiblio1.bib") in dbs)
-		self.assertTrue(os.path.join(self.__lastDirname, "mybiblio2.bib") in dbs)
+		self.assertIn(os.path.join(self.__lastDirname, "mybiblio1.bib"), dbs)
+		self.assertIn(os.path.join(self.__lastDirname, "mybiblio2.bib"), dbs)
 
 	def test_putbib_noparam_nofile(self):
 		analyzer = self.___run('\\documentclass{article}\\usepackage{bibunits}\\begin{document}\\putbib\\end{document}')
@@ -815,9 +821,9 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
-		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, self.__lastBasename)
 		self.assertEqual(0, len(dbs))
 
 	def test_putbib_noparam_otherfile(self):
@@ -834,9 +840,9 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
-		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, self.__lastBasename)
 		self.assertEqual(0, len(dbs))
 
 	def test_putbib_noparam_file(self):
@@ -853,13 +859,13 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertFalse(analyzer.is_makeindex)
 
 		types = analyzer.get_dependency_types()
-		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
 		self.assertEqual(1, len(types))
-		self.assertTrue(self.__lastBasename in types)
-		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		types = analyzer.get_bibliography_scopes()
+		self.assertEqual(1, len(types))
+		self.assertIn(self.__lastBasename, types)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, self.__lastBasename)
 		self.assertEqual(1, len(dbs))
-		self.assertTrue(os.path.join(self.__lastDirname, self.__lastBasename + ".bib") in dbs)
+		self.assertIn(os.path.join(self.__lastDirname, self.__lastBasename + ".bib"), dbs)
 
 
 	def test_putbib_noparam_nofile_dflt(self):
@@ -876,9 +882,9 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
-		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, self.__lastBasename)
 		self.assertEqual(0, len(dbs))
 
 	def test_putbib_noparam_otherfile_dflt(self):
@@ -895,9 +901,9 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
-		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, self.__lastBasename)
 		self.assertEqual(0, len(dbs))
 
 	def test_putbib_noparam_file_dflt(self):
@@ -914,13 +920,13 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertFalse(analyzer.is_makeindex)
 
 		types = analyzer.get_dependency_types()
-		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
 		self.assertEqual(1, len(types))
-		self.assertTrue(self.__lastBasename in types)
-		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		types = analyzer.get_bibliography_scopes()
+		self.assertEqual(1, len(types))
+		self.assertIn(self.__lastBasename, types)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, self.__lastBasename)
 		self.assertEqual(1, len(dbs))
-		self.assertTrue(os.path.join(self.__lastDirname, "mybib.bib") in dbs)
+		self.assertIn(os.path.join(self.__lastDirname, "mybib.bib"), dbs)
 
 
 	def test_defaultbibliography__noexplicit_nofile(self):
@@ -937,9 +943,9 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
-		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, self.__lastBasename)
 		self.assertEqual(0, len(dbs))
 
 
@@ -957,9 +963,9 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
-		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, self.__lastBasename)
 		self.assertEqual(0, len(dbs))
 
 
@@ -976,13 +982,13 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertFalse(analyzer.is_makeindex)
 
 		types = analyzer.get_dependency_types()
-		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
 		self.assertEqual(1, len(types))
-		self.assertTrue(self.__lastBasename in types)
-		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		types = analyzer.get_bibliography_scopes()
+		self.assertEqual(1, len(types))
+		self.assertIn(self.__lastBasename, types)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, self.__lastBasename)
 		self.assertEqual(1, len(dbs))
-		self.assertTrue(os.path.join(self.__lastDirname, "mybib.bib") in dbs)
+		self.assertIn(os.path.join(self.__lastDirname, "mybib.bib"), dbs)
 
 	def test_defaultbibliography__noexplicit_files(self):
 		analyzer = self.___run('\\documentclass{article}\\begin{document}\\defaultbibliography{mybib,mybib1,mybib2}\\end{document}', 'mybib.bib', 'mybib1.bib')
@@ -997,14 +1003,14 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertFalse(analyzer.is_makeindex)
 
 		types = analyzer.get_dependency_types()
-		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
 		self.assertEqual(1, len(types))
-		self.assertTrue(self.__lastBasename in types)
-		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		types = analyzer.get_bibliography_scopes()
+		self.assertEqual(1, len(types))
+		self.assertIn(self.__lastBasename, types)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, self.__lastBasename)
 		self.assertEqual(2, len(dbs))
-		self.assertTrue(os.path.join(self.__lastDirname, "mybib.bib") in dbs)
-		self.assertTrue(os.path.join(self.__lastDirname, "mybib1.bib") in dbs)
+		self.assertIn(os.path.join(self.__lastDirname, "mybib.bib"), dbs)
+		self.assertIn(os.path.join(self.__lastDirname, "mybib1.bib"), dbs)
 
 	def test_defaultbibliography__explicit_nofile(self):
 		analyzer = self.___run('\\documentclass{article}\\bibliography{mybib2}\\begin{document}\\defaultbibliography{mybib}\\end{document}')
@@ -1020,9 +1026,9 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
-		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, self.__lastBasename)
 		self.assertEqual(0, len(dbs))
 
 
@@ -1040,9 +1046,9 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
-		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, self.__lastBasename)
 		self.assertEqual(0, len(dbs))
 
 
@@ -1059,13 +1065,13 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertFalse(analyzer.is_makeindex)
 
 		types = analyzer.get_dependency_types()
-		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
 		self.assertEqual(1, len(types))
-		self.assertTrue(self.__lastBasename in types)
-		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		types = analyzer.get_bibliography_scopes()
+		self.assertEqual(1, len(types))
+		self.assertIn(self.__lastBasename, types)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, self.__lastBasename)
 		self.assertEqual(1, len(dbs))
-		self.assertTrue(os.path.join(self.__lastDirname, "mybib2.bib") in dbs)
+		self.assertIn(os.path.join(self.__lastDirname, "mybib2.bib"), dbs)
 
 
 	def test_defaultbibliography__explicit_files(self):
@@ -1081,13 +1087,13 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertFalse(analyzer.is_makeindex)
 
 		types = analyzer.get_dependency_types()
-		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
 		self.assertEqual(1, len(types))
-		self.assertTrue(self.__lastBasename in types)
-		dbs = analyzer.get_bib_dependencies('bib', self.__lastBasename)
+		types = analyzer.get_bibliography_scopes()
+		self.assertEqual(1, len(types))
+		self.assertIn(self.__lastBasename, types)
+		dbs = analyzer.get_dependencies_for_type(FileType.bib, self.__lastBasename)
 		self.assertEqual(1, len(dbs))
-		self.assertTrue(os.path.join(self.__lastDirname, "mybib2.bib") in dbs)
+		self.assertIn(os.path.join(self.__lastDirname, "mybib2.bib"), dbs)
 
 
 	def test_defaultbibliographystyle__noexplicit_nofile(self):
@@ -1104,9 +1110,9 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
-		dbs = analyzer.get_bib_dependencies('bst', self.__lastBasename)
+		dbs = analyzer.get_dependencies_for_type(FileType.bst, self.__lastBasename)
 		self.assertEqual(0, len(dbs))
 
 
@@ -1124,9 +1130,9 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
-		dbs = analyzer.get_bib_dependencies('bst', self.__lastBasename)
+		dbs = analyzer.get_dependencies_for_type(FileType.bst, self.__lastBasename)
 		self.assertEqual(0, len(dbs))
 
 
@@ -1143,13 +1149,13 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertFalse(analyzer.is_makeindex)
 
 		types = analyzer.get_dependency_types()
-		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
 		self.assertEqual(1, len(types))
-		self.assertTrue(self.__lastBasename in types)
-		dbs = analyzer.get_bib_dependencies('bst', self.__lastBasename)
+		types = analyzer.get_bibliography_scopes()
+		self.assertEqual(1, len(types))
+		self.assertIn(self.__lastBasename, types)
+		dbs = analyzer.get_dependencies_for_type(FileType.bst, self.__lastBasename)
 		self.assertEqual(1, len(dbs))
-		self.assertTrue(os.path.join(self.__lastDirname, "mybib.bst") in dbs)
+		self.assertIn(os.path.join(self.__lastDirname, "mybib.bst"), dbs)
 
 	def test_defaultbibliographystyle__noexplicit_files(self):
 		analyzer = self.___run('\\documentclass{article}\\begin{document}\\defaultbibliographystyle{mybib}\\end{document}', 'mybib.bst', 'mybib1.bst')
@@ -1164,13 +1170,13 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertFalse(analyzer.is_makeindex)
 
 		types = analyzer.get_dependency_types()
-		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
 		self.assertEqual(1, len(types))
-		self.assertTrue(self.__lastBasename in types)
-		dbs = analyzer.get_bib_dependencies('bst', self.__lastBasename)
+		types = analyzer.get_bibliography_scopes()
+		self.assertEqual(1, len(types))
+		self.assertIn(self.__lastBasename, types)
+		dbs = analyzer.get_dependencies_for_type(FileType.bst, self.__lastBasename)
 		self.assertEqual(1, len(dbs))
-		self.assertTrue(os.path.join(self.__lastDirname, "mybib.bst") in dbs)
+		self.assertIn(os.path.join(self.__lastDirname, "mybib.bst"), dbs)
 
 	def test_defaultbibliographystyle__explicit_nofile(self):
 		analyzer = self.___run('\\documentclass{article}\\bibliographystyle{mybib2}\\begin{document}\\defaultbibliographystyle{mybib}\\end{document}')
@@ -1186,9 +1192,9 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
-		dbs = analyzer.get_bib_dependencies('bst', self.__lastBasename)
+		dbs = analyzer.get_dependencies_for_type(FileType.bst, self.__lastBasename)
 		self.assertEqual(0, len(dbs))
 
 
@@ -1206,9 +1212,9 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 
 		types = analyzer.get_dependency_types()
 		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
+		types = analyzer.get_bibliography_scopes()
 		self.assertEqual(0, len(types))
-		dbs = analyzer.get_bib_dependencies('bst', self.__lastBasename)
+		dbs = analyzer.get_dependencies_for_type(FileType.bst, self.__lastBasename)
 		self.assertEqual(0, len(dbs))
 
 
@@ -1225,13 +1231,13 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertFalse(analyzer.is_makeindex)
 
 		types = analyzer.get_dependency_types()
-		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
 		self.assertEqual(1, len(types))
-		self.assertTrue(self.__lastBasename in types)
-		dbs = analyzer.get_bib_dependencies('bst', self.__lastBasename)
+		types = analyzer.get_bibliography_scopes()
+		self.assertEqual(1, len(types))
+		self.assertIn(self.__lastBasename, types)
+		dbs = analyzer.get_dependencies_for_type(FileType.bst, self.__lastBasename)
 		self.assertEqual(1, len(dbs))
-		self.assertTrue(os.path.join(self.__lastDirname, "mybib2.bst") in dbs)
+		self.assertIn(os.path.join(self.__lastDirname, "mybib2.bst"), dbs)
 
 
 	def test_defaultbibliographystyle__explicit_files(self):
@@ -1247,13 +1253,13 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		self.assertFalse(analyzer.is_makeindex)
 
 		types = analyzer.get_dependency_types()
-		self.assertEqual(0, len(types))
-		types = analyzer.get_bib_databases()
 		self.assertEqual(1, len(types))
-		self.assertTrue(self.__lastBasename in types)
-		dbs = analyzer.get_bib_dependencies('bst', self.__lastBasename)
+		types = analyzer.get_bibliography_scopes()
+		self.assertEqual(1, len(types))
+		self.assertIn(self.__lastBasename, types)
+		dbs = analyzer.get_dependencies_for_type(FileType.bst, self.__lastBasename)
 		self.assertEqual(1, len(dbs))
-		self.assertTrue(os.path.join(self.__lastDirname, "mybib2.bst") in dbs)
+		self.assertIn(os.path.join(self.__lastDirname, "mybib2.bst"), dbs)
 
 
 if __name__ == '__main__':

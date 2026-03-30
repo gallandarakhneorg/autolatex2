@@ -32,8 +32,8 @@ translator_python_dependencies:
     - from packaging import version
 translator_function: |
     if str(_inext).lower() == '.vsdx':
-    	sout,  serr,  sex,  retcode = Runner.run_command('inkscape',  '--version')
-    	Runner.check_runner_status(serr,  sex,  retcode)
+    	runner_output = Runner.run_command('inkscape',  '--version')
+    	Runner.check_runner_status(runner_output)
     	m = re.match('^Inkscape\\s+([0-9a-zA-Z\\._\\-]+)\\s+',  sout,  re.S | re.I)
     	if m:
     		mandatoryVersion = version.parse("0.49")
@@ -41,8 +41,8 @@ translator_function: |
     		if version_number < mandatoryVersion:
     			raise Exception("The convertion from %s needs Inkscape %s or higher" % (_inext,  mandatoryVersion))
     if _pdfmode:
-    	sout, serr, sex, retcode = Runner.run_command('inkscape', '--export-area-page', '--export-type=pdf', '--export-overwrite', '--export-filename=' + _out, _in)
+    	runner_output = Runner.run_command('inkscape', '--export-area-page', '--export-type=pdf', '--export-overwrite', '--export-filename=' + _out, _in)
     else:
-    	sout, serr, sex, retcode = Runner.run_command('inkscape', '--export-area-page', '--export-type=eps', '--export-overwrite', '--export-filename=' + _out, _in)
-    Runner.check_runner_status(serr, sex, retcode)
+    	runner_output = Runner.run_command('inkscape', '--export-area-page', '--export-type=eps', '--export-overwrite', '--export-filename=' + _out, _in)
+    Runner.check_runner_status(runner_output)
 ...

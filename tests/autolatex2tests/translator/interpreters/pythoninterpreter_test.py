@@ -51,25 +51,25 @@ class TestTranslatorInterpreter(AbstractBaseTest):
 
 
 	def test_run_valid1(self):
-		sout, serr, sex, retcode = self.interpreter.run('myvar = \'abc\'')
-		self.assertEqual('', sout)
-		self.assertEqual('', serr)
-		self.assertIsNone(sex)
-		self.assertEqual(0, retcode)
+		output = self.interpreter.run('myvar = \'abc\'')
+		self.assertEqual('', output.standard_output)
+		self.assertEqual('', output.error_output)
+		self.assertIsNone(output.exception)
+		self.assertEqual(0, output.return_code)
 
 	def test_run_valid2(self):
-		sout, serr, sex, retcode = self.interpreter.run('myvar = \'abc\'\nprint(myvar)')
-		self.assertEqual('abc\n', sout)
-		self.assertEqual('', serr)
-		self.assertIsNone(sex)
-		self.assertEqual(0, retcode)
+		output = self.interpreter.run('myvar = \'abc\'\nprint(myvar)')
+		self.assertEqual('abc\n', output.standard_output)
+		self.assertEqual('', output.error_output)
+		self.assertIsNone(output.exception)
+		self.assertEqual(0, output.return_code)
 
 	def test_run_valid3(self):
-		sout, serr, sex, retcode = self.interpreter.run('myvar = \'abc\'\nsys.stderr.write(myvar)')
-		self.assertEqual('', sout)
-		self.assertEqual('abc', serr)
-		self.assertIsNone(sex)
-		self.assertEqual(0, retcode)
+		output = self.interpreter.run('myvar = \'abc\'\nsys.stderr.write(myvar)')
+		self.assertEqual('', output.standard_output)
+		self.assertEqual('abc', output.error_output)
+		self.assertIsNone(output.exception)
+		self.assertEqual(0, output.return_code)
 
 	def test_run_valid4(self):
 		with self.assertRaises(NotImplementedError):

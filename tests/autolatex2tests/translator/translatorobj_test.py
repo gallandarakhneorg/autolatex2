@@ -305,7 +305,7 @@ class TestTranslatorRepositoryInit(AbstractBaseTest):
 		translators = self.repo._read_directory(directory=self.directory, recursive=False, warn=False)
 		self.assertSetEqual(
 				{ 'svg2pdf', 'dot2pdf' },
-				{ k for (k, v) in translators.items() })
+				{ k for k, v in translators })
 		self.assertEqual(
 					os.path.join(self.directory, 'svg2pdf.transdef'),
 					translators['svg2pdf'].filename)
@@ -314,7 +314,7 @@ class TestTranslatorRepositoryInit(AbstractBaseTest):
 		translators = self.repo._read_directory(directory=self.directory, recursive=True, warn=False)
 		self.assertSetEqual(
 				{ 'svg2pdf', 'dot2pdf', 'svg2pdf+tex', 'uml2pdf_umbrello' },
-				{ k for (k, v) in translators.items() })
+				{ k for k, v in translators })
 		self.assertEqual(
 					os.path.join(self.directory, 'subdir', 'svg2pdf.transdef'),
 					translators['svg2pdf'].filename)

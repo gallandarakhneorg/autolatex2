@@ -45,8 +45,8 @@ translator_function: |
     			out_file.write(in_file.read())
     	# Change directory in case the plot file contains relative references to data files
     	os.chdir(workingDir)
-    	sout, serr, sex, retcode = Runner.run_command_to(_out, 'gnuplot', extPlotFile)
-    	Runner.check_runner_status(serr, sex, retcode)
+    	runner_output = Runner.run_command_to(_out, 'gnuplot', extPlotFile)
+    	Runner.check_runner_status(runner_output)
     finally:
     	os.chdir(curdir)
     	genutils.unlink(extPlotFile)

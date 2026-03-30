@@ -50,16 +50,16 @@ translator_function: |
     text = re.sub('[\n\r\t]', ' ', text).strip()
     try:
     	if _pdfmode:
-    		sout, serr, sex, retcode = Runner.run_command('pdflatex', '-shell-escape', '-halt-on-error',
+    		runner_output = Runner.run_command('pdflatex', '-shell-escape', '-halt-on-error',
     			'-interaction', 'batchmode', '-jobname', basename, text)
-    		Runner.check_runner_status(serr, sex, retcode)
+    		Runner.check_runner_status(runner_output)
     	else:
-    		sout, serr, sex, retcode = Runner.run_command('latex', '-shell-escape', '-halt-on-error',
+    		runner_output = Runner.run_command('latex', '-shell-escape', '-halt-on-error',
     			'-interaction', 'batchmode', '-jobname', basename, text)
-    		Runner.check_runner_status(serr, sex, retcode)
+    		Runner.check_runner_status(runner_output)
     		eps_file = os.path.join(_outdir, basename + '.eps')
-    		sout, serr, sex, retcode = Runner.run_command('dvips', '-E', '-o', eps_file, basename)
-    		Runner.check_runner_status(serr, sex, retcode)
+    		runner_output = Runner.run_command('dvips', '-E', '-o', eps_file, basename)
+    		Runner.check_runner_status(runner_output)
     		dvi_file = os.path.join(_outdir, basename + '.dvi')
     		#genutils.unlink(dvi_file)
     finally:

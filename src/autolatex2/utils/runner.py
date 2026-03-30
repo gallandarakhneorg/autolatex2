@@ -28,8 +28,22 @@ import os
 import subprocess
 from abc import ABC
 from typing import override, Any
+from dataclasses import dataclass
 
 from autolatex2.utils.i18n import T
+
+
+@dataclass
+class ScriptOutput:
+	"""
+	Represents the information that is output by an interpreter.
+	"""
+	standard_output : str
+	error_output : str
+	exception : BaseException | None
+	return_code : int
+
+
 
 class CommandExecutionError(Exception):
 
@@ -76,20 +90,18 @@ class Runner(ABC):
 	"""
 
 	@staticmethod
-	def check_runner_status(standard_error, script_exception : Any, return_code : int = 0):
+	def check_runner_status(runner_output : ScriptOutput):
 		"""
 		Helper function that generate the correct running behavior regarding the status of a command.
-		:param standard_error: Standard error output.
-		:param script_exception: Exception during script execution.
-		:param return_code: The return code.
+		:param runner_output: The definition of the output provided by the runner.
 		"""
-		if script_exception:
-			raise script_exception
-		elif return_code != 0:
-			if standard_error:
-				raise Exception(standard_error)
+		if runner_output.exception:
+			raise runner_output.exception
+		elif runner_output.return_code != 0:
+			if runner_output.error_output:
+				raise Exception(runner_output.error_output)
 			else:
-				raise Exception(T("Error when running the command. Return code is %d") % return_code)
+				raise Exception(T("Error when running the command. Return code is %d") % runner_output.return_code)
 
 	@staticmethod
 	def check_runner_exit_code(code : int):
@@ -102,7 +114,7 @@ class Runner(ABC):
 			raise Exception(T("Errorneous command with exit code %d") % code)
 
 	@staticmethod
-	def run_python(script : str, intercept_error : bool = False, local_variables : dict = None, show_script_on_error : bool = True) -> tuple[str,str,Any,int]:
+	def run_python(script : str, intercept_error : bool = False, local_variables : dict = None, show_script_on_error : bool = True) -> ScriptOutput:
 		"""
 		Run a Python script in the current process.
 		:param script: The Python script to run.
@@ -116,9 +128,9 @@ class Runner(ABC):
 		:type local_variables: dict
 		:param show_script_on_error: Indicates if the script must be output on the standard error output in case of an error. Default is True.
 		:type show_script_on_error: bool
-		:return: A quadruplet containing the standard output, the
+		:return: An output containing the standard output, the
 				 error output, the error and the exit code.
-		:rtype: (str,str,exception,int)
+		:rtype: ScriptOutput
 		"""
 		script = script + "\n"
 		code_out = io.StringIO()
@@ -149,7 +161,7 @@ class Runner(ABC):
 		serr = code_err.getvalue()
 		code_out.close()
 		code_err.close()
-		return sout, serr, exception, 0 if exception is None else 255
+		return ScriptOutput(standard_output=sout, error_output=serr, exception=exception, return_code=0 if exception is None else 255)
 
 	@staticmethod
 	def __format_script(script : str) -> str:
@@ -165,19 +177,19 @@ class Runner(ABC):
 
 
 	@staticmethod
-	def run_command(*cmd : str) -> tuple[str,str,Any,int]:
+	def run_command(*cmd : str) -> ScriptOutput:
 		"""
 		Run an external command in a subprocess.
 		:param cmd: The command line to run.
 		:type cmd: list[str]
 		:return: A quadruplet containing the standard output, the
 				 error output, and the exception, the return code.
-		:rtype: tuple[str,str,Any,int]
+		:rtype: ScriptOutput
 		"""
 		return Runner.run_command_to(None, *cmd)
 
 	@staticmethod
-	def run_command_to(redirect_stdout_to : str | None, *cmd : str) -> tuple[str,str,Any,int]:
+	def run_command_to(redirect_stdout_to : str | None, *cmd : str) -> ScriptOutput:
 		"""
 		Run an external command in a subprocess.
 		:param redirect_stdout_to: Specify the path of the file that must receive the standard output.
@@ -186,7 +198,7 @@ class Runner(ABC):
 		:type cmd: list
 		:return: A quadruplet containing the standard output, the
 				 error output, and the exception, the return code.
-		:rtype: tuple[str,str,Any,int]
+		:rtype: ScriptOutput
 		"""
 		if redirect_stdout_to is not None:
 			with open(redirect_stdout_to, "w") as stdout_file:
@@ -205,7 +217,7 @@ class Runner(ABC):
 			sout = sout.decode()
 		if serr is not None and isinstance(serr, bytes):
 			serr = serr.decode()
-		return sout or '', serr or '', sex, return_code
+		return ScriptOutput(standard_output=sout or '', error_output=serr or '', exception=sex, return_code=return_code)
 
 	@staticmethod
 	def run_command_without_redirect(*cmd : str) -> int:
@@ -252,7 +264,7 @@ class Runner(ABC):
 		return cmd
 
 	@staticmethod
-	def run_script(script : str, *interpreter : str) -> tuple[str,str,Any,int]:
+	def run_script(script : str, *interpreter : str) -> ScriptOutput:
 		"""
 		Run a script with the given interpreter.
 		The script is passed to the interpreter on the standard input.
@@ -262,9 +274,9 @@ class Runner(ABC):
 		:type script: str
 		:param interpreter: The command line of the interpreter to use.
 		:type interpreter: str
-		:return: A quadruplet containing the standard output, the
+		:return: An output containing the standard output, the
 				 error output, the exception, the return code.
-		:rtype: tuple[str,str,Any,int]
+		:rtype: ScriptOutput
 		"""
 		out = subprocess.Popen(interpreter, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		sin = script.encode("ascii")
@@ -277,6 +289,6 @@ class Runner(ABC):
 			sout = sout.decode()
 		if serr is not None and isinstance(serr, bytes):
 			serr = serr.decode()
-		return sout or '', serr or '', sex, out.returncode
+		return ScriptOutput(standard_output=sout or '', error_output=serr or '', exception=sex, return_code=out.returncode)
 
 

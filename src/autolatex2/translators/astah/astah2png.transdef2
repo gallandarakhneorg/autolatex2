@@ -114,8 +114,8 @@ translator_function: |
     	cmd.append(javabin)
     	cmd.extend(JAVA_OPTS)
     	cmd.extend(['-cp',  library, 'com.change_vision.jude.cmdline.JudeCommandRunner', '-image', 'all', '-f',  _in,  '-t', 'png', '-o',  outputDir])
-    	sout, serr, sex, retcode = Runner.run_command(*cmd)
-    	Runner.check_runner_status(serr, sex, retcode)
+    	runner_output = Runner.run_command(*cmd)
+    	Runner.check_runner_status(runner_output)
     	# Detect Png files
     	generated_files = list()
     	for file in os.listdir(astahOutputDir):

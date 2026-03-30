@@ -81,8 +81,8 @@ translator_function: |
     					out_file.write(line)
     					out_file.write("\n")
     	os.chdir(plotdir)
-    	sout, serr, sex, retcode = Runner.run_command('gnuplot', plotFile)
-    	if retcode == 0:
+    	runner_output = Runner.run_command('gnuplot', plotFile)
+    	if runner_output.return_code == 0:
     		if not os.path.isfile(epsFile):
     			shutil.move(psFile,  epsFile)
     		if _pdfmode:
@@ -91,14 +91,14 @@ translator_function: |
     					def __init__(self, out):
     						super().__init__()
     						self._out = out
-    					def expand(self, parser, rawtext, name, *parameter) -> str:
+    					def expand(self, parser, rawtext, name, *parameters) -> str:
     						if name == '\\special':
-    							if len(parameter) > 0 and parameter[0] and 'text' in parameter[0] and parameter[0]['text']:
-    								if 'psfile=' in parameter[0]['text']:
+    							if len(parameters) > 0 and parameters[0].text:
+    								if 'psfile=' in parameters[0].text:
     									return "\\put(0,0){\\includegraphics{%s}}" % (self._out)
-    								elif parameter[0]['text'] =='}':
+    								elif parameters[0].text =='}':
     									return name + "}"
-    						return super().expand(parser,  rawtext,  name,  *parameter)
+    						return super().expand(parser,  rawtext,  name,  *parameters)
     				obs = PlotObserver(_out)
     				with open(texFile, 'rt') as texfile_in:
     					content = texfile_in.read()
@@ -110,7 +110,7 @@ translator_function: |
     				genutils.unlink(ptexFile)
     				with open(ptexFile, 'wt') as ptexfile_out:
     					ptexfile_out.write(obs.content)
-    				_runner.generate_image(in_file = epsFile, out_file = _out, only_more_recent = False, ignore_debug_feature = True)
+    				_runner.generate_image(in_file = epsFile, out_file = _out, only_more_recent = False)
     			finally:
     				genutils.unlink(epsFile)
     				if not os.path.isfile(_out):

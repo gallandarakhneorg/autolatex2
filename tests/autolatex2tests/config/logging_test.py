@@ -41,7 +41,7 @@ class TestLoggingConfig(AbstractBaseTest):
 		return self.__config
 
 	def test_get_message(self):
-		self.assertIsNone(self.config.message)
+		self.assertFalse(self.config.message)
 
 	def test_set_message(self):
 		self.config.message = 'abc'

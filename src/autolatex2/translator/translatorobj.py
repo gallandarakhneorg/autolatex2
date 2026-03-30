@@ -54,17 +54,17 @@ class Translator:
 		:type configuration: Config
 		"""
 		self.configuration = configuration
-		self.__name = None
-		self.__basename = None
-		self.__source = None
-		self.__full_source = None
-		self.__target = None
-		self.__variant = None
-		self.__filename = None
-		self.__level = None
-		self.__file_content = None
-		self.__temporary_file_patterns = None
-		self.__target_file_patterns = None
+		self.__name : str = ''
+		self.__basename : str = ''
+		self.__source : str = ''
+		self.__full_source : str = ''
+		self.__target : str = ''
+		self.__variant : str = ''
+		self.__filename : str | None = None
+		self.__level : TranslatorLevel | None = None
+		self.__file_content : dict[str,TransdefLine] | None = None
+		self.__temporary_file_patterns : list[str] | None = None
+		self.__target_file_patterns : list[str] | None = None
 		self.decode(name)
 
 	@classmethod
@@ -179,38 +179,38 @@ class Translator:
 		return self.__basename
 
 	@property
-	def filename(self) -> str:
+	def filename(self) -> str | None:
 		"""
 		Replies the filename of the translator.
 		:return: The filename or None.
-		:rtype: str
+		:rtype: str | None
 		"""
 		return self.__filename
 
 	@filename.setter
-	def filename(self, name : str):
+	def filename(self, name : str | None):
 		"""
 		Set the filename of the translator.
 		:param name: The filename of the translator.
-		:type name: str
+		:type name: str | None
 		"""
 		self.__filename = name
 
 	@property
-	def level(self) -> TranslatorLevel:
+	def level(self) -> TranslatorLevel | None:
 		"""
 		Replies the execution level at which this translator was defined.
 		:return: The execution level of the translator.
-		:rtype: TranslatorLevel
+		:rtype: TranslatorLevel | None
 		"""
 		return self.__level 
 
 	@level.setter
-	def level(self, l : TranslatorLevel):
+	def level(self, l : TranslatorLevel | None):
 		"""
 		Set the execution level at which this translator was defined.
 		:param l: The execution level of the translator.
-		:type l: TranslatorLevel
+		:type l: TranslatorLevel | None
 		"""
 		self.__level  = l
 

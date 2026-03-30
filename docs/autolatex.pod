@@ -595,6 +595,10 @@ Display the dependencies in the form of list of filenames in place of the defaul
 
 Prevents AutoLaTeX from reading the auxilliary files in order to extract file dependencies.
 
+=item B<--times>
+
+Display for each file the last-change time that is considered by AutoLaTeX in the processing stages.
+
 =back
 
 =item I<showimages>

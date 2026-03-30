@@ -49,16 +49,16 @@ class TranslatorConfig:
 	"""
 
 	def __init__(self):	
-		self.__ignore_system_translators = False
-		self.__ignore_user_translators = False
-		self.__ignore_document_translators = False
-		self.__include_paths = list()
-		self.__image_paths = list()
-		self.__images_to_convert = set()
-		self.__recursive_image_path = True
-		self.__inclusions = list((dict(), dict(), dict()))
-		self.__is_translator_enable = True
-		self.__enable_translatorfile_format_1 = False
+		self.__ignore_system_translators : bool = False
+		self.__ignore_user_translators : bool = False
+		self.__ignore_document_translators : bool = False
+		self.__include_paths : list[str] = list()
+		self.__image_paths : list[str] = list()
+		self.__images_to_convert : set[str] = set()
+		self.__recursive_image_path : bool = True
+		self.__inclusions : list[dict[str,bool|None]] = list([dict(), dict(), dict()])
+		self.__is_translator_enable : bool = True
+		self.__enable_translatorfile_format_1 : bool = False
 
 	def reset_internal_attributes(self):
 		"""
@@ -71,7 +71,7 @@ class TranslatorConfig:
 		self.__image_paths = list()
 		self.__images_to_convert = set()
 		self.__recursive_image_path = True
-		self.__inclusions = list((dict(), dict(), dict()))
+		self.__inclusions = list([dict(), dict(), dict()])
 		self.__is_translator_enable = True
 		self.__enable_translatorfile_format_1 = False
 
@@ -109,33 +109,63 @@ class TranslatorConfig:
 
 	@property
 	def ignore_system_translators(self) -> bool:
+		"""
+		Replies if the translators defined at the system level must be ignored or not.
+		:return: True if the translators at the system level are ignored.
+		:rtype: bool
+		"""
 		return self.__ignore_system_translators
 
 	@ignore_system_translators.setter
 	def ignore_system_translators(self, ignore : bool):
+		"""
+		Change the flag that indicates if the translators defined at the system level must be ignored or not.
+		:param ignore: True if the translators at the system level are ignored.
+		:type ignore: bool
+		"""
 		self.__ignore_system_translators = ignore
 
 	@property
 	def ignore_user_translators(self) -> bool:
+		"""
+		Replies if the translators defined at the user level must be ignored or not.
+		:return: True if the translators at the user level are ignored.
+		:rtype: bool
+		"""
 		return self.__ignore_user_translators
 
 	@ignore_user_translators.setter
 	def ignore_user_translators(self, ignore : bool):
+		"""
+		Change the flag that indicates if the translators defined at the user level must be ignored or not.
+		:param ignore: True if the translators at the user level are ignored.
+		:type ignore: bool
+		"""
 		self.__ignore_user_translators = ignore
 
 	@property
 	def ignore_document_translators(self) -> bool:
+		"""
+		Replies if the translators defined at the document level must be ignored or not.
+		:return: True if the translators at the document level are ignored.
+		:rtype: bool
+		"""
 		return self.__ignore_document_translators
 
 	@ignore_document_translators.setter
 	def ignore_document_translators(self, ignore : bool):
+		"""
+		Change the flag that indicates if the translators defined at the document level must be ignored or not.
+		:param ignore: True if the translators at the document level are ignored.
+		:type ignore: bool
+		"""
 		self.__ignore_document_translators = ignore
 
 	@property
 	def include_paths(self) -> list[str]:
 		"""
 		Replies the inclusion paths for the translators.
-		:rtype: list
+		:rtype: list[str]
 		"""
 		return self.__include_paths
 
@@ -143,32 +173,29 @@ class TranslatorConfig:
 	def include_paths(self, path : list[str] | None):
 		"""
 		Set the inclusion paths for the translators.
-		:param path: The inclusion paths.
-		:type path: list
+		:param path: The inclusion paths. None is equivalent to an empty list.
+		:type path: list[str] | None
 		"""
 		if path is None:
 			self.__include_paths = list()
 		else:
-			for p in path:
-				if p is None:
-					raise Exception(T('Illegal None value for the include path'))
+			assert None not in path
 			self.__include_paths = list(path)
 
-	def add_include_path(self, path : str | None):
+	def add_include_path(self, path : str):
 		"""
 		Add a translator path for the translators.
-		:param path: the path to add.
+		:param path: the path to add. None is not allowed
 		:type path: str
 		"""
-		if path is None:
-			raise Exception(T('Illegal None value for the include path'))
+		assert path is not None
 		self.__include_paths.append(path)
 
 	@property
 	def image_paths(self) -> list[str]:
 		"""
 		Replies the image paths for the translators.
-		:rtype: list
+		:rtype: list[str]
 		"""
 		return self.__image_paths
 
@@ -176,18 +203,19 @@ class TranslatorConfig:
 	def image_paths(self, path : list[str] | None):
 		"""
 		Set the image paths for the translators.
-		:param path: The image paths.
-		:type path: list
+		:param path: The image paths. None is equivalet to an empty list.
+		:type path: list[str] | None
 		"""
 		if path is None:
 			self.__image_paths = list()
 		else:
+			assert None not in path
 			self.__image_paths = path
 
 	def add_image_path(self, path : str):
 		"""
 		Add an image path for the translators.
-		:param path: the path to add.
+		:param path: the path to add. None is not allowed.
 		:type path: str
 		"""
 		self.__image_paths.append(path)
@@ -196,7 +224,7 @@ class TranslatorConfig:
 	def images_to_convert(self) -> set[str]:
 		"""
 		Replies the images to convert that are manually specified.
-		:rtype: set
+		:rtype: set[str]
 		"""
 		return self.__images_to_convert
 
@@ -204,7 +232,7 @@ class TranslatorConfig:
 	def images_to_convert(self, images : set[str]):
 		"""
 		Set manually the image to convert.
-		:param images: The images.
+		:param images: The images. None is not allowed
 		:type images: set
 		"""
 		self.__images_to_convert = images
@@ -212,7 +240,7 @@ class TranslatorConfig:
 	def add_image_to_convert(self, img_path : str):
 		"""
 		Add an image to be converted.
-		:param img_path: the path of the image to convert.
+		:param img_path: the path of the image to convert. None is not allowed.
 		:type img_path: str
 		"""
 		self.__images_to_convert.add(img_path)
@@ -235,11 +263,12 @@ class TranslatorConfig:
 		self.__recursive_image_path = recursive
 
 	@property
-	def inclusions(self) -> list[dict[str,str]]:
+	def inclusions(self) -> list[dict[str,bool|None]]:
 		"""
 		Replies the inclusion configuration.
-		:return: The internal data structure for specifying the inclusions.
-		:rtype: list
+		:return: The internal data structure for specifying the inclusions. The list corresponds to the levels
+		of inclusion. The dictionaries map the translator names to their inclusion flags (True, False, Undefined).
+		:rtype: list[dict[str,bool|None]]
 		"""
 		return self.__inclusions
 
@@ -260,7 +289,7 @@ class TranslatorConfig:
 			if translator in self.__inclusions[level.value]:
 				del self.__inclusions[level.value][translator]
 		else:
-			self.__inclusions[level.value][translator] = included
+			self.__inclusions[level.value][translator] = bool(included)
 
 	def included(self, translator : str, level : TranslatorLevel, inherit : bool = True) -> bool | None:
 		"""
@@ -272,7 +301,7 @@ class TranslatorConfig:
 		:param inherit: Indicates if the inclusions of the lower levels are inherited. Default value: True.
 		:type inherit: bool
 		:return: The inclusion. True if included. False if not included. None if not specified in the configuration.
-		:rtype: bool
+		:rtype: bool | None
 		:
 		"""
 		if level is None or level == TranslatorLevel.NEVER or not translator:
@@ -294,8 +323,8 @@ class TranslatorConfig:
 		Replies the highest level at which the translator is included.
 		:param translator: The name of the translator.
 		:type translator: str
-		:return: The inclusion level (see TranslatorLevel enumeration) or None if not included or 'unspecified' if not specified.
-		:rtype: TranslatorLevel
+		:return: The inclusion level (see TranslatorLevel enumeration) or None if not specified.
+		:rtype: TranslatorLevel | None
 		:
 		"""
 		lvls = list(TranslatorLevel)[1:]
@@ -311,10 +340,10 @@ class TranslatorConfig:
 		"""
 		Replies the list of the registered translators with their inclusion status.
 		:return: The pairs of translator names and inclusion status.
-		:rtype: dict
+		:rtype: dict[str,bool]
 		:
 		"""
-		trans = dict()
+		trans : dict[str,bool] = dict()
 		lvls = list(TranslatorLevel)[1:]
 		for level in reversed(lvls):
 			for translator,  included in self.__inclusions[level].items():

@@ -40,10 +40,10 @@ class AbstractTransdefReader(ABC):
 		:param configuration: the global configuration.
 		:type configuration: Config
 		"""
-		self.__configuration = configuration
+		self.__configuration : Config = configuration
 
 	@property
-	def configuration(self):
+	def configuration(self) -> Config:
 		"""
 		Replies the configuration.
 		:return: the configuration.
@@ -68,4 +68,4 @@ class AbstractTransdefReader(ABC):
 		:type filename: str
 		:rtype: dict[str,TransdefLine]
 		"""
-		pass
+		raise NotImplementedError()

@@ -30,21 +30,24 @@ import sys
 import textwrap
 from typing import Any
 
+from libxml2mod import parent
+
 from autolatex2.config.configobj import Config
 from autolatex2.make.filedescription import FileDescription
-from autolatex2.make.make_enums import TeXTools, TeXCompiler, BibCompiler, IndexCompiler, GlossaryCompiler, FileType
+from autolatex2.make.make_enums import TeXTools, TeXCompiler, BibCompiler, IndexCompiler, GlossaryCompiler
 from autolatex2.tex.biber import BiberErrorParser
 from autolatex2.tex.bibtex import BibTeXErrorParser
 from autolatex2.tex.citationanalyzer import AuxiliaryCitationAnalyzer
 from autolatex2.tex.citationanalyzer import BiblatexCitationAnalyzer
-from autolatex2.tex.dependencyanalyzer import DependencyAnalyzer
+from autolatex2.tex.dependencyanalyzer import DependencyAnalyzer, DependencyDescription
 import autolatex2.tex.utils as texutils
+from autolatex2.tex.glossaryanalyzer import GlossaryAnalyzer
 from autolatex2.tex.indexanalyzer import IndexAnalyzer
-from autolatex2.tex.utils import TeXWarnings
+from autolatex2.tex.utils import TeXWarnings, FileType
 from autolatex2.translator.translatorrepository import TranslatorRepository
 from autolatex2.translator.translatorrunner import TranslatorRunner
 import autolatex2.utils.extlogging as extlogging
-from autolatex2.utils.runner import Runner
+from autolatex2.utils.runner import Runner, ScriptOutput
 from autolatex2.utils import extprint
 import autolatex2.utils.utilfunctions as genutils
 from autolatex2.utils.i18n import T
@@ -214,6 +217,7 @@ class AutoLaTeXMaker(Runner):
 		"""
 		self.__root_files = set()
 		self.__stamps : dict[str,dict[str,str]] = dict()
+		self.__reset_stamps()
 		self.translator_runner = translator_runner
 		if self.translator_runner is None:
 			self.configuration = None
@@ -225,8 +229,12 @@ class AutoLaTeXMaker(Runner):
 		self.__instance_compiler_definition : dict[str,str|list[str]|None] | None = None
 
 		# Initialization of the callback definitions and the command-line options are
-		# differed to the "__internal_register_callbacks" method factory
-		self.__callback_functions : dict[str,Any] | None = None
+		# differed to the "__internal_register_building_callbacks" method factory
+		self.__build_callback_functions : dict[str,Any] | None = None
+
+		# Initialization of the callback definitions are
+		# differed to the "__internal_register_needrebuild_callbacks" method factory
+		self.__needrebuild_callback_functions : dict[str,Any] | None = None
 
 		# Initialize fields by resetting them
 		self.reset()
@@ -640,7 +648,7 @@ class AutoLaTeXMaker(Runner):
 			self.__reset_warnings()
 			if os.path.isfile(log_file):
 				os.remove(log_file)
-			exit_code = 0
+			command_output = None
 			continue_to_compile = False
 			if self.__is_extended_warning_enable:
 				with open(filename, "r") as f:
@@ -666,7 +674,7 @@ class AutoLaTeXMaker(Runner):
 					cmd = Runner.normalize_command(*cmd)
 					nb_runs += 1
 					logging.debug(T('Running: %s') % repr(cmd))
-					sout, serr, sex, exit_code = self.__run_cmd(*cmd)
+					command_output = self.__run_cmd(*cmd)
 					logging.debug(T('Run finished'))
 				finally:
 					genutils.unlink(autofile)
@@ -676,10 +684,10 @@ class AutoLaTeXMaker(Runner):
 				cmd = Runner.normalize_command(*cmd)
 				nb_runs += 1
 				logging.debug(T('Running: %s') % repr(cmd))
-				sout, serr, sex, exit_code = self.__run_cmd(*cmd)
+				command_output = self.__run_cmd(*cmd)
 				logging.debug(T('Run finished'))
 
-			if exit_code != 0:
+			if command_output is not None and command_output.return_code != 0:
 				logging.debug(T("LATEX: Error when processing %s") % os.path.basename(filename))
 
 				# Parse the log to extract the blocks of messages
@@ -711,14 +719,14 @@ class AutoLaTeXMaker(Runner):
 		return nb_runs
 
 	# noinspection PyMethodMayBeStatic
-	def __run_cmd(self, *cmd) -> tuple[str,str,Any,int]:
+	def __run_cmd(self, *cmd) -> ScriptOutput:
 		"""
 		Run the given command and show up the standard output if it is in debug mode.
 		:param cmd: The command to run.
 		:type cmd: str array
-		:return: A quadruplet containing the standard output, the
+		:return: An output containing the standard output, the
 				 error output, and the exception, the return code.
-		:rtype: tuple[str,str,Any,int]
+		:rtype: ScriptOutput
 		"""
 		if logging.getLogger().isEnabledFor(logging.DEBUG):
 			exit_code = 0
@@ -729,9 +737,9 @@ class AutoLaTeXMaker(Runner):
 				exit_code = Runner.run_command_without_redirect(*cmd)
 			except Exception as ex:
 				sex = ex
+			return ScriptOutput(standard_output=sout, error_output=serr, exception=sex, return_code=exit_code)
 		else:
-			sout, serr, sex, exit_code = Runner.run_command(*cmd)
-		return sout, serr, sex, exit_code
+			return Runner.run_command(*cmd)
 
 	# noinspection PyMethodMayBeStatic,PyBroadException
 	def __select_aux_file(self, filename : str) -> bool:
@@ -802,15 +810,15 @@ class AutoLaTeXMaker(Runner):
 				logging.debug(T('BIBER: Command line is: %s') % ' '.join(cmd))
 			else:
 				logging.debug(T('BIBTEX: Command line is: %s') % ' '.join(cmd))
-			sout, serr, sex, exitcode = Runner.run_command(*cmd)
-			if exitcode != 0:
+			command_output = Runner.run_command(*cmd)
+			if command_output.return_code != 0:
 				if self.configuration.generation.is_biber:
 					logging.debug(T('BIBER: error when processing %s') % os.path.basename(aux_file))
 				else:
 					logging.debug(T('BIBTEX: error when processing %s') % os.path.basename(aux_file))
-				log = sout
+				log = command_output.standard_output
 				if not log:
-					log = serr
+					log = command_output.error_output
 				if log:
 					if self.configuration.generation.is_biber:
 						log_parser = BiberErrorParser()
@@ -819,11 +827,11 @@ class AutoLaTeXMaker(Runner):
 					current_error = log_parser.parse_log(aux_file, log)
 					if current_error:
 						return current_error
-				current_error = {'filename': aux_file, 'lineno': 0, 'message': sout + "\n" + serr}
+				current_error = {'filename': aux_file, 'lineno': 0, 'message': command_output.standard_output + "\n" + command_output.error_output}
 				return current_error
 		return None
 
-	def run_makeindex(self, filename : str) -> tuple[int,str,str] | None:
+	def run_makeindex(self, filename : str) -> ScriptOutput | None:
 		"""
 		Launch the MakeIndex tool once time.
 		The success status if the run of MakeIndex is replied.
@@ -850,10 +858,10 @@ class AutoLaTeXMaker(Runner):
 				cmd.append(os.path.relpath(ist_file))
 		cmd.append(os.path.relpath(idx_file))
 		cmd = Runner.normalize_command(*cmd)
-		sout, serr, sex, exitcode = Runner.run_command(*cmd)
-		if exitcode != 0:
-			logging.error(T("%s\n%s") % (sout, serr))
-			return exitcode, sout, serr
+		command_output = Runner.run_command(*cmd)
+		if command_output.return_code != 0:
+			logging.error(T("%s\n%s") % (command_output.standard_output, command_output.error_output))
+			return command_output
 		return None
 
 	def run_makeglossaries(self, filename : str) -> bool:
@@ -880,8 +888,8 @@ class AutoLaTeXMaker(Runner):
 			cmd.append(os.path.relpath(ist_file))
 		cmd.append(os.path.relpath(tex_wo_ext))
 		cmd = Runner.normalize_command(*cmd)
-		(sout, serr, sex, exitcode) = Runner.run_command(*cmd)
-		return exitcode == 0
+		command_output = Runner.run_command(*cmd)
+		return command_output.return_code == 0
 
 	def run_dvips(self, filename : str) -> dict[str,Any] | None:
 		"""
@@ -905,14 +913,15 @@ class AutoLaTeXMaker(Runner):
 		cmd.append(os.path.relpath(output))
 		cmd.append(os.path.relpath(filename))
 		cmd = Runner.normalize_command(*cmd)
-		(sout, serr, sex, exitcode) = Runner.run_command(*cmd)
-		if exitcode != 0:
+		command_output = Runner.run_command(*cmd)
+		if command_output.return_code != 0:
 			logging.debug(T('DVIPS: error when processing %s') % (os.path.basename(filename)))
-			current_error = {'filename': filename, 'lineno': 0, 'message': sout + "\n" + serr}
+			current_error = {'filename': filename, 'lineno': 0, 'message': command_output.standard_output + "\n" + command_output.error_output}
 			return current_error
 		return None
 
-	def __create_file_description(self, output_filename : str, output_type : FileType, input_filename : str, main_filename : str) -> bool:
+	def __create_file_description(self, output_filename : DependencyDescription, output_type : FileType,
+								  input_filename : str, main_filename : str) -> bool:
 		"""
 		Create an entry into the list of files involved into the execution process.
 		:param output_filename: The name of the output file.
@@ -957,16 +966,15 @@ class AutoLaTeXMaker(Runner):
 				analyzer.run()
 				# Treat the pure TeX files
 				for dep_type in analyzer.get_dependency_types():
-					deps = analyzer.get_dependencies(dep_type)
+					deps = analyzer.get_dependencies_for_type(dep_type)
 					for dep in deps:
-						self.__create_file_description(dep, FileType[dep_type], dep, None if dep_type != 'tex' or dep == tex_root_filename else tex_root_filename)
-						#self.__files[pdf_filename].dependencies.add(dep)
-						self.__files[tex_file].dependencies.add(dep)
+						self.__create_file_description(dep, dep_type, dep, None if dep_type != FileType.tex or dep == tex_root_filename else tex_root_filename)
+						self.__files[tex_file].dependencies.update(dep)
 						changed = True
-						if dep_type == 'tex':
+						if dep_type == FileType.tex:
 							tex_files.append(dep)
 				# Treat the bibliography files that  are referred from the TeX code
-				biblio_deps = analyzer.get_dependencies('biblio')
+				biblio_deps = analyzer.get_dependencies_for_type('biblio')
 				if biblio_deps:
 					for bibdb, bibdt in biblio_deps.items():
 						pass
@@ -975,9 +983,9 @@ class AutoLaTeXMaker(Runner):
 							for bibfile in bibdt['bib']:
 								bblfile = genutils.basename2(bibfile, '.bib') + '.bbl'
 								self.__create_file_description(bblfile, FileType.bbl, tex_root_filename, tex_root_filename)
-								self.__files[pdf_filename].dependencies.add(bblfile)
-								self.__files[bblfile].dependencies.add(bibfile)
-								self.__files[bblfile].dependencies.add(tex_file)
+								self.__files[pdf_filename].dependencies.update(bblfile)
+								self.__files[bblfile].dependencies.update(bibfile)
+								self.__files[bblfile].dependencies.update(tex_file)
 								changed = True
 								self.__files[bblfile].use_biber = analyzer.is_biber
 								bblfiles.add(bblfile)
@@ -987,29 +995,29 @@ class AutoLaTeXMaker(Runner):
 									chg = self.__create_file_description(bibdepfile, FileType[bibext], tex_root_filename, tex_root_filename)
 									changed = changed or chg
 									for bblfile in bblfiles:
-										self.__files[bblfile].dependencies.add(bibdepfile)
+										self.__files[bblfile].dependencies.update(bibdepfile)
 										changed = True
 				# Treat the index files that  are referred from the TeX code
 				if analyzer.is_makeindex:
 					idxfile = genutils.basename2(tex_root_filename, *texutils.get_tex_file_extensions()) + '.idx'
 					self.__create_file_description(idxfile, FileType.idx, tex_root_filename, tex_root_filename)
 					self.__files[idxfile].use_xindy = analyzer.is_xindy_index
-					self.__files[idxfile].dependencies.add(tex_file)
+					self.__files[idxfile].dependencies.update(tex_file)
 					indfile = genutils.basename2(idxfile, '.idx') + '.ind'
 					self.__create_file_description(indfile, FileType.ind, idxfile, tex_root_filename)
 					self.__files[indfile].use_xindy = analyzer.is_xindy_index
-					self.__files[indfile].dependencies.add(idxfile)
-					self.__files[pdf_filename].dependencies.add(indfile)
+					self.__files[indfile].dependencies.update(idxfile)
+					self.__files[pdf_filename].dependencies.update(indfile)
 					changed = True
 				# Treat the glossaries files that  are referred from the TeX code
 				if analyzer.is_glossary:
 					glofile = genutils.basename2(tex_root_filename, *texutils.get_tex_file_extensions()) + '.glo'
 					self.__create_file_description( glofile, FileType.glo, tex_root_filename, tex_root_filename)
-					self.__files[glofile].dependencies.add(tex_file)
+					self.__files[glofile].dependencies.update(tex_file)
 					glsfile = genutils.basename2(glofile, '.glo') + '.gls'
 					self.__create_file_description(glsfile, FileType.gls, tex_root_filename, tex_root_filename)
-					self.__files[glsfile].dependencies.add(glofile)
-					self.__files[pdf_filename].dependencies.add(glsfile)
+					self.__files[glsfile].dependencies.update(glofile)
+					self.__files[pdf_filename].dependencies.update(glsfile)
 					changed = True
 		return changed
 
@@ -1045,9 +1053,9 @@ class AutoLaTeXMaker(Runner):
 								bbl_file = os.path.abspath(genutils.basename2(bib_file, '.bib') + '.bbl')
 								self.__create_file_description(bbl_file, FileType.bbl, tex_root_filename, tex_root_filename)
 								changed = changed or chg
-								self.__files[bbl_file].dependencies.add(bst_file)
-								self.__files[bbl_file].dependencies.add(bib_file)
-								self.__files[pdf_filename].dependencies.add(bbl_file)
+								self.__files[bbl_file].dependencies.update(bst_file)
+								self.__files[bbl_file].dependencies.update(bib_file)
+								self.__files[pdf_filename].dependencies.update(bbl_file)
 								changed = True
 			if databases:
 				for db in databases:
@@ -1056,8 +1064,8 @@ class AutoLaTeXMaker(Runner):
 						self.__create_file_description(bib_file, FileType.bib, tex_root_filename, tex_root_filename)
 						bbl_file = genutils.basename2(bib_file, '.bib') + '.bbl'
 						self.__create_file_description(bbl_file, FileType.bbl, tex_root_filename, tex_root_filename)
-						self.__files[bbl_file].dependencies.add(bib_file)
-						self.__files[pdf_filename].dependencies.add(bbl_file)
+						self.__files[bbl_file].dependencies.update(bib_file)
+						self.__files[pdf_filename].dependencies.update(bbl_file)
 						changed = True
 		return changed
 
@@ -1076,7 +1084,7 @@ class AutoLaTeXMaker(Runner):
 		# Add dependency for the final PDF file
 		out_file = genutils.basename2(tex_filename, *texutils.get_tex_file_extensions()) + '.' + out_type
 		self.__create_file_description(out_file, FileType[out_type], tex_filename, tex_filename)
-		self.__files[out_file].dependencies.add(tex_filename)
+		self.__files[out_file].dependencies.update(tex_filename)
 		# TeX files
 		self.__compute_tex_dependencies(tex_filename, root_dir, out_file)
 		# Aux files
@@ -1084,105 +1092,58 @@ class AutoLaTeXMaker(Runner):
 			self.__compute_aux_dependencies(tex_filename, root_dir, out_file)
 		return out_file, self.__files
 
-	def __need_rebuild(self, root_change_date : int, filename : str, description : FileDescription, main_tex_filename : str) -> bool:
-		"""
-		Test if a rebuild is needed for the given files.
-		:param root_change_date: Time stamp of the root file. It could be None.
-		:type root_change_date: int
-		:param filename: Name of the file to test.
-		:type filename: str
-		:param description: Description of the file to test.
-		:type description: FileDescription
-		:param main_tex_filename: Name of the main tex file.
-		:type main_tex_filename: str
-		:return: True if the file needs to be rebuilt
-		:rtype: bool
-		"""
-		if root_change_date is None or description.change is None or not os.path.isfile(filename):
-			return True
-		exts = os.path.splitext(filename)
-		ext = exts[-1]
-		if ext:
-			if ext == '.bbl':
-				if description.use_biber:
-					# Parse the BCF file to detect the citations
-					bcf_file = genutils.basename2(filename, '.bbl') + '.bcf'
-					bcf_analyzer = BiblatexCitationAnalyzer(bcf_file)
-					current_md5 : str = bcf_analyzer.md5 or ''
-					old_md5 = self.__stamps['bib'][bcf_file] or ''
-					if current_md5 != old_md5:
-						self.__stamps['bib'][bcf_file] = current_md5
-						return True
-				else:
-					# Parse the AUX file to detect the citations
-					aux_file = genutils.basename2(filename, '.bbl') + '.aux'
-					aux_analyzer = AuxiliaryCitationAnalyzer(aux_file)
-					current_md5 = aux_analyzer.md5 or ''
-					old_md5 = self.__stamps['bib'][aux_file] or ''
-					if current_md5 != old_md5:
-						self.__stamps['bib'][aux_file] = current_md5
-						return True
-				return False
-			elif  ext  == '.ind' or (ext == '.idx' and description.use_xindy):
-				# Parse the IDX file to detect the index definitions
-				idx_file = genutils.basename2(filename, '.idx', '.ind') + '.idx'
-				idx_analyzer = IndexAnalyzer(idx_file)
-				current_md5 = idx_analyzer.md5 or ''
-				if not 'idx' in self.__stamps:
-					self.__stamps = dict()
-				if idx_file in self.__stamps['idx']:
-					old_md5 = self.__stamps['idx'][idx_file]
-				else:
-					old_md5 = ''
-				if  current_md5 != old_md5:
-					self.__stamps['idx'][idx_file] = current_md5
-					return True
-				return False
-			elif ext == '.pdf':
-				log_file = genutils.basename2(main_tex_filename, *texutils.get_tex_file_extensions()) + '.log'
-				if log_file is not None and os.path.isfile(log_file):
-					need_rebuild = self.__extract_info_from_tex_log_file(log_file, True)
-					if need_rebuild:
-						return True
-		return description.change is None or description.change > root_change_date
-
-	def __build_internal_execution_list(self, builds : list[FileDescription], root_change_date : int, filename : str, force_changes : bool, main_tex_filename : str) -> bool:
+	def __build_internal_execution_list(self, builds : list[FileDescription], parent_change_date : float|None, filename : str,
+										force_changes : bool, main_tex_filename : str, known_answers : dict[str,bool]) -> bool:
 		"""
 		Build the list of files that needs to be generated in the best order. For each file, a building function named "_build_<ext>" is defined and must be invoked.
 		:param builds: List of builds to fill up.
 		:type builds: list[FileDescription]
-		:param root_change_date: The change date of the root PDF file. It could be None.
-		:type root_change_date: int
+		:param parent_change_date: The change date of the parent file that depends on the filename. It could be None.
+		:type parent_change_date: float|None
 		:param filename: The name of the file to consider.
 		:type filename: str
 		:param force_changes: Indicates all the files should be considered as changed. Default value is: False.
 		:type force_changes: bool
 		:param main_tex_filename: Name of the main tex file.
 		:type main_tex_filename: str
+		:param known_answers: Dictionary of already computed answers.
+		:type known_answers: dict[str,bool]
 		:return: True if the given filename has been added to the build.
 		:rtype: bool
 		"""
 		added = False
 		if filename in self.__files:
+			# Check the memory for known answers
+			if filename in known_answers:
+				return known_answers[filename]
 			description = self.__files[filename]
 			if description:
 				child_changed = False
 				dependencies = description.dependencies
 				if dependencies:
 					for dependency in dependencies:
-						change = self.__build_internal_execution_list(builds=builds, root_change_date=root_change_date, filename=dependency, force_changes=force_changes, main_tex_filename=main_tex_filename)
+						change = self.__build_internal_execution_list(builds=builds,
+																	  parent_change_date=description.change,
+																	  filename=dependency,
+																	  force_changes=force_changes,
+																	  main_tex_filename=main_tex_filename,
+																	  known_answers=known_answers)
 						if change:
 							child_changed = True
-				if child_changed or force_changes or self.__need_rebuild(root_change_date, filename, description, main_tex_filename):
-					added = True
+				known_answers[filename] = (child_changed or force_changes
+										   or self.__need_rebuild(parent_change_date, filename, description, main_tex_filename, known_answers))
+				if known_answers[filename]:
 					method_name = self.__internal_build_callback_funcname(description.file_type)
-					if method_name in self.__internal_register_callbacks():
+					if method_name in self.__internal_register_building_callbacks():
+						added = True
 						builds.append(description)
 		return added
 
 	def build_internal_execution_list(self, root_file : str, root_pdf_file : str, dependencies : dict, force_changes : bool = False) -> list[FileDescription]:
 		"""
 		Build the list of files that needs to be generated in the best order. For each file, a building function named "_build_<ext>" is defined and must be invoked.
+		This function uses the lasted change date of each file to determine if a build is needed, except if force_changes is True.
+		If force_changes is True, all the files are supported to be built.
 		This function must be invoked after a call to compute_dependencies().
 		:param root_file: The LaTeX file to compile.
 		:type root_file: str
@@ -1196,12 +1157,14 @@ class AutoLaTeXMaker(Runner):
 		:rtype: list[FileDescription]
 		"""
 		builds = list()
+		known_answers = dict()
 		root_change = self.__files[root_pdf_file].change
 		self.__build_internal_execution_list(builds=builds,
-											 root_change_date=root_change,
+											 parent_change_date=root_change,
 											 filename=root_pdf_file,
 											 force_changes=force_changes,
-											 main_tex_filename=root_file)
+											 main_tex_filename=root_file,
+											 known_answers=known_answers)
 		return builds
 
 	def run_translators(self, force_generation : bool = False, detect_conflicts : bool = True) -> dict[str,str]:
@@ -1223,6 +1186,12 @@ class AutoLaTeXMaker(Runner):
 			generated_images[img] = generated_image
 		return generated_images
 
+	def __reset_stamps(self):
+		self.__stamps = dict()
+		self.__stamps['bib'] = dict()
+		self.__stamps['idx'] = dict()
+		self.__stamps['gls'] = dict()
+
 	def read_build_stamps(self, folder : str, basename : str = ".autolatex_stamp") -> dict[str,dict[str,str]]:
 		"""
 		Read the build stamps. There stamps are used to memorize the building dates of each element (latex, bibtex, etc.).
@@ -1235,9 +1204,7 @@ class AutoLaTeXMaker(Runner):
 		:rtype: dict[str,dict[str,str]]
 		"""
 		stamp_file = os.path.join(folder, basename)
-		self.__stamps = dict()
-		self.__stamps['bib'] = dict()
-		self.__stamps['idx'] = dict()
+		self.__reset_stamps()
 		if os.access(stamp_file, os.R_OK):
 			with open(stamp_file, 'r') as sf:
 				line = sf.readline()
@@ -1253,6 +1220,12 @@ class AutoLaTeXMaker(Runner):
 							k = m.group(1)
 							n = m.group(2)
 							self.__stamps['idx'][n] = k
+						else:
+							m = re.match(r'^GLS\(([^)]+?)\):(.+)$', line)
+							if m:
+								k = m.group(1)
+								n = m.group(2)
+								self.__stamps['gls'][n] = k
 					line = sf.readline()
 		return self.__stamps
 
@@ -1287,6 +1260,13 @@ class AutoLaTeXMaker(Runner):
 						sf.write("):")
 						sf.write(str(k))
 						sf.write("\n")
+				if 'gls' in s and s['gls']:
+					for (k, n) in s['gls'].items():
+						sf.write("GLS(")
+						sf.write(str(n))
+						sf.write("):")
+						sf.write(str(k))
+						sf.write("\n")
 
 	def __launch_file_build(self, root_file : str, input_file : FileDescription) -> bool:
 		"""
@@ -1305,7 +1285,7 @@ class AutoLaTeXMaker(Runner):
 			if file_type:
 				method_name = self.__internal_build_callback_funcname(file_type)
 				if method_name:
-					cb = self.__internal_register_callbacks()
+					cb = self.__internal_register_building_callbacks()
 					if method_name in cb:
 						func = cb[method_name]
 						continuation = func(root_file, input_file)
@@ -1408,24 +1388,255 @@ class AutoLaTeXMaker(Runner):
 		return True
 
 	#--------------------------------------------------------------------------------------------
+	# CALLBACKS FOR DETERMINING IF A REBUILD IS NEEDED
+	#--------------------------------------------------------------------------------------------
+
+	# noinspection PyMethodMayBeStatic
+	def __callback_needrebuild_function_selector(self, x : Any) -> bool:
+		return inspect.ismethod(x) and x.__name__.startswith('__needrebuild_callback_')
+
+	def __internal_register_needrebuild_callbacks(self) -> dict[str,Any]:
+		"""
+		Register the different callbacks according to the current configuration. This method should not be called
+		from outside the class.
+		It is based on the method factory design pattern.
+		:return: The callback functions.
+		:rtype: dict[str,Any]
+		"""
+		if self.__needrebuild_callback_functions is None:
+			defined_callbacks = inspect.getmembers(self, predicate=self.__callback_needrebuild_function_selector)
+			self.__needrebuild_callback_functions = dict(defined_callbacks)
+		return self.__needrebuild_callback_functions
+
+	def __internal_needrebuild_callback_funcname(self, file_type : FileType) -> str:
+		"""
+		Build the internal name of a need-building callback function.
+		:param file_type: The type of file concerned by the callback.
+		:type file_type: str
+		:return: the name of the callback function.
+		:rtype: str
+		"""
+		return '_' + self.__class__.__name__ + '__needrebuild_callback_' + file_type.name
+
+	@staticmethod
+	def __is_file_changed(in_change : float | None, out_change : float | None) -> bool:
+		"""
+		Test if the change date of an input file is greater than the change date of a output file.
+		This function supports None as change date if this date is unknown.
+		:param in_change: The change date of the input file.
+		:type in_change: float | None
+		:param out_change: The change date of the output file.
+		:type out_change: float | None
+		:return: True if the change date of the input file is more recent than those of the output file.
+		:rtype: bool
+		"""
+		if in_change is None:
+			return False
+		return out_change is None or in_change > out_change
+
+	# noinspection PyMethodMayBeStatic
+	def __need_rebuild(self, root_change_date : float, filename : str, description : FileDescription,
+					   main_tex_filename : str, known_answers : dict[str,bool]) -> bool:
+		"""
+		Test if a rebuild is needed for the given files.
+		:param root_change_date: Time stamp of the root file. It could be None.
+		:type root_change_date: int
+		:param filename: Name of the file to test.
+		:type filename: str
+		:param description: Description of the file to test.
+		:type description: FileDescription
+		:param main_tex_filename: Name of the main tex file.
+		:type main_tex_filename: str
+		:param known_answers: Dictionary of already computed answers.
+		:type known_answers: dict[str,bool]
+		:return: True if the file needs to be rebuilt
+		:rtype: bool
+		"""
+		# Special case, the files have not dates nor are existing
+		if root_change_date is None or description.change is None or not os.path.isfile(filename):
+			return True
+		# Check the memory for known answers
+		if filename in known_answers:
+			return known_answers[filename]
+		# Delegate to the callback function
+		method_name = self.__internal_needrebuild_callback_funcname(description.file_type)
+		if method_name:
+			cb = self.__internal_register_needrebuild_callbacks()
+			if method_name in cb:
+				func = cb[method_name]
+				return func(root_change_date, filename, description, main_tex_filename)
+		return AutoLaTeXMaker.__is_file_changed(description.change, root_change_date)
+
+	# noinspection PyUnusedLocal
+	def __needrebuild_callback_pdf(self, root_change_date : float, filename : str, description : FileDescription, main_tex_filename : str) -> bool:
+		"""
+		Test if the PDF file must be rebuilt.
+		:param root_change_date: Time stamp of the root file. It could be None.
+		:type root_change_date: int
+		:param filename: Name of the file to test.
+		:type filename: str
+		:param description: Description of the file to test.
+		:type description: FileDescription
+		:param main_tex_filename: Name of the main tex file.
+		:type main_tex_filename: str
+		:return: True if the file needs to be rebuilt
+		:rtype: bool
+		"""
+		log_file = genutils.basename2(main_tex_filename, *texutils.get_tex_file_extensions()) + '.log'
+		if log_file is not None and os.path.isfile(log_file):
+			need_rebuild = self.__extract_info_from_tex_log_file(log_file, True)
+			if need_rebuild:
+				return True
+		return AutoLaTeXMaker.__is_file_changed(root_change_date, description.change)
+
+	# noinspection PyUnusedLocal
+	def __needrebuild_callback_bbl(self, root_change_date : float, filename : str, description : FileDescription, main_tex_filename : str) -> bool:
+		"""
+		Test if the BBL file must be rebuilt from the TeX file and the Bibtex file.
+		:param root_change_date: Time stamp of the root file. It could be None.
+		:type root_change_date: int
+		:param filename: Name of the file to test.
+		:type filename: str
+		:param description: Description of the file to test.
+		:type description: FileDescription
+		:param main_tex_filename: Name of the main tex file.
+		:type main_tex_filename: str
+		:return: True if the file needs to be rebuilt
+		:rtype: bool
+		"""
+		if description.use_biber:
+			# Parse the BCF file to detect the citations
+			bcf_file = genutils.basename2(filename, '.bbl') + '.bcf'
+			bcf_analyzer = BiblatexCitationAnalyzer(bcf_file)
+			current_md5: str = bcf_analyzer.md5 or ''
+			old_md5 = self.__stamps['bib'][bcf_file] or ''
+			if current_md5 != old_md5:
+				self.__stamps['bib'][bcf_file] = current_md5
+				return True
+		else:
+			# Parse the AUX file to detect the citations
+			aux_file = genutils.basename2(filename, '.bbl') + '.aux'
+			aux_analyzer = AuxiliaryCitationAnalyzer(aux_file)
+			current_md5 = aux_analyzer.md5 or ''
+			old_md5 = ''
+			if 'bib' in self.__stamps and aux_file in self.__stamps['bib']:
+				old_md5 = self.__stamps['bib'][aux_file] or ''
+			if current_md5 != old_md5:
+				if 'bib' not in self.__stamps:
+					self.__stamps['bib'] = dict()
+				self.__stamps['bib'][aux_file] = current_md5
+				return True
+		return False
+
+	# noinspection PyUnusedLocal,DuplicatedCode
+	def __needrebuild_callback_ind(self, root_change_date : float, filename : str, description : FileDescription, main_tex_filename : str) -> bool:
+		"""
+		Test if the IND file must be rebuilt from the TeX file and the IDX file.
+		:param root_change_date: Time stamp of the root file. It could be None.
+		:type root_change_date: int
+		:param filename: Name of the file to test.
+		:type filename: str
+		:param description: Description of the file to test.
+		:type description: FileDescription
+		:param main_tex_filename: Name of the main tex file.
+		:type main_tex_filename: str
+		:return: True if the file needs to be rebuilt
+		:rtype: bool
+		"""
+		# Parse the IDX file to detect the index definitions
+		idx_file = genutils.basename2(filename, '.idx', '.ind') + '.idx'
+		idx_analyzer = IndexAnalyzer(idx_file)
+		current_md5 = idx_analyzer.md5 or ''
+		if 'idx' not in self.__stamps:
+			self.__stamps['idx'] = dict()
+		if idx_file in self.__stamps['idx']:
+			old_md5 = self.__stamps['idx'][idx_file]
+		else:
+			old_md5 = ''
+		if current_md5 != old_md5:
+			self.__stamps['idx'][idx_file] = current_md5
+			return True
+		return False
+
+	# noinspection PyUnusedLocal,DuplicatedCode
+	def __needrebuild_callback_idx(self, root_change_date : float, filename : str, description : FileDescription, main_tex_filename : str) -> bool:
+		"""
+		Test if the IDX file must be rebuilt from the TeX file.
+		:param root_change_date: Time stamp of the root file. It could be None.
+		:type root_change_date: int
+		:param filename: Name of the file to test.
+		:type filename: str
+		:param description: Description of the file to test.
+		:type description: FileDescription
+		:param main_tex_filename: Name of the main tex file.
+		:type main_tex_filename: str
+		:return: True if the file needs to be rebuilt
+		:rtype: bool
+		"""
+		if description.use_xindy:
+			# Parse the IDX file to detect the index definitions
+			idx_file = genutils.basename2(filename, '.idx', '.ind') + '.idx'
+			idx_analyzer = IndexAnalyzer(idx_file)
+			current_md5 = idx_analyzer.md5 or ''
+			if not 'idx' in self.__stamps:
+				self.__stamps['idx'] = dict()
+			if idx_file in self.__stamps['idx']:
+				old_md5 = self.__stamps['idx'][idx_file]
+			else:
+				old_md5 = ''
+			if current_md5 != old_md5:
+				self.__stamps['idx'][idx_file] = current_md5
+				return True
+		return False
+
+	# noinspection PyUnusedLocal,DuplicatedCode
+	def __needrebuild_callback_gls(self, root_change_date : float, filename : str, description : FileDescription, main_tex_filename : str) -> bool:
+		"""
+		Test if the GLS file must be rebuilt from the TeX file and the GLO file.
+		:param root_change_date: Time stamp of the root file. It could be None.
+		:type root_change_date: int
+		:param filename: Name of the file to test.
+		:type filename: str
+		:param description: Description of the file to test.
+		:type description: FileDescription
+		:param main_tex_filename: Name of the main tex file.
+		:type main_tex_filename: str
+		:return: True if the file needs to be rebuilt
+		:rtype: bool
+		"""
+		# Parse the GLO file to detect the index definitions
+		gls_analyzer = GlossaryAnalyzer(filename)
+		current_md5 = gls_analyzer.md5 or ''
+		if 'gls' not in self.__stamps:
+			self.__stamps['gls'] = dict()
+		if filename in self.__stamps['gls']:
+			old_md5 = self.__stamps['gls'][filename]
+		else:
+			old_md5 = ''
+		if current_md5 != old_md5:
+			self.__stamps['gls'][filename] = current_md5
+			return True
+		return False
+
+	#--------------------------------------------------------------------------------------------
 	# CALLBACKS FOR BUILDING DOCUMENT COMPONENTS
 	#--------------------------------------------------------------------------------------------
 
 	# noinspection PyMethodMayBeStatic
-	def __callback_function_selector(self, x : Any) -> bool:
+	def __callback_building_function_selector(self, x : Any) -> bool:
 		return inspect.ismethod(x) and x.__name__.startswith('__build_callback_')
 
-	def __internal_register_callbacks(self) -> dict[str,Any]:
+	def __internal_register_building_callbacks(self) -> dict[str,Any]:
 		"""
 		Register the different callbacks according to the current configuration. This method should not be called from outside the class.
 		It is based on the method factory design pattern.
 		:return: The callback functions.
 		:rtype: dict[str,Any]
 		"""
-		if self.__callback_functions is None:
-			defined_callbacks = inspect.getmembers(self, predicate=self.__callback_function_selector)
-			self.__callback_functions = dict(defined_callbacks)
-		return self.__callback_functions
+		if self.__build_callback_functions is None:
+			defined_callbacks = inspect.getmembers(self, predicate=self.__callback_building_function_selector)
+			self.__build_callback_functions = dict(defined_callbacks)
+		return self.__build_callback_functions
 
 	def __internal_build_callback_funcname(self, file_type : FileType) -> str:
 		"""
@@ -1440,10 +1651,10 @@ class AutoLaTeXMaker(Runner):
 	# noinspection PyUnusedLocal
 	def __build_callback_bbl(self, root_file : str, input_file : FileDescription) -> bool:
 		"""
-		Generate BBL (bibtex) file.
+		Generate BBL (bibtex) file. This function runs run_bibtex().
 		:param root_file: Name of the root file (tex document).
 		:type root_file: str
-		:param input_file: Description of the input file.
+		:param input_file: Description of the input TeX file.
 		:type input_file: FileDescription
 		:return: The continuation statut, i.e. True if the build could continue.
 		:rtype: bool
@@ -1457,13 +1668,14 @@ class AutoLaTeXMaker(Runner):
 				return False
 		return True
 
-	# noinspection PyBroadException,PyUnusedLocal
+	# noinspection PyBroadException,PyUnusedLocal,DuplicatedCode
 	def __build_callback_ind(self, root_file : str, input_file : FileDescription) -> bool | None:
 		"""
-		Generate IND (index) file.
+		Generate IND (index) file. This function invokes run_latex() (without loop support) if xindyis used or
+		if the idx file is less recent than the input TeX file. Then, the function calls run_makeindex().
 		:param root_file: Name of the root file (tex document).
 		:type root_file: str
-		:param input_file: Description of the input file.
+		:param input_file: Description of the input TeX file.
 		:type input_file: FileDescription
 		:return: The continuation statut, i.e. True if the build could continue.
 		:rtype: bool
@@ -1471,8 +1683,19 @@ class AutoLaTeXMaker(Runner):
 		if self.configuration.generation.is_index_enable:
 			# Ensure texindy configuration
 			self.configuration.generation.is_xindy_index = input_file.use_xindy
-			# Special case: TeX should be launched before running texindy
+
+			is_run_latex = False
 			if self.configuration.generation.is_xindy_index:
+				# Special case: TeX should be launched before running texindy
+				is_run_latex = True
+			else:
+				tex_wo_ext = genutils.basename2(input_file.input_filename, *texutils.get_tex_file_extensions())
+				idx_file = tex_wo_ext + texutils.get_index_file_extensions()[0]
+				input_change = genutils.get_file_last_change(input_file.input_filename)
+				idx_change = genutils.get_file_last_change(idx_file)
+				if AutoLaTeXMaker.__is_file_changed(input_change, idx_change):
+					is_run_latex = True
+			if is_run_latex:
 				try:
 					self.run_latex(filename=input_file.input_filename, loop=False)
 				except:
@@ -1489,25 +1712,33 @@ class AutoLaTeXMaker(Runner):
 	# noinspection PyUnusedLocal
 	def __build_callback_gls(self, root_file : str, input_file : FileDescription) -> bool:
 		"""
-		Generate GLS (glossary) file.
+		Generate GLS (glossary) file. This function calls run_makeglossaries()
+		This function invokes run_latex() (without loop support) before run_makeglossaries() if
+		the GLO file is less recent than the input file.
 		:param root_file: Name of the root file (tex document).
 		:type root_file: str
-		:param input_file: Description of the input file.
+		:param input_file: Description of the input TeX file.
 		:type input_file: FileDescription
 		:return: The continuation statut, i.e. True if the build could continue.
 		:rtype: bool
 		"""
 		if self.configuration.generation.is_glossary_enable:
+			tex_wo_ext = genutils.basename2(input_file.input_filename, *texutils.get_tex_file_extensions())
+			glo_file = tex_wo_ext + texutils.get_glossary_file_extensions()[0]
+			input_change = genutils.get_file_last_change(input_file.input_filename)
+			glo_change = genutils.get_file_last_change(glo_file)
+			if AutoLaTeXMaker.__is_file_changed(input_change, glo_change) and not self.run_latex(input_file.input_filename, loop=False):
+				return False
 			return self.run_makeglossaries(input_file.input_filename)
 		return True
 
 	# noinspection PyBroadException,PyUnusedLocal
 	def __build_callback_pdf(self, root_file : str, input_file : FileDescription) -> bool:
 		"""
-		Generate root PDF file.
+		Generate root PDF file. This function invokes run_latex() with loop support enabled.
 		:param root_file: Name of the root file (tex document).
 		:type root_file: str
-		:param input_file: Description of the input file.
+		:param input_file: Description of the input TeX file.
 		:type input_file: FileDescription
 		:return: The continuation statut, i.e. True if the build could continue.
 		:rtype: bool

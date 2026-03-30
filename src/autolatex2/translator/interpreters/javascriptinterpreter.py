@@ -28,6 +28,8 @@ from typing import override, Any
 
 from autolatex2.translator.interpreters.abstractinterpreter import AbstractTranslatorInterpreter
 from autolatex2.config.configobj import Config
+from autolatex2.utils.runner import ScriptOutput
+
 
 class TranslatorInterpreter(AbstractTranslatorInterpreter):
 	"""
@@ -42,6 +44,7 @@ class TranslatorInterpreter(AbstractTranslatorInterpreter):
 		"""
 		super().__init__(configuration)
 
+	# noinspection PyDeprecation
 	@property
 	@override
 	def runnable(self) -> bool:
@@ -97,18 +100,18 @@ class TranslatorInterpreter(AbstractTranslatorInterpreter):
 		return "_%s" % name
 
 	@override
-	def run(self, code : str) -> tuple[str,str,Any,int]:
+	def run(self, code : str) -> ScriptOutput:
 		"""
 		Run the interpreter.
 		:param code: The JavaScript code to interprete.
 		:type code: str
-		:return: A quadruplet containing the standard output, the
+		:return: An output containing the standard output, the
 				 error output, the exception, the return code.
-		:rtype: tuple[str,str,Any,int]
+		:rtype: InterpreterOutput
 		"""
 		full_code = ""
-		for name in self.global_variables:
-			value = self.filter_variable_name(self.global_variables[name])
+		for name, value in self.global_variables.items():
+			value = self.filter_variable_name(value)
 			pvalue = self.to_javascript(value)
 			full_code += "var %s = %s\n" % (name, pvalue)
 		full_code += "\n\n\n"+ code

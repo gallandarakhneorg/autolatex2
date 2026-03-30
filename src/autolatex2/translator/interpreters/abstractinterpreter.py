@@ -24,10 +24,11 @@ Abstract implementation of an interpreter for the AutoLaTeX translators.
 
 import pprint
 import abc
-from typing import Any
+from typing import Any, Self
 
-from autolatex2.utils.runner import Runner
+from autolatex2.utils.runner import Runner, ScriptOutput
 from autolatex2.config.configobj import Config
+
 
 class AbstractTranslatorInterpreter(Runner):
 	"""
@@ -40,9 +41,9 @@ class AbstractTranslatorInterpreter(Runner):
 		:param configuration: The general configuration.
 		:type configuration: Config
 		"""
-		self.__global_variables = dict()
-		self.__parent = None
-		self.__configuration = configuration
+		self.__global_variables : dict[str,str] = dict()
+		self.__parent : Self | None = None
+		self.__configuration : Config = configuration
 
 	@property
 	def configuration(self) -> Config:
@@ -63,7 +64,7 @@ class AbstractTranslatorInterpreter(Runner):
 		self.__configuration = c
 
 	@property
-	def parent(self) -> Any:
+	def parent(self) -> Self | None:
 		"""
 		Replies the parent interpreter.
 		:return: The parent interpreter.
@@ -72,7 +73,7 @@ class AbstractTranslatorInterpreter(Runner):
 		return self.__parent
 
 	@parent.setter
-	def parent(self, p : Any):
+	def parent(self, p : Self | None):
 		"""
 		Change the parent interpreter.
 		:param p: The parent interpreter, or None for unset it.
@@ -85,7 +86,7 @@ class AbstractTranslatorInterpreter(Runner):
 		"""
 		Replies all the global variables.
 		:return: the map of the global variables in which the keys are the variable names.
-		:rtype: map
+		:rtype: dict[str,str]
 		"""
 		return self.__global_variables
 
@@ -108,11 +109,14 @@ class AbstractTranslatorInterpreter(Runner):
 		raise NotImplementedError
 
 	@abc.abstractmethod
-	def run(self, code : str):
+	def run(self, code : str) -> ScriptOutput:
 		"""
 		Run the interpreter.
-		:param code: The Python code to interprete.
+		:param code: The JavaScript code to interprete.
 		:type code: str
+		:return: An output containing the standard output, the
+				 error output, the exception and the return code.
+		:rtype: InterpreterOutput
 		"""
 		raise NotImplementedError
 

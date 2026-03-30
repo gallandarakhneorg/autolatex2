@@ -32,9 +32,10 @@ from autolatex2.tex.texobservers import Observer
 from autolatex2.tex.texparsers import Parser
 from autolatex2.tex.texparsers import TeXParser
 import autolatex2.utils.utilfunctions as genutils
+from autolatex2.tex.utils import TeXMacroParameter
 from autolatex2.utils.i18n import T
 
-EXPAND_REGISTRY : dict[str, Callable[[Any, Parser, tuple[dict[str, Any], ...]], None]] = dict()
+EXPAND_REGISTRY : dict[str, Callable[[Any, Parser, list[TeXMacroParameter]], None]] = dict()
 
 def expand_function(func : Callable) -> Callable:
 	"""
@@ -83,15 +84,19 @@ class ImageInclusions(Observer):
 		:type filename: str
 		"""
 		self.__expand_registry = EXPAND_REGISTRY
-		self.__filename = filename
-		self.__basename = os.path.basename(os.path.splitext(filename)[0])
-		self.__directory_name = os.path.dirname(filename)
-		self.__dynamic_preamble = list()
-		self.__init()
+		self.__filename : str = filename
+		self.__basename : str = os.path.basename(os.path.splitext(filename)[0])
+		self.__directory_name : str = os.path.dirname(filename)
+		self.__dynamic_preamble : list[str] = list()
+		self.__include_paths : list[str] = list()
+		self.__files_to_copy : set[str] = set()
+		self.__source2target : dict[str,str] = dict()
+		self.__target2source : dict[str,str] = dict()
+		self.__reset()
 
-	def __init(self) :
+	def __reset(self) :
 		# Inclusion paths for pictures.
-		self.__include_paths = []
+		self.__include_paths = list()
 		if self.__directory_name:
 			self.__include_paths.append(self.__directory_name)
 		# Content of the TeX file to generate
@@ -239,7 +244,7 @@ class ImageInclusions(Observer):
 
 	# noinspection DuplicatedCode
 	@override
-	def expand(self, parser : Parser, raw_text : str, name : str, *parameter : dict[str,Any]) -> str:
+	def expand(self, parser : Parser, raw_text : str, name : str, *parameters : TeXMacroParameter) -> str:
 		"""
 		Expand the given macro on the given parameters.
 		:param parser: reference to the parser.
@@ -248,8 +253,8 @@ class ImageInclusions(Observer):
 		:type raw_text: str
 		:param name: Name of the macro.
 		:type name: str
-		:param parameter: Descriptions of the values passed to the TeX macro.
-		:type parameter: dict[str,Any]
+		:param parameters: Descriptions of the values passed to the TeX macro.
+		:type parameters: dict[str,Any]
 		:return: the result of expansion of the macro, or None to not replace the macro by something (the macro is used as-is)
 		:rtype: str
 		"""
@@ -257,37 +262,39 @@ class ImageInclusions(Observer):
 			callback_name = re.sub(r'\*', 'star', name[1:])
 			if callback_name in self.__expand_registry:
 				func = self.__expand_registry[callback_name]
-				r = func(self, parser, parameter)
+				r = func(self, parser, list(parameters))
 				if r is not None:
 					return str(r)
 		return raw_text
 
 	@expand_function
-	def _expand__includeanimatedfigure(self, parser : Parser, parameter : list[dict[str,Any]]) -> str | None:
-		return self._expand__includegraphics(parser, parameter)
+	def _expand__includeanimatedfigure(self, parser : Parser, parameters : list[TeXMacroParameter]) -> str | None:
+		return self._expand__includegraphics(parser, parameters)
 
 	@expand_function
-	def _expand__includeanimatedfigurewtex(self, parser : Parser, parameter : list[dict[str,Any]]) -> str | None:
-		return self._expand__includegraphics(parser, parameter)
+	def _expand__includeanimatedfigurewtex(self, parser : Parser, parameters : list[TeXMacroParameter]) -> str | None:
+		return self._expand__includegraphics(parser, parameters)
 
 	@expand_function
-	def _expand__includefigurewtex(self, parser : Parser, parameter : list[dict[str,Any]]) -> str | None:
-		return self._expand__includegraphics(parser, parameter)
+	def _expand__includefigurewtex(self, parser : Parser, parameters : list[TeXMacroParameter]) -> str | None:
+		return self._expand__includegraphics(parser, parameters)
 
 	@expand_function
-	def _expand__includegraphicswtex(self, parser : Parser, parameter : list[dict[str,Any]]) -> str | None:
-		return self._expand__includegraphics(parser, parameter)
+	def _expand__includegraphicswtex(self, parser : Parser, parameters : list[TeXMacroParameter]) -> str | None:
+		return self._expand__includegraphics(parser, parameters)
 
 	# noinspection PyUnusedLocal
 	@expand_function
-	def _expand__includegraphics(self, parser : Parser, parameter : list[dict[str,Any]]) -> str | None:
-		self.__find_picture(parameter[1]['text'])
+	def _expand__includegraphics(self, parser : Parser, parameters : list[TeXMacroParameter]) -> str | None:
+		assert len(parameters) > 1
+		self.__find_picture(parameters[1].text)
 		return None
 
 	# noinspection PyUnusedLocal
 	@expand_function
-	def _expand__graphicspath(self, parser : Parser, parameter: list[dict[str, Any]]) -> str | None:
-		t = parameter[1]['text']
+	def _expand__graphicspath(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
+		assert len(parameters) > 1
+		t = parameters[1].text
 		if t:
 			r = re.match(r'^\s*(?:\{([^}]+)}|([^,]+))\s*[,;]?\s*(.*)$', t)
 			while r:
@@ -300,48 +307,53 @@ class ImageInclusions(Observer):
 		return None
 
 	@expand_function
-	def _expand__mfigurestar(self, parser : Parser, parameter: list[dict[str, Any]]) -> str | None:
-		self._expand__mfigure(parser, parameter)
+	def _expand__mfigurestar(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
+		self._expand__mfigure(parser, parameters)
 		return None
 
 	@expand_function
-	def _expand__mfiguretex(self, parser : Parser, parameter: list[dict[str, Any]]) -> str | None:
-		return self._expand__mfigure(parser, parameter)
+	def _expand__mfiguretex(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
+		return self._expand__mfigure(parser, parameters)
 
 	@expand_function
-	def _expand__mfiguretexstar(self, parser : Parser, parameter: list[dict[str, Any]]) -> str | None:
-		return self._expand__mfigure(parser, parameter)
+	def _expand__mfiguretexstar(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
+		return self._expand__mfigure(parser, parameters)
 
 	# noinspection PyUnusedLocal
 	@expand_function
-	def _expand__mfigure(self, parser : Parser, parameter: list[dict[str, Any]]) -> str | None:
-		self.__find_picture(parameter[2]['text'])
+	def _expand__mfigure(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
+		assert len(parameters) > 2
+		self.__find_picture(parameters[2].text)
 		return None
 
 	@expand_function
-	def _expand__msubfigurestar(self, parser : Parser, parameter: list[dict[str, Any]]) -> str | None:
-		return self._expand__msubfigurestar(parser, parameter)
+	def _expand__msubfigurestar(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
+		return self._expand__msubfigurestar(parser, parameters)
 
 	# noinspection PyUnusedLocal
 	@expand_function
-	def _expand__msubfigure(self, parser : Parser, parameter: list[dict[str, Any]]) -> str | None:
-		self.__find_picture(parameter[2]['text'])
+	def _expand__msubfigure(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
+		assert len(parameters) > 2
+		self.__find_picture(parameters[2].text)
 		return None
 
 	# noinspection PyUnusedLocal
 	@expand_function
-	def _expand__pgfdeclareimage(self, parser : Parser, name: str, parameter: list[dict[str, Any]]) -> str | None:
-		self.__find_picture(parameter[2]['text'])
+	def _expand__pgfdeclareimage(self, parser : Parser, name: str, parameters: list[TeXMacroParameter]) -> str | None:
+		assert len(parameters) > 2
+		self.__find_picture(parameters[2].text)
 		return None
 
 	@expand_function
-	def _expand__include(self, parser : Parser, parameter: list[dict[str, Any]]) -> str | None:
-		return self._expand__input(parser, parameter)
+	def _expand__include(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
+		return self._expand__input(parser, parameters)
 
+	# noinspection DuplicatedCode
 	@expand_function
-	def _expand__input(self, parser : Parser, parameter: list[dict[str, Any]]) -> str | None:
-		self.__find_picture(parameter[2]['text'])
-		filename = self.__make_filename(parameter[0]['text'], '.tex')
+	def _expand__input(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
+		assert len(parameters) > 2
+		self.__find_picture(parameters[2].text)
+		filename = self.__make_filename(parameters[0].text, '.tex')
 		with open(filename) as f:
 			subcontent = f.read()
 		subcontent += textwrap.dedent("""
@@ -515,7 +527,7 @@ class ImageInclusions(Observer):
 		Make the input file standalone.
 		:return: True if the execution is a success, otherwise False.
 		"""
-		self.__init()
+		self.__reset()
 		self._analyze_document()
 		return True
 

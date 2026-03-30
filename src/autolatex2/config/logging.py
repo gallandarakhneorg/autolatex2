@@ -34,14 +34,14 @@ class LoggingConfig:
 	DEFAULT_LOG_MESSAGE : str = T('%(levelname)s: %(message)s')
 
 	def __init__(self):
-		self.__message = None
-		self.__level = LoggingConfig.DEFAULT_LEVEL
+		self.__message : str = ''
+		self.__level : LoggingConfig = LoggingConfig.DEFAULT_LEVEL
 
 	def reset_internal_attributes(self):
 		"""
 		Reset the internal attributes.
 		"""
-		self.__message = None
+		self.__message = ''
 		self.__level = LoggingConfig.DEFAULT_LEVEL
 
 	@property

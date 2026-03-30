@@ -42,18 +42,33 @@ class TestAutolatexCommand(AbstractBaseTest):
 
 
 	def test_name(self):
+		"""
+		obj.name
+		"""
 		self.assertEqual('my_name', self.__obj.name)
 
 	def test_help(self):
+		"""
+		obj.help
+		"""
 		self.assertEqual('my_help', self.__obj.help)
 
 	def test_aliases(self):
+		"""
+		obj.aliases
+		"""
 		self.assertEqual(['alias1', 'alias2', 'alias3'], self.__obj.aliases)
 
 	def test_creator_type(self):
+		"""
+		obj.creator_type
+		"""
 		self.assertEqual(TestAutolatexCommand.InternalMock, self.__obj.creator_type)
 
 	def test_instance(self):
+		"""
+		obj.instance
+		"""
 		instance = self.__obj.instance
 		self.assertIsNotNone(instance)
 		self.assertEqual("xyz", instance.data)

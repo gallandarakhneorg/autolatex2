@@ -70,9 +70,8 @@ class MakerAction(AbstractMakerAction):
 				idx_file = genutils.basename2(root_file,  *texutils.get_tex_file_extensions()) + idx_ext
 				result = maker.run_makeindex(idx_file)
 				if result is not None:
-					exit_code, sout, serr = result
-					if exit_code != 0:
-						message = (sout or '') + (serr or '')
+					if result.return_code != 0:
+						message = (result.standard_output or '') + (result.error_output or '')
 						extlogging.multiline_error(T("Error when running the indexing tool: %s") % message)
 						return False
 		finally:

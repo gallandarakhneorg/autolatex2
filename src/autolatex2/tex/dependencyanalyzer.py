@@ -24,17 +24,18 @@ Tools that is extracting the dependencies of the TeX file.
 
 import os
 import re
-from typing import override, Any, Callable
+from typing import override, Any, Callable, Sized
 
 from autolatex2.tex.texobservers import Observer
 from autolatex2.tex.texparsers import Parser
 from autolatex2.tex.texparsers import TeXParser
 from autolatex2.tex import utils
+from autolatex2.tex.utils import FileType, TeXMacroParameter
+import  autolatex2.utils.utilfunctions as genutils
 
-FULL_EXPAND_REGISTRY : dict[str, Callable[[Any, str, tuple[dict[str, Any], ...]], None]] = dict()
+FULL_EXPAND_REGISTRY : dict[str, Callable[[Any, str, list[TeXMacroParameter]], None]] = dict()
 
-PREFIX_EXPAND_REGISTRY : dict[str, Callable[[Any, str, tuple[dict[str, Any], ...]], None]] = dict()
-
+PREFIX_EXPAND_REGISTRY : dict[str, Callable[[Any, str, list[TeXMacroParameter]], None]] = dict()
 
 # noinspection DuplicatedCode
 def expand_function(start_symbol : bool):
@@ -56,6 +57,259 @@ def expand_function(start_symbol : bool):
 			FULL_EXPAND_REGISTRY[func_name] = func
 		return func
 	return decorator
+
+
+class DependencyDescription:
+	"""
+	Description of a dependency with all the interesting information.
+	:param filename: The filename.
+	:type filename: str
+	:param file_type: The type of the dependency.
+	:type file_type: FileType
+	:param scope: The name of the scope that may be associated to the filename dependency.
+	:type scope: str|None
+	:param output_file: The name of the file that may be considered as an output. The type of file depends on file_type.
+	For example, for a bib file, the output file may be a specific bbl file.
+	:type output_file: str|None
+	"""
+	def __init__(self, filename : str, file_type : FileType, scope : str|None, output_file : str|None):
+		self.__filename : str = filename
+		self.__type : FileType = file_type
+		self.__has_change : bool = False
+		self.__change : float = float(0)
+		self.__scopes : set[str] = set()
+		self.__output_files : list[str] = list()
+		self.add_scope(scope)
+		self.add_output_file(output_file)
+
+	@property
+	def file_name(self) -> str:
+		"""
+		Replies the filename.
+		:rtype: str
+		"""
+		return self.__filename
+
+	@property
+	def file_type(self) -> FileType:
+		"""
+		Replies the type of file.
+		:rtype: FileType
+		"""
+		return self.__type
+
+	@property
+	def scopes(self) -> set[str]:
+		"""
+		Replies the scopes in which this file was defined as a dependency.
+		:rtype: set[str]
+		"""
+		return self.__scopes
+
+	def add_scope(self, scope : str|None):
+		"""
+		Add the given scope.
+		:param scope: The name of the scope.
+		:type scope: str|None
+		"""
+		if scope:
+			self.__scopes.add(scope)
+
+	def add_output_file(self, output_file : str|None):
+		"""
+		Add the given output file.
+		:param output_file: The name of the output file if relevant.
+		:type output_file: str|None
+		"""
+		if output_file:
+			self.__output_files.append(output_file)
+
+	@property
+	def change(self) -> float:
+		"""
+		Replies the time of the last change for the file.
+		:rtype: float
+		"""
+		if not self.__has_change:
+			self.__has_change = True
+			self.__change = genutils.get_file_last_change(self.file_name)
+		return self.__change
+
+	@property
+	def output_files(self) -> list[str]:
+		"""
+		Replies the linked output file. For example, for a Bibtex file, it may be a specific BBL file.
+		:rtype: list[str]
+		"""
+		return self.__output_files
+
+
+
+class _TypeDependencyRepositoryDescriptionIterator:
+	def __init__(self, parent_iterator):
+		self.__parent_iterator = parent_iterator
+
+	def __next__(self) -> DependencyDescription:
+		name, description = self.__parent_iterator.__next__()
+		return description
+
+
+
+
+class TypeDependencyRepository(Sized):
+	"""
+	Repository of dependency descriptions of a specific type.
+	"""
+	def __init__(self, database : dict[str,DependencyDescription] = None):
+		if database is None:
+			self.__database : dict[str,DependencyDescription] = dict()
+		else:
+			self.__database: dict[str, DependencyDescription] = database
+		self.__buffer_scopes : set[str] | None = None
+		self.__buffer_new_database : dict[str,dict[str, DependencyDescription]] | None = None
+
+	def __len__(self) -> int:
+		return len(self.__database)
+
+	def __contains__(self, item : str) -> bool:
+		return item in self.__database
+
+	def __iter__(self):
+		return _TypeDependencyRepositoryDescriptionIterator(self.__database.items().__iter__())
+
+	def __reset_buffers(self):
+		self.__buffer_scopes = None
+		self.__buffer_new_database = None
+
+	def update(self, file_type : FileType, filename : str, scope : str|None = None, output_file : str|None = None) -> DependencyDescription:
+		"""
+		Add a dependency for the given file.
+		:param file_type: The type of the dependency.
+		:type file_type: FileType
+		:param filename: The filename.
+		:type filename: str
+		:param scope: The name of the scope that may be associated to the filename dependency.
+		:type scope: str|None
+		:param output_file: The name of the file that may be considered as an output. The type of file depends on file_type.
+		For example, for a bib file, the output file may be a specific bbl file.
+		:type output_file: str|None
+		:return: The dependency description.
+		:rtype: DependencyDescription
+		"""
+		self.__reset_buffers()
+		if filename not in self.__database:
+			desc = DependencyDescription(filename, file_type, scope=scope, output_file=output_file)
+			self.__database[filename] = desc
+		else:
+			desc = self.__database[filename]
+			desc.add_scope(scope)
+			desc.add_output_file(output_file)
+		return desc
+
+	def scope_to(self, scope : str) -> 'TypeDependencyRepository':
+		"""
+		Create a scopy of this repository with only the dependencies of the given scope.
+		:param scope: The name of the scope.
+		:return: the scoped repository.
+		"""
+		if self.__buffer_new_database is None:
+			self.__buffer_new_database = dict()
+		if scope not in self.__buffer_new_database:
+			self.__buffer_new_database[scope] = dict()
+			for name, dep in self.__database.items():
+				if scope in dep.scopes:
+					self.__buffer_new_database[scope][name] = dep
+		return TypeDependencyRepository(database=self.__buffer_new_database[scope])
+
+	def get_scopes(self) -> set[str]:
+		"""
+		Replies the scopes that are defined in the repository.
+		:return: the scopes.
+		:rtype: set[str]
+		"""
+		if self.__buffer_scopes is None:
+			self.__buffer_scopes = set()
+			for name, dep in self.__database.items():
+				if dep.scopes:
+					self.__buffer_scopes.update(dep.scopes)
+		return self.__buffer_scopes
+
+
+
+class _DependencyRepository(Sized):
+	"""
+	Repository of dependency descriptions.
+	"""
+	def __init__(self):
+		self.__database : dict[FileType,TypeDependencyRepository] = dict()
+		self.__buffer_bibliography_databases : set[str] | None = None
+
+	def __len__(self) -> int:
+		return len(self.__database)
+
+	def __reset_buffers(self):
+		self.__buffer_bibliography_databases = None
+
+	def update(self, file_type : FileType, filename : str, scope : str|None = None, output_file : str|None = None) -> DependencyDescription:
+		"""
+		Add a dependency for the given file, associated to the given type.
+		:param file_type: The type of the dependency.
+		:type file_type: FileType
+		:param filename: The filename.
+		:type filename: str
+		:param scope: The name of the scope that may be associated to the filename dependency.
+		:type scope: str|None
+		:param output_file: The name of the file that may be considered as an output. The type of file depends on file_type.
+		For example, for a bib file, the output file may be a specific bbl file.
+		:type output_file: str|None
+		:return: The dependency description.
+		:rtype: DependencyDescription
+		"""
+		self.__reset_buffers()
+		if file_type not in self.__database:
+			self.__database[file_type] = TypeDependencyRepository()
+		return self.__database[file_type].update(file_type, filename, scope=scope, output_file=output_file)
+
+	@property
+	def types(self) -> set[FileType]:
+		"""
+		Replies the types of files that have been stored in this repository.
+		:return: the set of file types.
+		:rtype: set[FileType]
+		"""
+		return set(self.__database.keys())
+
+	def get_bibliography_scopes(self) -> set[str]:
+		"""
+		Replies the names of the bibliography scopes that have been detected.
+		The scopes of the bibliographies are usually defined by the LaTeX multibib package.
+		:return: the names of the bibliography database.
+		:rtype: set[str]
+		"""
+		if self.__buffer_bibliography_databases is None:
+			self.__buffer_bibliography_databases = set()
+			for btype in FileType.biliography_types():
+				if btype in self.__database:
+					content = self.__database[btype]
+					if content:
+						self.__buffer_bibliography_databases.update(content.get_scopes())
+		return self.__buffer_bibliography_databases
+
+	def get_dependencies_for_type(self, dependency_type : FileType, scope : str|None = None) -> TypeDependencyRepository:
+		"""
+		Replies the dependencies of the given type.
+		:param dependency_type: The type of the dependency (tex, bib, ...)
+		:type dependency_type: FileType
+		:param scope: The scope of the dependency to restrict to.
+		:type scope: str|None
+		:return: the set of dependencies. The replied dictionary maps the dependency filenames to their detailled descriptions
+		:rtype: TypeDependencyRepository
+		"""
+		if dependency_type not in self.__database:
+			self.__database[dependency_type] = TypeDependencyRepository()
+		if scope:
+			return self.__database[dependency_type].scope_to(scope)
+		return self.__database[dependency_type]
 
 
 
@@ -81,6 +335,7 @@ class DependencyAnalyzer(Observer):
 		# BibTeX
 		'addbibresource'			: '![]!{}',
 		'begin'						: '[]!{}',
+		'end'						: '!{}',
 		'putbib'					: '![]',
 		'bibliographyslide'			: '',
 		'defaultbibliography'		: '!{}',
@@ -97,21 +352,23 @@ class DependencyAnalyzer(Observer):
 		"""
 		self.__full_expand_registry = FULL_EXPAND_REGISTRY
 		self.__prefix_expand_registry = PREFIX_EXPAND_REGISTRY
-		self.__is_multibib = False
-		self.__is_bibunits = False
-		self.__is_biblatex = False
-		self.__is_biber = False
-		self.__is_index = False
-		self.__is_xindy = False
-		self.__is_glossary = False
-		self.__dependencies = {}
-		self.__filename = filename
-		self.__basename = os.path.basename(os.path.splitext(filename)[0])
-		self.__root_directory = root_directory
-		self.__explicit_bibliography = False
-		self.__explicit_bibliography_style = False
-		self.__default_bibliography = dict()
-		self.__default_bibliography_style = dict()
+		self.__is_multibib : bool = False
+		self.__bibunit_index : int = 0
+		self.__in_bibunit : bool = False
+		self.__is_bibunits : bool = False
+		self.__is_biblatex : bool = False
+		self.__is_biber : bool = False
+		self.__is_index : bool = False
+		self.__is_xindy : bool = False
+		self.__is_glossary : bool = False
+		self.__dependency_repository : _DependencyRepository = _DependencyRepository()
+		self.__filename : str = filename
+		self.__basename : str = os.path.basename(os.path.splitext(filename)[0])
+		self.__root_directory : str = root_directory
+		self.__explicit_bibliography : bool = False
+		self.__explicit_bibliography_style : bool = False
+		self.__default_bibliography : dict[str,list[TeXMacroParameter]] = dict()
+		self.__default_bibliography_style : dict[str,list[TeXMacroParameter]] = dict()
 
 	@property
 	def root_directory(self) -> str:
@@ -295,111 +552,57 @@ class DependencyAnalyzer(Observer):
 		"""
 		self.__is_glossary = enable
 
-	def __add_dependency(self, dependency_type : str, dependency_file : str):
-		"""
-		Add a dependency.
-		:param dependency_type: The type of the dependency (tex, bib, ...)
-		:type dependency_type: str
-		:param dependency_file: The filename.
-		:type dependency_file: str
-		"""
-		if dependency_type not in self.__dependencies:
-			s = set()
-			s.add(dependency_file)
-			self.__dependencies[dependency_type] = s
-		else:
-			self.__dependencies[dependency_type].add(dependency_file)
-
-	def get_dependency_types(self) -> set[str]:
+	def get_dependency_types(self) -> set[FileType]:
 		"""
 		Replies the dependency types.
 		:return: the set of dependency types.
-		:rtype: set[str]
+		:rtype: set[FileType]
 		"""
-		the_set = set(self.__dependencies.keys())
-		if 'biblio' in the_set:
-			the_set.remove('biblio')
-		return the_set
+		return self.__dependency_repository.types
 
-	def get_dependencies(self, dependency_type : str) -> set[str] | dict[str,dict[str,set[str]]]:
+	def get_dependencies_for_type(self, dependency_type : FileType, scope : str|None = None) -> TypeDependencyRepository:
 		"""
 		Replies the dependencies of the given type.
 		:param dependency_type: The type of the dependency (tex, bib, ...)
-		:type dependency_type: str
+		:type dependency_type: FileType
+		:param scope: The scope of the dependency to restrict to.
+		:type scope: str|None
 		:return: the set of dependencies. The set of dependency names is the more used form. The dictionary of dictionary is usually used for bibliography dependencies.
-		:rtype: set[str] | dict[str,dict[str,set[str]]]
+		:rtype: TypeDependencyRepository
 		"""
-		if dependency_type in self.__dependencies:
-			return self.__dependencies[dependency_type]
-		return set()
+		return self.__dependency_repository.get_dependencies_for_type(dependency_type, scope)
 
-	def get_bib_dependencies(self, bib_type : str, bib_database : str = '') -> set[str]:
+	def get_bibliography_scopes(self) -> set[str]:
 		"""
-		Replies the bibliography dependencies of the given type.
-		:param bib_type: The type of the dependency (bbx, ...)
-		:type bib_type: str
-		:param bib_database: The name of the bibliography database.
-		:type bib_database: str
-		:return: the set of dependencies.
+		Replies the names of the bibliography scopes that have been detected.
+		:return: the names of the bibliography database.
 		:rtype: set[str]
 		"""
-		if 'biblio' in self.__dependencies:
-			hash1 = self.__dependencies['biblio']
-			if bib_database in hash1:
-				hash2 = hash1[bib_database]
-				if bib_type in hash2:
-					return hash2[bib_type]
-		return set()
+		return self.__dependency_repository.get_bibliography_scopes()
 
-	def get_bib_databases(self) -> set[str]:
-		"""
-		Replies the set of bibliography databases
-		:return: the set of bibliography database.
-		:rtype: set[str]
-		"""
-		if 'biblio' in self.__dependencies:
-			hash1 = self.__dependencies['biblio']
-			return hash1.keys()
-		return set()
+	def __extract_bibdb(self, macro_name_prefix : str, name : str) -> str:
+		l = len(macro_name_prefix)
+		if self.is_multibib:
+			return name[l:] if len(name) > l else self.basename
+		else:
+			return self.basename
 
-	def __add_bib_dependency(self, bib_type : str, dependency_file : str, db_name : str = ''):
+	def __parse_bib_references(self, bib_db : str, bbl_file : str, *files : TeXMacroParameter):
 		"""
-		Add a dependency.
-		:param bib_type: The type of the dependency (bbx, ...)
-		:type bib_type: str
-		:param dependency_file: The filename.
-		:type dependency_file: str
-		:param db_name: The name of the bibliography database (default: )
-		:type db_name: str
-		"""
-		if 'biblio' not in self.__dependencies:
-			hash1 = {}
-			self.__dependencies['biblio'] = hash1
-		else:
-			hash1 = self.__dependencies['biblio']
-		if db_name not in hash1:
-			hash2 = {}
-			hash1[db_name] = hash2
-		else:
-			hash2 = hash1[db_name]
-		if bib_type not in hash2:
-			the_set = set()
-			hash2[bib_type] = the_set
-		else:
-			the_set = hash2[bib_type]
-		the_set.add(dependency_file)
-
-	def __parse_bib_references(self, bib_db : str, *files : dict[str,Any]):
-		"""
-		Add a dependency to a BibTeX database.
-		:param bib_db: the BibTeX database.
+		Add a dependency to a bibliography database.
+		:param bib_db: the name of the database.
 		:type bib_db: str
-		:param files: the BibTeX files.
-		:type files: dict[str,Any]
+		:param bbl_file: the name of the BBL file.
+		:type bbl_file: str
+		:param files: the bibliography files.
+		:type files: TeXMacroParameter
 		:type files: str
 		"""
+		# Special case: the bibunit
+		if self.__in_bibunit:
+			bib_db = bib_db + '.' + str(self.__bibunit_index)
 		for param in files:
-			value = param['text']
+			value = param.text
 			if value:
 				for svalue in re.split(r'\s*,\s*', value):
 					if svalue:
@@ -411,11 +614,11 @@ class DependencyAnalyzer(Observer):
 						if not os.path.isabs(bib_file):
 							bib_file = os.path.normpath(os.path.join(self.root_directory, bib_file))
 						if os.path.isfile(bib_file):
-							self.__add_bib_dependency('bib', bib_file, bib_db)
+							self.__dependency_repository.update(FileType.bib, bib_file, scope=bib_db, output_file=bbl_file)
 
 	# noinspection PyCallingNonCallable
 	@override
-	def expand(self, parser : Parser, raw_text : str, name : str, *parameter : dict[str,Any]) -> str:
+	def expand(self, parser : Parser, raw_text : str, name : str, *parameters : TeXMacroParameter) -> str:
 		"""
 		Expand the given macro on the given parameters.
 		:param parser: reference to the parser.
@@ -424,8 +627,8 @@ class DependencyAnalyzer(Observer):
 		:type raw_text: str
 		:param name: Name of the macro.
 		:type name: str
-		:param parameter: Descriptions of the values passed to the TeX macro.
-		:type parameter: dict[str,Any]
+		:param parameters: Descriptions of the values passed to the TeX macro.
+		:type parameters: TeXMacroParameter
 		:return: the result of expansion of the macro, or None to not replace the macro by something (the macro is used as-is)
 		:rtype: str
 		"""
@@ -433,7 +636,7 @@ class DependencyAnalyzer(Observer):
 			callback_name = name[1:]
 			if callback_name in self.__full_expand_registry:
 				func = self.__full_expand_registry[callback_name]
-				func(self, name, list(parameter))
+				func(self, name, list(parameters))
 			else:
 				largest_size = 0
 				largest_func = None
@@ -444,75 +647,81 @@ class DependencyAnalyzer(Observer):
 							largest_size = l
 							largest_func = func
 				if largest_func is not None:
-					largest_func(self, name, list(parameter))
+					largest_func(self, name, list(parameters))
 		return ''
 
+	# noinspection PyUnusedLocal
 	@expand_function(start_symbol=False)
-	def _expand__input(self, name : str, parameters : list[dict[str, Any],...]):
+	def _expand__documentclass(self, name : str, parameters : list[TeXMacroParameter]):
+		assert len(parameters) > 1
+		cls = parameters[1].text
+		if cls.endswith('.cls'):
+			cls_file = cls
+		else:
+			cls_file = cls + '.cls'
+		if not os.path.isabs(cls_file):
+			cls_file = os.path.normpath(os.path.join(self.root_directory, cls_file))
+		if os.path.isfile(cls_file):
+			self.__dependency_repository.update(FileType.cls, cls_file)
+
+	@expand_function(start_symbol=False)
+	def _expand__input(self, name : str, parameters : list[TeXMacroParameter]):
 		self._expand__include(name, parameters)
 
+	# noinspection PyUnusedLocal
 	@expand_function(start_symbol=False)
-	def _expand__newglossaryentry(self, name : str, parameters : list[dict[str, Any],...]):
+	def _expand__include(self, name : str, parameters : list[TeXMacroParameter]):
+		for param in parameters:
+			value = param.text
+			if value:
+				if utils.is_tex_document(value):
+					tex_file = value
+				else:
+					tex_file = value + utils.get_tex_file_extensions()[0]
+				if not os.path.isabs(tex_file):
+					tex_file = os.path.normpath(os.path.join(self.root_directory, tex_file))
+				if os.path.isfile(tex_file):
+					self.__dependency_repository.update(FileType.tex, tex_file)
+
+	@expand_function(start_symbol=False)
+	def _expand__newglossaryentry(self, name : str, parameters : list[TeXMacroParameter]):
 		self._expand__makeglossaries(name, parameters)
 
 	@expand_function(start_symbol=False)
-	def _expand__printglossaries(self, name : str, parameters : list[dict[str, Any],...]):
+	def _expand__printglossaries(self, name : str, parameters : list[TeXMacroParameter]):
 		self._expand__makeglossaries(name, parameters)
 
+	# noinspection PyUnusedLocal
 	@expand_function(start_symbol=False)
-	def _expand__printindex(self, name : str, parameters : list[dict[str, Any],...]):
+	def _expand__makeglossaries(self, name : str, parameters : list[TeXMacroParameter]):
+		self.is_glossary = True
+
+	@expand_function(start_symbol=False)
+	def _expand__printindex(self, name : str, parameters : list[TeXMacroParameter]):
 		self._expand__makeindex(name, parameters)
+
+	# noinspection PyUnusedLocal
+	@expand_function(start_symbol=False)
+	def _expand__makeindex(self, name : str, parameters : list[TeXMacroParameter]):
+		self.is_makeindex = True
 
 	# noinspection PyPep8Naming
 	@expand_function(start_symbol=False)
-	def _expand__RequirePackage(self, name : str, parameters : list[dict[str, Any],...]):
+	def _expand__RequirePackage(self, name : str, parameters : list[TeXMacroParameter]):
 		self._expand__usepackage(name, parameters)
 
-	# noinspection PyUnusedLocal
-	@expand_function(start_symbol = False)
-	def _expand__addbibresource(self, name : str, parameters : list[dict[str, Any],...]):
-		bibdb = self.basename
-		self.__parse_bib_references(bibdb, *parameters)
+	@expand_function(start_symbol = True)
+	def _expand__bibliography(self, name : str, parameters : list[TeXMacroParameter]):
+		assert len(parameters) > 0
+		bibdb = self.__extract_bibdb('\\bibliography', name)
+		self.__parse_bib_references(bibdb, bibdb, *parameters)
 
 	@expand_function(start_symbol = True)
-	def _expand__bibliography(self, name : str, parameters : list[dict[str, Any],...]):
-		if self.is_multibib:
-			bibdb = name[13:] if len(name) > 13 else self.basename
-		else:
-			bibdb = self.basename
-		self.__parse_bib_references(bibdb, *parameters)
-
-	# noinspection PyUnusedLocal
-	@expand_function(start_symbol = False)
-	def _expand__putbib(self, name : str, parameters : list[dict[str, Any],...]):
-		bibdb = self.basename
-		if len(parameters) > 0 and parameters[0] and 'text' in parameters[0] and parameters[0]['text']:
-			self.__parse_bib_references(bibdb, *parameters)
-		elif '\\defaultbibliography' not in self.__default_bibliography:
-			self.__default_bibliography['\\defaultbibliography'] = [ {'text': self.basename} ]
-
-	# noinspection PyUnusedLocal
-	@expand_function(start_symbol = False)
-	def _expand__bibliographyslide(self, name : str, parameters : list[dict[str, Any],...]):
-		bibdb = self.basename
-		self.__parse_bib_references(bibdb, {'text': 'biblio'})
-
-	# noinspection PyUnusedLocal
-	@expand_function(start_symbol = False)
-	def _expand__begin(self, name : str, parameters : list[dict[str, Any],...]):
-		tex_name = parameters[1]['text']
-		if tex_name == 'bibliographysection':
-			bibdb = self.basename
-			self.__parse_bib_references(bibdb, {'text': 'biblio'})
-
-	@expand_function(start_symbol = True)
-	def _expand__bibliographystyle(self, name : str, parameters : list[dict[str, Any],...]):
-		if self.is_multibib:
-			bibdb = name[18:] if len(name) > 18 else self.basename
-		else:
-			bibdb = self.basename
+	def _expand__bibliographystyle(self, name : str, parameters : list[TeXMacroParameter]):
+		assert len(parameters) > 0
+		bibdb = self.__extract_bibdb('\\bibliographystyle', name)
 		for param in parameters:
-			value = param['text']
+			value = param.text
 			if value:
 				for svalue in re.split('\\s*,\\s*', value.strip()):
 					if svalue:
@@ -524,50 +733,56 @@ class DependencyAnalyzer(Observer):
 						if not os.path.isabs(bst_file):
 							bst_file = os.path.normpath(os.path.join(self.root_directory, bst_file))
 						if os.path.isfile(bst_file):
-							self.__add_bib_dependency('bst', bst_file, bibdb)
+							self.__dependency_repository.update(FileType.bst, bst_file, scope=bibdb)
 
 	# noinspection PyUnusedLocal
-	@expand_function(start_symbol=False)
-	def _expand__documentclass(self, name : str, parameters : list[dict[str, Any],...]):
-		cls = parameters[1]['text']
-		if cls.endswith('.cls'):
-			cls_file = cls
+	@expand_function(start_symbol = False)
+	def _expand__addbibresource(self, name : str, parameters : list[TeXMacroParameter]):
+		assert len(parameters) > 0
+		bibdb = self.basename
+		self.__parse_bib_references(bibdb, *parameters)
+
+	# noinspection PyUnusedLocal
+	@expand_function(start_symbol = False)
+	def _expand__putbib(self, name : str, parameters : list[TeXMacroParameter]):
+		bibdb = self.basename
+		bbl_file = self.basename
+		if len(parameters) > 0 and parameters[0].text:
+			self.__parse_bib_references(bibdb, bbl_file, *parameters)
+		elif '\\defaultbibliography' in self.__default_bibliography:
+			self.__parse_bib_references(bibdb, bbl_file,*self.__default_bibliography['\\defaultbibliography'])
 		else:
-			cls_file = cls + '.cls'
-		if not os.path.isabs(cls_file):
-			cls_file = os.path.normpath(os.path.join(self.root_directory, cls_file))
-		if os.path.isfile(cls_file):
-			self.__add_dependency('cls', cls_file)
+			self.__parse_bib_references(bibdb, bbl_file, TeXMacroParameter(text=self.basename))
 
 	# noinspection PyUnusedLocal
-	@expand_function(start_symbol=False)
-	def _expand__include(self, name : str, parameters : list[dict[str, Any],...]):
-		for param in parameters:
-			value = param['text']
-			if value:
-				if utils.is_tex_document(value):
-					tex_file = value
-				else:
-					tex_file = value + utils.get_tex_file_extensions()[0]
-				if not os.path.isabs(tex_file):
-					tex_file = os.path.normpath(os.path.join(self.root_directory, tex_file))
-				if os.path.isfile(tex_file):
-					self.__add_dependency('tex', tex_file)
+	@expand_function(start_symbol = False)
+	def _expand__bibliographyslide(self, name : str, parameters : list[TeXMacroParameter]):
+		self.__parse_bib_references(self.basename, self.basename, TeXMacroParameter(text='biblio'))
 
 	# noinspection PyUnusedLocal
-	@expand_function(start_symbol=False)
-	def _expand__makeglossaries(self, name : str, parameters : list[dict[str, Any],...]):
-		self.is_glossary = True
+	@expand_function(start_symbol = False)
+	def _expand__begin(self, name : str, parameters : list[TeXMacroParameter]):
+		assert len(parameters) > 1
+		tex_name = parameters[1].text
+		if tex_name == 'bibliographysection':
+			self.__parse_bib_references(self.basename, self.basename, TeXMacroParameter(text='biblio'))
+		elif tex_name == 'bibunit':
+			self.__in_bibunit = True
+			self.__bibunit_index = self.__bibunit_index + 1
 
 	# noinspection PyUnusedLocal
-	@expand_function(start_symbol=False)
-	def _expand__makeindex(self, name : str, parameters : list[dict[str, Any],...]):
-		self.is_makeindex = True
+	@expand_function(start_symbol = False)
+	def _expand__end(self, name : str, parameters : list[TeXMacroParameter]):
+		assert len(parameters) > 0
+		tex_name = parameters[0].text
+		if tex_name == 'bibunit':
+			self.__in_bibunit = False
 
 	# noinspection DuplicatedCode,PyUnusedLocal
 	@expand_function(start_symbol=False)
-	def _expand__usepackage(self, name : str, parameters : list[dict[str, Any],...]):
-		sty = parameters[1]['text']
+	def _expand__usepackage(self, name : str, parameters : list[TeXMacroParameter]):
+		assert len(parameters) > 1
+		sty = parameters[1].text
 		if sty.endswith('.sty'):
 			sty_file = sty
 		else:
@@ -579,8 +794,8 @@ class DependencyAnalyzer(Observer):
 		elif sty_file == 'biblatex.sty':
 			self.is_biblatex = True
 			# Parse the biblatex parameters
-			if parameters[0] and parameters[0]['text']:
-				params = re.split(r'\s*,\s*', (parameters[0]['text'] or '').strip())
+			if parameters[0].text:
+				params = re.split(r'\s*,\s*', (parameters[0].text or '').strip())
 				for p in params:
 					r = re.match(r'^([^=]+)\s*=\s*(.*?)\s*$', p, re.DOTALL)
 					if r:
@@ -599,7 +814,7 @@ class DependencyAnalyzer(Observer):
 						if not os.path.isabs(bbx_file):
 							bbx_file = os.path.normpath(os.path.join(self.root_directory, bbx_file))
 						if os.path.isfile(bbx_file):
-							self.__add_bib_dependency('bbx', bbx_file)
+							self.__dependency_repository.update(FileType.bbx, bbx_file)
 						if v.endswith('.cbx'):
 							cbx_file = v
 						else:
@@ -607,7 +822,7 @@ class DependencyAnalyzer(Observer):
 						if not os.path.isabs(cbx_file):
 							cbx_file = os.path.normpath(os.path.join(self.root_directory, cbx_file))
 						if os.path.isfile(cbx_file):
-							self.__add_bib_dependency('cbx', cbx_file)
+							self.__dependency_repository.update(FileType.cbx, cbx_file)
 					elif k == 'bibstyle':
 						if v.endswith('.bbx'):
 							bbx_file = v
@@ -616,7 +831,7 @@ class DependencyAnalyzer(Observer):
 						if not os.path.isabs(bbx_file):
 							bbx_file = os.path.normpath(os.path.join(self.root_directory, bbx_file))
 						if os.path.isfile(bbx_file):
-							self.__add_bib_dependency('bbx', bbx_file)
+							self.__dependency_repository.update(FileType.bbx, bbx_file)
 					elif k == 'citestyle':
 						if v.endswith('.cbx'):
 							cbx_file = v
@@ -625,9 +840,9 @@ class DependencyAnalyzer(Observer):
 						if not os.path.isabs(cbx_file):
 							cbx_file = os.path.normpath(os.path.join(self.root_directory, cbx_file))
 						if os.path.isfile(cbx_file):
-							self.__add_bib_dependency('cbx', cbx_file)
+							self.__dependency_repository.update(FileType.cbx, cbx_file)
 		elif sty_file == 'indextools.sty':
-			if parameters[0] and parameters[0]['text'] and 'xindy' in parameters[0]['text']:
+			if parameters[0] and parameters[0].text and 'xindy' in parameters[0].text:
 				self.is_xindy_index = True
 		elif sty_file == 'glossaries.sty':
 			self.is_glossary = True
@@ -635,16 +850,16 @@ class DependencyAnalyzer(Observer):
 			if not os.path.isabs(sty_file):
 				sty_file = os.path.normpath(os.path.join(self.root_directory, sty_file))
 			if os.path.isfile(sty_file):
-				self.__add_dependency('sty', sty_file)
+				self.__dependency_repository.update(FileType.sty, sty_file)
 
 	# noinspection DuplicatedCode,PyUnusedLocal
 	@expand_function(start_symbol=False)
-	def _expand__defaultbibliography(self, name : str, parameters : list[dict[str, Any],...]):
+	def _expand__defaultbibliography(self, name : str, parameters : list[TeXMacroParameter]):
 		self.__default_bibliography[name] = parameters
 
 	# noinspection DuplicatedCode,PyUnusedLocal
 	@expand_function(start_symbol=False)
-	def _expand__defaultbibliographystyle(self, name : str, parameters : list[dict[str, Any],...]):
+	def _expand__defaultbibliographystyle(self, name : str, parameters : list[TeXMacroParameter]):
 		self.__default_bibliography_style[name] = parameters
 
 

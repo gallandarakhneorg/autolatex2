@@ -33,8 +33,8 @@ translator_function: |
     		with open(tmpFile,  'wt') as out_file:
     			out_file.write(in_file.read())
     			out_file.write("\n\nprint -dpng -svgconvert -tight -color \"" + _out + "\"\n")
-    	sout, serr, sex, retcode = Runner.run_command('octave', '-q', '--no-gui', '--no-history', tmpFile);
-    	Runner.check_runner_status(serr, sex, retcode)
+    	runner_output = Runner.run_command('octave', '-q', '--no-gui', '--no-history', '--no-window-system', tmpFile);
+    	Runner.check_runner_status(runner_output)
     finally:
     	genutils.unlink(tmpFile)
 ...

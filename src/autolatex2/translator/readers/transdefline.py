@@ -18,9 +18,9 @@
 # write to the Free Software Foundation, Inc., 59 Temple Place - Suite
 # 330, Boston, MA 02111-1307, USA.
 
-'''
+"""
 Readers of "transdef" files.
-'''
+"""
 
 from dataclasses import dataclass
 
@@ -29,12 +29,12 @@ from dataclasses import dataclass
 class TransdefLine:
 	name : str
 	lineno : int
-	interpreter : str
-	value : str
-	value_list : list
+	interpreter : str | None
+	value : str | None
+	value_list : list[str|None]
 	
 	def __init__(self,  name : str,  lineno : int,  value : str | None,  interpreter : str | None):
-		'''
+		"""
 		Constructor.
 		:param name: The name of transdef entry.
 		:type name: str
@@ -44,7 +44,7 @@ class TransdefLine:
 		:type value: str
 		:param interpreter: The interpreter to use for the value (if the value is code).
 		:type interpreter: str
-		'''
+		"""
 		self.name = name
 		self.lineno = lineno
 		self.value = value

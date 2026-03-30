@@ -28,6 +28,7 @@ from typing import override, Any
 
 from autolatex2.translator.interpreters.abstractinterpreter import AbstractTranslatorInterpreter
 from autolatex2.config.configobj import Config
+from autolatex2.utils.runner import ScriptOutput
 
 
 class TranslatorInterpreter(AbstractTranslatorInterpreter):
@@ -43,6 +44,7 @@ class TranslatorInterpreter(AbstractTranslatorInterpreter):
 		"""
 		super().__init__(configuration)
 
+	# noinspection PyDeprecation
 	@property
 	@override
 	def runnable(self) -> bool:
@@ -54,7 +56,7 @@ class TranslatorInterpreter(AbstractTranslatorInterpreter):
 		if self.configuration:
 			cmd = self.configuration.python_interpreter
 		else:
-			cmd = 'python'
+			cmd = 'python3'
 		return shutil.which(cmd) is not None
 
 	
@@ -69,7 +71,7 @@ class TranslatorInterpreter(AbstractTranslatorInterpreter):
 		if self.configuration:
 			cmd = self.configuration.python_interpreter
 		else:
-			cmd = 'python'
+			cmd = 'python3'
 		return cmd
 
 
@@ -101,7 +103,7 @@ class TranslatorInterpreter(AbstractTranslatorInterpreter):
 		return "\n".join(code_array)
 
 	@override
-	def run(self, code : str, show_script_on_error : bool = True) -> tuple[str,str,Any,int]:
+	def run(self, code : str, show_script_on_error : bool = True) -> ScriptOutput:
 		"""
 		Run the interpreter.
 		:param code: The Python code to interprete.

@@ -51,27 +51,26 @@ class Config:
 	DEFAULT_CLI_ACTION : str = 'all'
 
 	def __init__(self):
-		self.__python_interpreter = 'python3'
-		self.__os_name = None
-		self.__home_directory = None
-		self.__user_directory = None
-		self.__user_file = None
-		self.__document_directory = None
-		self.__document_filename = None
-		self.__installation_directory = None
-		self.__autolatex_script_name = None
-		self.__autolatex_launch_name = None
-		self.__autolatex_version = None
-		self.__infinite_loop = False
-		self.__infinite_loop_delay = Config.DEFAULT_INFINITE_LOOP_DELAY
-		self.__default_cli_action = Config.DEFAULT_CLI_ACTION
-
-		self.__generation = GenerationConfig()
-		self.__translation = TranslatorConfig()
-		self.__view = ViewerConfig()
-		self.__logging = LoggingConfig()
-		self.__scm = ScmConfig()
-		self.__clean = CleanConfig()
+		self.__python_interpreter : str = 'python3'
+		self.__os_name : str | None = None
+		self.__home_directory : str | None = None
+		self.__user_directory : str | None = None
+		self.__user_file : str | None = None
+		self.__document_directory : str | None = None
+		self.__document_filename : str | None = None
+		self.__installation_directory : str | None = None
+		self.__autolatex_script_name : str | None = None
+		self.__autolatex_launch_name : str | None = None
+		self.__autolatex_version : str | None = None
+		self.__infinite_loop : bool = False
+		self.__infinite_loop_delay : int = Config.DEFAULT_INFINITE_LOOP_DELAY
+		self.__default_cli_action : str = Config.DEFAULT_CLI_ACTION
+		self.__generation : GenerationConfig | None = None
+		self.__translation : TranslatorConfig | None = None
+		self.__view : ViewerConfig | None = None
+		self.__logging : LoggingConfig | None = None
+		self.__scm : ScmConfig | None = None
+		self.__clean : CleanConfig | None = None
 
 	def reset_internal_attributes(self, os_name : str):
 		"""
@@ -94,12 +93,18 @@ class Config:
 		self.__infinite_loop_delay = Config.DEFAULT_INFINITE_LOOP_DELAY
 		self.__default_cli_action = Config.DEFAULT_CLI_ACTION
 
-		self.__generation.reset_internal_attributes()
-		self.__translation.reset_internal_attributes()
-		self.__view.reset_internal_attributes()
-		self.__logging.reset_internal_attributes()
-		self.__scm.reset_internal_attributes()
-		self.__clean.reset_internal_attributes()
+		if self.__generation is not None:
+			self.__generation.reset_internal_attributes()
+		if self.__translation is not None:
+			self.__translation.reset_internal_attributes()
+		if self.__view is not None:
+			self.__view.reset_internal_attributes()
+		if self.__logging is not None:
+			self.__logging.reset_internal_attributes()
+		if self.__scm is not None:
+			self.__scm.reset_internal_attributes()
+		if self.__clean is not None:
+			self.__clean.reset_internal_attributes()
 
 	@override
 	def __str__(self) -> str:
@@ -147,13 +152,16 @@ class Config:
 		return self.__python_interpreter
 
 	@python_interpreter.setter
-	def python_interpreter(self, name : str):
+	def python_interpreter(self, name : str | None):
 		"""
 		Change the name of the python interpreter.
-		:param name: The name of the interpreter.
+		:param name: The name of the interpreter. If None is used, 'python3' is assumed.
 		:type name: str
 		"""
-		self.__python_interpreter = name
+		if name:
+			self.__python_interpreter = name
+		else:
+			self.__python_interpreter = 'python3'
 	
 	@property
 	def os_name(self) -> str:
@@ -163,19 +171,19 @@ class Config:
 		:return: the name.
 		:rtype: str
 		"""
-		if self.__os_name is None:
-			return os.name
-		else:
+		if self.__os_name:
 			return self.__os_name
+		else:
+			return os.name
 
 	@os_name.setter
-	def os_name(self, name : str):
+	def os_name(self, name : str | None):
 		"""
 		Set the name of the OS.
 		This name is used by this configuration for building  the property values.
 		:param name: The name of the OS. If None, the value of <code>os.name</code>
 		             will be used.
-		:type name: str
+		:type name: str | None
 		"""
 		self.__os_name = name
 	
@@ -186,19 +194,35 @@ class Config:
 		:return: the absolute filename or None.
 		:rtype: str
 		"""
-		if self.__home_directory is None:
-			return os.path.expanduser('~')
-		else:
+		if self.__home_directory:
 			return self.__home_directory
+		else:
+			return os.path.expanduser('~')
 
 	@home_directory.setter
-	def home_directory(self, name : str):
+	def home_directory(self, name : str | None):
 		"""
 		Set the home directory.
-		:param name: The home directory, or None.
+		:param name: The home directory, or None to reset to the home directory.
 		:type name: str
 		"""
 		self.__home_directory = name
+
+	def __is_unix(self) -> bool:
+		"""
+		Replies if the current operating system is using the Unix conventions.
+		:return: True if the operating is compatible with Unix; False if another operating system.
+		:rtype: bool
+		"""
+		return self.os_name == 'posix'
+
+	def __is_windows(self) -> bool:
+		"""
+		Replies if the current operating system is using the Windows conventions.
+		:return: True if the operating is compatible with Windows; False if another operating system.
+		:rtype: bool
+		"""
+		return self.os_name == 'nt'
 
 	def make_document_config_filename(self, directory : str) -> str:
 		"""
@@ -209,7 +233,7 @@ class Config:
 		:return: The name of the file in which the document-level configuration is stored.
 		:rtype: str
 		"""
-		if self.os_name == 'posix':
+		if self.__is_unix():
 			return os.path.join(directory, ".autolatex_project.cfg")
 		else:
 			return os.path.join(directory, "autolatex_project.cfg")
@@ -222,9 +246,9 @@ class Config:
 		:rtype: str
 		"""
 		if self.__user_directory is None:
-			if self.os_name == 'posix':
+			if self.__is_unix():
 				self.__user_directory = os.path.join(self.home_directory, ".autolatex")
-			elif self.os_name == 'nt':
+			elif self.__is_windows():
 				self.__user_directory = os.path.join(self.home_directory, "Local Settings", "Application Data", "autolatex")
 			else:
 				self.__user_directory = os.path.join(self.home_directory, "autolatex")
@@ -242,19 +266,19 @@ class Config:
 		return os.path.isdir(directory)
 
 	@property
-	def user_config_file(self) -> str | None:
+	def user_config_file(self) -> str:
 		"""
 		Replies the name of file where the AutoLateX 'user' configuration is.
 		:return: The name of the file in which the user-level configuration is stored.
-		:rtype: str | None
+		:rtype: str
 		"""
 		if self.__user_file is None:
 			directory = self.user_config_directory
 			if self._isdir(directory):
 				self.__user_file = os.path.join(directory, 'autolatex.conf')
-			elif self.os_name == 'posix':
+			elif self.__is_unix():
 				self.__user_file = os.path.join(self.home_directory, ".autolatex")
-			elif self.os_name == 'nt':
+			elif self.__is_windows():
 				self.__user_file = os.path.join(self.home_directory, "Local Settings", "Application Data", "autolatex.conf")
 			else:
 				self.__user_file = os.path.join(self.home_directory, "autolatex.conf")
@@ -315,7 +339,7 @@ class Config:
 		else:
 			self.__document_filename = None
 
-	def set_document_directory_and_filename(self, current_document : str) -> str:
+	def set_document_directory_and_filename(self, current_document : str) -> str | None:
 		"""
 		Change the document directory and filename.
 		If the given path does not contain a document, try to find the directory where
@@ -326,7 +350,7 @@ class Config:
 		:type current_document: str
 		:return: The path to the folder where the AutoLaTeX configuration was found.
 		         It is 'current_document' or a parent directory of 'current_document'.
-		:rtype: str
+		:rtype: str | None
 		"""
 		adir = None
 		if self._isdir(current_document):
@@ -361,6 +385,7 @@ class Config:
 
 		return adir
 
+	# noinspection PyBroadException
 	@property
 	def installation_directory(self) -> str:
 		"""
@@ -460,6 +485,8 @@ class Config:
 		:return: the generation configuration.
 		:rtype: GenerationConfig
 		"""
+		if self.__generation is None:
+			self.__generation = GenerationConfig()
 		return self.__generation
 
 	@generation.setter
@@ -478,6 +505,8 @@ class Config:
 		:return: the view configuration.
 		:rtype: ViewerConfig
 		"""
+		if self.__view is None:
+			self.__view = ViewerConfig()
 		return self.__view
 
 	@view.setter
@@ -496,6 +525,8 @@ class Config:
 		:return: the translator configuration.
 		:rtype: TranslatorConfig
 		"""
+		if self.__translation is None:
+			self.__translation = TranslatorConfig()
 		return self.__translation
 
 	@translators.setter
@@ -514,6 +545,8 @@ class Config:
 		:return: the logging configuration.
 		:rtype: LoggingConfig
 		"""
+		if self.__logging is None:
+			self.__logging = LoggingConfig()
 		return self.__logging
 
 	@logging.setter
@@ -532,6 +565,8 @@ class Config:
 		:return: the SCM configuration.
 		:rtype: ScmConfig
 		"""
+		if self.__scm is None:
+			self.__scm = ScmConfig()
 		return self.__scm
 
 	@scm.setter
@@ -615,6 +650,8 @@ class Config:
 		:return: the cleaning configuration.
 		:rtype: CleanConfig
 		"""
+		if self.__clean is None:
+			self.__clean = CleanConfig()
 		return self.__clean
 
 	@clean.setter

@@ -31,10 +31,7 @@ from autolatex2.config.configobj import Config
 from autolatex2.translator.readers.abstractreader import AbstractTransdefReader
 from autolatex2.translator.readers.transdefline import TransdefLine
 import autolatex2.utils.utilfunctions as genutils
-
-import gettext
-_T = gettext.gettext
-
+from autolatex2.utils.i18n import T
 
 
 class YamlTransdefReader(AbstractTransdefReader):
@@ -50,6 +47,7 @@ class YamlTransdefReader(AbstractTransdefReader):
 		"""
 		super().__init__(configuration)
 
+	# noinspection PyBroadException
 	@override
 	def read_translator_file(self, filename : str) -> dict[str,TransdefLine]:
 		"""
@@ -62,7 +60,7 @@ class YamlTransdefReader(AbstractTransdefReader):
 		with open(filename, 'r') as stream:
 			yaml_content = yaml.safe_load(stream)
 		# Analyze the content
-		content = dict()
+		content : dict[str,TransdefLine] = dict()
 		for (key,  value) in yaml_content.items():
 			m = re.match('^\\s*([azA-Z0-9_]+)(?:\\s+with\\s+(.*?))?(?:\\s+for\\s+(pdf|eps))?\\s*$', key, re.I | re.S)
 			if m:
@@ -79,7 +77,7 @@ class YamlTransdefReader(AbstractTransdefReader):
 		
 		# Translate the values into suitable Python objects
 		if 'TRANSLATOR_PERL_DEPENDENCIES' in content and content['TRANSLATOR_PERL_DEPENDENCIES'] and content['TRANSLATOR_PERL_DEPENDENCIES'].value:
-			logging.warning(_T("The key 'TRANSLATOR_PERL_DEPENDENCIES' is no more supported in the translator files. Please use 'TRANSLATOR_PYTHON_DEPENDENCIES'"))
+			logging.warning(T("The key 'TRANSLATOR_PERL_DEPENDENCIES' is no more supported in the translator files. Please use 'TRANSLATOR_PYTHON_DEPENDENCIES'"))
 
 		# Ensure that the command line is a list
 		if 'COMMAND_LINE' in content and content['COMMAND_LINE'] and content['COMMAND_LINE'].value:
@@ -117,6 +115,7 @@ class YamlTransdefReader(AbstractTransdefReader):
 
 		return content
 
+	# noinspection PyMethodMayBeStatic
 	def _normalize_extension(self,  extension : str) -> str:
 		if not extension:
 			return extension

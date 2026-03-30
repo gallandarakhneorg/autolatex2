@@ -21,12 +21,13 @@
 """
 General utilities for TeX.
 """
-
+import dataclasses
 import os
 import re
 from enum import IntEnum, unique
 from pathlib import Path
 from typing import Callable
+from dataclasses import dataclass
 
 from autolatex2.utils.i18n import T
 import autolatex2.utils.utilfunctions as genutils
@@ -44,6 +45,87 @@ class TeXWarnings(IntEnum):
 	undefined_citation = 2
 	multiple_definition = 3
 	other_warning = 4
+
+
+@unique
+class FileType(IntEnum):
+	"""
+	Type of file in the AutoLaTeX making process.
+	"""
+	bbc = 1
+	bbl = 2
+	bbx = 3
+	bib = 4
+	bst = 5
+	cbx = 6
+	cls = 7
+	glo = 8
+	gls = 9
+	idx = 10
+	ind = 11
+	pdf = 12
+	ps = 13
+	sty = 14
+	tex = 15
+
+	@staticmethod
+	def output_types() -> list['FileType']:
+		"""
+		Replies all the file types that are related to the output result of TeX tools.
+		:return: the list of file types.
+		:rtype: list[FileType]
+		"""
+		return [FileType.pdf, FileType.sty, FileType.ps]
+
+	@staticmethod
+	def tex_types() -> list['FileType']:
+		"""
+		Replies all the file types that are related to the TeX code.
+		:return: the list of file types.
+		:rtype: list[FileType]
+		"""
+		return [FileType.cls, FileType.sty, FileType.tex]
+
+	@staticmethod
+	def biliography_types() -> list['FileType']:
+		"""
+		Replies all the file types that are related to the bibliography.
+		:return: the list of file types.
+		:rtype: list[FileType]
+		"""
+		return [FileType.bbc, FileType.bbl, FileType.bbx, FileType.bib, FileType.bst, FileType.cbx]
+
+	@staticmethod
+	def glossary_types() -> list['FileType']:
+		"""
+		Replies all the file types that are related to the glossary.
+		:return: the list of file types.
+		:rtype: list[FileType]
+		"""
+		return [FileType.glo, FileType.gls]
+
+	@staticmethod
+	def index_types() -> list['FileType']:
+		"""
+		Replies all the file types that are related to the index.
+		:return: the list of file types.
+		:rtype: list[FileType]
+		"""
+		return [FileType.idx, FileType.ind]
+
+
+
+@dataclass
+class TeXMacroParameter:
+	"""
+	Definition of a parameter for a TeX macro.
+	"""
+	text : str
+	index : int = -1
+	optional : bool = False
+	evaluable : bool = True
+	macro_name : bool = False
+
 
 def get_tex_file_extensions() -> list[str]:
 	"""
@@ -64,6 +146,7 @@ def get_aux_file_extensions() -> list[str]:
 def get_index_file_extensions() -> list[str]:
 	"""
 	Replies the supported filename extensions for Index files.
+	".idx" at index 0 and ".ind" is at index 1.
 	:return: The list of the filename extensions.
 	:rtype: list
 	"""
@@ -72,6 +155,7 @@ def get_index_file_extensions() -> list[str]:
 def get_glossary_file_extensions() -> list[str]:
 	"""
 	Replies the supported filename extensions for glossary files.
+	".glo" at index 0 and ".gls" is at index 1.
 	:return: The list of the filename extensions.
 	:rtype: list
 	"""
@@ -147,6 +231,7 @@ def parse_tex_log_file(log_filename : str) -> tuple[str,list[str]]:
 	if one, and the second member is the list of log blocks.
 	:param log_filename: The filename of the log file.
 	:type log_filename: str
+	:return: A tuple with the fatal errorn, followed by a list of log blocks.
 	:rtype: tuple[str,list[str]]
 	"""
 	blocks = list()

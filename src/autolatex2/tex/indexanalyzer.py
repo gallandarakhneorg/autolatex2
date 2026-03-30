@@ -24,11 +24,14 @@ Tools for that is extracting the definitions of indexes from an IDX file.
 
 import os
 from hashlib import md5
-from typing import override, Any
+from typing import override
+
+from sortedcontainers import SortedSet
 
 from autolatex2.tex.texobservers import Observer
 from autolatex2.tex.texparsers import Parser
 from autolatex2.tex.texparsers import TeXParser
+from autolatex2.tex.utils import TeXMacroParameter
 
 
 class IndexAnalyzer(Observer):
@@ -46,18 +49,19 @@ class IndexAnalyzer(Observer):
 		:param filename: The name of the file to parse.
 		:type filename: str
 		"""
-		self.__filename = filename
-		self.__basename = os.path.basename(os.path.splitext(filename)[0])
+		self.__filename : str = filename
+		self.__basename : str = os.path.basename(os.path.splitext(filename)[0])
 		self.__databases = set()
-		self.__indexes = None
-		self.__md5 = None
+		self.__indexes_computed : bool = False
+		self.__indexes : SortedSet = SortedSet()
+		self.__md5 : str|None = None
 
 	@property
-	def indexes(self) -> set:
+	def indexes(self) -> SortedSet:
 		"""
 		Replies the indexes that were specified in the IDX file.
 		:return: the set of indexes.
-		:rtype: set
+		:rtype: SortedSet
 		"""
 		return self.__indexes
 
@@ -104,14 +108,15 @@ class IndexAnalyzer(Observer):
 		:return: the MD5 of the indexes.
 		"""
 		if self.__md5 is None:
-			if self.__indexes is None:
+			if not self.__indexes_computed:
+				self.__indexes_computed = True
 				self.run()
 			self.__md5 = md5(bytes('\\'.join(self.indexes), 'UTF-8')).hexdigest()
 		return self.__md5
 
 	# noinspection DuplicatedCode
 	@override
-	def expand(self, parser : Parser, raw_text : str, name : str, *parameter : dict[str,Any]) -> str:
+	def expand(self, parser : Parser, raw_text : str, name : str, *parameters : TeXMacroParameter) -> str:
 		"""
         Expand the given macro on the given parameters.
         :param parser: reference to the parser.
@@ -120,16 +125,16 @@ class IndexAnalyzer(Observer):
         :type raw_text: str
         :param name: Name of the macro.
         :type name: str
-        :param parameter: Descriptions of the values passed to the TeX macro.
-        :type parameter: dict[str,Any]
+        :param parameters: Descriptions of the values passed to the TeX macro.
+        :type parameters: dict[str,Any]
         :return: the result of expansion of the macro, or None to not replace the macro by something (the macro is used as-is)
         :rtype: str
         """
 		value = []
-		if len(parameter) > 2 and parameter[2]['text']:
-			value.append(parameter[2]['text'])
-		if len(parameter) > 1 and parameter[1]['text']:
-			value.append(parameter[1]['text'])
+		if len(parameters) > 2 and parameters[2].text:
+			value.append(parameters[2].text)
+		if len(parameters) > 1 and parameters[1].text:
+			value.append(parameters[1].text)
 		if len(value) > 0:
 			self.__indexes.add('|'.join(value))
 		return ''
@@ -142,7 +147,7 @@ class IndexAnalyzer(Observer):
 		with open(self.filename) as f:
 			content = f.read()
 
-		self.__indexes = set()
+		self.__indexes = SortedSet()
 
 		parser = TeXParser()
 		parser.observer = self
@@ -153,8 +158,6 @@ class IndexAnalyzer(Observer):
 			parser.add_math_mode_macro(k, v)
 
 		parser.parse(content)
-
-		self.__indexes = sorted(self.__indexes)
 
 	@override
 	def text(self, parser: Parser, text: str):

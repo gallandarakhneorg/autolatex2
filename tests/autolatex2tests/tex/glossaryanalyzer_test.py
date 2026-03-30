@@ -24,6 +24,8 @@ import os
 import logging
 from typing import override
 
+from sortedcontainers import SortedSet
+
 from autolatex2.tex import glossaryanalyzer
 from autolatex2tests.abstract_base_test import AbstractBaseTest
 
@@ -106,6 +108,10 @@ class TestGlossaryAnalyzer(AbstractBaseTest):
 		logging.getLogger().setLevel(logging.CRITICAL)
 		self.analyzer = self.__run()
 
+	@override
+	def tearDown(self):
+		os.remove(self.__lastFilename)
+
 	def __run(self):
 		f = tempfile.NamedTemporaryFile(delete=False)
 		name = f.name
@@ -117,7 +123,6 @@ class TestGlossaryAnalyzer(AbstractBaseTest):
 		f.close
 		analyzer = glossaryanalyzer.GlossaryAnalyzer(name)
 		analyzer.run()
-		os.remove(name)
 		return analyzer
 
 	def test_basename(self):
@@ -127,7 +132,7 @@ class TestGlossaryAnalyzer(AbstractBaseTest):
 		self.assertEqual(self.__lastFilename, self.analyzer.filename)
 
 	def test_glossaryEntries(self):
-		self.assertEqual([
+		self.assertEqual(SortedSet([
 				'10|Non-uniform random variate generation!Exponential distribution!$D^{-1}(x)$|hyperpage',
 				'10|Non-uniform random variate generation!Exponential distribution!Cumulative distribution $D(x)$|hyperpage',
 				'10|Non-uniform random variate generation!Inverse method!Log-normal distribution|hyperpage',
@@ -193,7 +198,7 @@ class TestGlossaryAnalyzer(AbstractBaseTest):
 
 				'9|Non-uniform random variate generation!Exponential distribution!Probability distribution $f(x)$|hyperpage',
 				'9|Non-uniform random variate generation!Inverse method!Exponential distribution|hyperpage',
-				'9|Non-uniform random variate generation!Normal distribution!$D^{-1}(x)$|hyperpage'], self.analyzer.glossary_entries)
+				'9|Non-uniform random variate generation!Normal distribution!$D^{-1}(x)$|hyperpage']), self.analyzer.glossary_entries)
 
 	def test_md5(self):
 		self.assertEqual('d91cebdaa0473808a1df9aed5fd95b08', self.analyzer.md5)

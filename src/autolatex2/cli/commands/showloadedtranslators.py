@@ -74,7 +74,7 @@ class MakerAction(AbstractMakerAction):
 		# Detect the translators
 		repository.sync(False)
 		# Get translator status
-		inclusions = repository.get_included_translators_with_levels()
+		inclusions = repository.get_included_translator_names_with_levels()
 		# Show the list
 		if cli_arguments.show_activation_translator_level:
 			self._show_inclusions(inclusions)

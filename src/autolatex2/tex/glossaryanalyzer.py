@@ -11,7 +11,7 @@
 # This library is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# Lesser General Public License for more details.
+# Lesser General Public License for more details.1
 #
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; see the file COPYING.  If not,
@@ -24,11 +24,15 @@ Tools for that is extracting the definitions of glossaries from a GLS file.
 
 import os
 from hashlib import md5
-from typing import override, Any
+from typing import override
+
+from sortedcontainers import SortedSet
 
 from autolatex2.tex.texobservers import Observer
 from autolatex2.tex.texparsers import Parser
 from autolatex2.tex.texparsers import TeXParser
+from autolatex2.tex.utils import TeXMacroParameter
+
 
 class GlossaryAnalyzer(Observer):
 	"""
@@ -45,18 +49,19 @@ class GlossaryAnalyzer(Observer):
 		:param filename: The name of the file to parse.
 		:type filename: str
 		"""
-		self.__filename = filename
-		self.__basename = os.path.basename(os.path.splitext(filename)[0])
-		self.__databases = set()
-		self.__glossary_entries = None
-		self.__md5 = None
+		self.__filename : str = filename
+		self.__basename : str = os.path.basename(os.path.splitext(filename)[0])
+		self.__databases : set[str] = set()
+		self.__glossary_entries_computed : bool = False
+		self.__glossary_entries : SortedSet | None = None
+		self.__md5 : str | None = None
 
 	@property
-	def glossary_entries(self) -> set[str] | None:
+	def glossary_entries(self) -> SortedSet:
 		"""
 		Replies the glossary entries that were specified in the GLS file.
 		:return: the set of glossary entries.
-		:rtype: set[str] | None
+		:rtype: SortedSet
 		"""
 		return self.__glossary_entries
 
@@ -103,14 +108,15 @@ class GlossaryAnalyzer(Observer):
 		:return: the MD5 of the indexes.
 		"""
 		if self.__md5 is None:
-			if self.__glossary_entries is None:
+			if not self.__glossary_entries_computed:
+				self.__glossary_entries_computed = True
 				self.run()
 			self.__md5 = md5(bytes('\\'.join(self.glossary_entries), 'UTF-8')).hexdigest()
 		return self.__md5
 
 	# noinspection DuplicatedCode
 	@override
-	def expand(self, parser : Parser, raw_text : str, name : str, *parameter : dict[str,Any]) -> str:
+	def expand(self, parser : Parser, raw_text : str, name : str, *parameters : TeXMacroParameter) -> str:
 		"""
         Expand the given macro on the given parameters.
         :param parser: reference to the parser.
@@ -119,16 +125,16 @@ class GlossaryAnalyzer(Observer):
         :type raw_text: str
         :param name: Name of the macro.
         :type name: str
-        :param parameter: Descriptions of the values passed to the TeX macro.
-        :type parameter: dict[str,Any]
+        :param parameters: Descriptions of the values passed to the TeX macro.
+        :type parameters: dict[str,Any]
         :return: the result of expansion of the macro, or None to not replace the macro by something (the macro is used as-is)
         :rtype: str
         """
 		value = []
-		if len(parameter) > 2 and parameter[2]['text']:
-			value.append(parameter[2]['text'])
-		if len(parameter) > 1 and parameter[1]['text']:
-			value.append(parameter[1]['text'])
+		if len(parameters) > 2 and parameters[2].text:
+			value.append(parameters[2].text)
+		if len(parameters) > 1 and parameters[1].text:
+			value.append(parameters[1].text)
 		if len(value) > 0:
 			self.__glossary_entries.add('|'.join(value))
 		return ''
@@ -141,7 +147,7 @@ class GlossaryAnalyzer(Observer):
 		with open(self.filename) as f:
 			content = f.read()
 
-		self.__glossary_entries = set()
+		self.__glossary_entries = SortedSet()
 
 		parser = TeXParser()
 		parser.observer = self
@@ -152,8 +158,6 @@ class GlossaryAnalyzer(Observer):
 			parser.add_math_mode_macro(k, v)
 
 		parser.parse(content)
-
-		self.__glossary_entries = sorted(self.__glossary_entries)
 
 	@override
 	def text(self, parser: Parser, text: str):

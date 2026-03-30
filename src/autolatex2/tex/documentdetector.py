@@ -21,11 +21,12 @@
 """
 Tools that is parsing a TeX file and detect if \\documentclass is inside.
 """
-from typing import override, Any
+from typing import override
 
 from autolatex2.tex.texobservers import Observer
 from autolatex2.tex.texparsers import Parser
 from autolatex2.tex.texparsers import TeXParser
+from autolatex2.tex.utils import TeXMacroParameter
 
 
 class DocumentDetector(Observer):
@@ -43,14 +44,14 @@ class DocumentDetector(Observer):
 		:param lineno: The number of the first line.
 		:type lineno: int
 		"""
-		self.__filename = filename
+		self.__filename : str = filename
 		if text is None:
 			with open(self.__filename, 'rb') as f:
-				self.__content = f.read().decode('UTF-8')
+				self.__content : str = f.read().decode('UTF-8')
 		else:
-			self.__content = text
-		self.__lineno = lineno
-		self.__latex_document = False
+			self.__content : str = text
+		self.__lineno : int = lineno
+		self.__latex_document : bool = False
 
 	@property
 	def latex(self) -> bool:
@@ -89,7 +90,7 @@ class DocumentDetector(Observer):
 		self.__filename = n
 
 	@override
-	def expand(self, parser : Parser, raw_text : str, name : str, *parameter : dict[str,Any]) -> str | None:
+	def expand(self, parser : Parser, raw_text : str, name : str, *parameters : TeXMacroParameter) -> str | None:
 		"""
         Expand the given macro on the given parameters.
         :param parser: reference to the parser.
@@ -98,8 +99,8 @@ class DocumentDetector(Observer):
         :type raw_text: str
         :param name: Name of the macro.
         :type name: str
-        :param parameter: Descriptions of the values passed to the TeX macro.
-        :type parameter: dict[str,Any]
+        :param parameters: Descriptions of the values passed to the TeX macro.
+        :type parameters: dict[str,Any]
         :return: the result of expansion of the macro, or None to not replace the macro by something (the macro is used as-is)
         :rtype: str
         """

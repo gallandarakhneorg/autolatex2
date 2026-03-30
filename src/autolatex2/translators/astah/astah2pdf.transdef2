@@ -116,8 +116,8 @@ translator_function: |
     	cmd.append(javabin)
     	cmd.extend(JAVA_OPTS)
     	cmd.extend(['-cp',  library, 'com.change_vision.jude.cmdline.JudeCommandRunner', '-image', 'all', '-f',  _in,  '-t', 'svg', '-o',  outputDir])
-    	sout, serr, sex, retcode = Runner.run_command(*cmd)
-    	Runner.check_runner_status(serr, sex, retcode)
+    	runner_output = Runner.run_command(*cmd)
+    	Runner.check_runner_status(runner_output)
     	# Generation of the PDF/PS from the SVG
     	generated_files = list()
     	for file in os.listdir(astahOutputDir):
@@ -154,12 +154,12 @@ translator_function: |
     			bn = genutils.basename(generated_file,['.svg'])
     			bn = re.sub('\\s+',  '_',  bn,  re.S)
     			bn = template + bn + _outext
-    			_runner.generate_image(in_file = gf, out_file = bn, translator_name = 'svg2pdf_inkscape', only_more_recent = False,  ignore_debug_feature = True)
+    			_runner.generate_image(in_file = gf, out_file = bn, translator_name = 'svg2pdf_inkscape', only_more_recent = False)
     			if not os.path.isfile(bn):
     				raise Exception("Image not generated: " + bn)
     		Path(_out).touch()
     	elif len(generated_files) > 0:
-    		_runner.generate_image(in_file = generated_files[0], out_file = _out, only_more_recent = False,  ignore_debug_feature = True)
+    		_runner.generate_image(in_file = generated_files[0], out_file = _out, only_more_recent = False)
     		if not os.path.isfile(_out):
     			raise Exception("Image not generated: " + _out)
     	else:

@@ -52,9 +52,9 @@ translator_function: |
     	ttexmode1 = 'pstex'
     	ttexmode2 = 'pstex_t'
     ttexFile = _outwoext + ext
-    sout, serr, sex, retcode = Runner.run_command( 'fig2dev', '-L', ttexmode1, _in, _out)
-    Runner.check_runner_status(serr, sex, retcode)
-    sout, serr, sex, retcode = Runner.run_command( 'fig2dev', '-L', ttexmode2, '-p', _out, _in, ttexFile)
-    Runner.check_runner_status(serr, sex, retcode)
+    runner_output = Runner.run_command( 'fig2dev', '-L', ttexmode1, _in, _out)
+    Runner.check_runner_status(runner_output)
+    runner_output = Runner.run_command( 'fig2dev', '-L', ttexmode2, '-p', _out, _in, ttexFile)
+    Runner.check_runner_status(runner_output)
 ...
 

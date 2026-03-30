@@ -499,6 +499,9 @@ OPTIONS FOR COMMANDS
         --noauxfile Prevents AutoLaTeX from reading the auxilliary files in
                     order to extract file dependencies.
 
+        --times     Display for each file the last-change time that is
+                    considered by AutoLaTeX in the processing stages.
+
     *showimages*
 
         --changed   Shows only images not associated with up-to-date

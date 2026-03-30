@@ -47,8 +47,8 @@ translator_function: |
     	shutil.rmtree(outdir)
     os.makedirs(outdir,  exist_ok=True)
     try:
-    	sout, serr, sex, retcode = Runner.run_command(umbrello_cmd, '--export', 'eps', '--directory', outdir, _in)
-    	Runner.check_runner_status(serr, sex, retcode)
+    	runner_output = Runner.run_command(umbrello_cmd, '--export', 'eps', '--directory', outdir, _in)
+    	Runner.check_runner_status(runner_output)
     	generatedFiles = list()
     	with os.scandir(outdir) as fdir:
     		for fn in fdir:
@@ -65,11 +65,11 @@ translator_function: |
     				bn = genutils.basename(file, ['.eps'])
     				bn = re.sub('\\s+',  '_',  bn)
     				outfile = template + bn + '.pdf'
-    				_runner.generate_image(in_file = file, out_file = outfile, only_more_recent = False,  ignore_debug_feature = True)
+    				_runner.generate_image(in_file = file, out_file = outfile, only_more_recent = False)
     			Path(_out).touch()
     		elif len(generatedFiles) > 0:
     			file = generatedFiles[0]
-    			_runner.generate_image(in_file = file, out_file = _out, only_more_recent = False,  ignore_debug_feature = True)
+    			_runner.generate_image(in_file = file, out_file = _out, only_more_recent = False)
     		else:
     			raise Exception("No file generated")
     	else:

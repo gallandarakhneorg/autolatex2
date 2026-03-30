@@ -27,11 +27,14 @@ import re
 from hashlib import md5
 from typing import override, Any, Callable
 
+from sortedcontainers import SortedSet
+
 from autolatex2.tex.texobservers import Observer
 from autolatex2.tex.texparsers import TeXParser, Parser
+from autolatex2.tex.utils import TeXMacroParameter
 
 # noinspection DuplicatedCode
-EXPAND_REGISTRY : dict[str, Callable[[Any, tuple[dict[str, Any], ...]], None]] = dict()
+EXPAND_REGISTRY : dict[str, Callable[[Any, list[TeXMacroParameter]], None]] = dict()
 
 def expand_function(func : Callable) -> Callable:
 	"""
@@ -68,12 +71,13 @@ class AuxiliaryCitationAnalyzer(Observer):
 		:type filename: str
 		"""
 		self.__expand_registry = EXPAND_REGISTRY
-		self.__filename = filename
-		self.__basename = os.path.basename(os.path.splitext(filename)[0])
-		self.__databases = set()
-		self.__styles = set()
-		self.__citations = None
-		self.__md5 = None
+		self.__filename : str = filename
+		self.__basename : str = os.path.basename(os.path.splitext(filename)[0])
+		self.__databases : set[str] = set()
+		self.__styles : set[str] = set()
+		self.__citations_computed : bool = False
+		self.__citations : SortedSet = SortedSet()
+		self.__md5 : str | None = None
 
 	@property
 	def databases(self) -> set[str]:
@@ -94,14 +98,12 @@ class AuxiliaryCitationAnalyzer(Observer):
 		return self.__styles
 
 	@property
-	def citations(self) -> set[str]:
+	def citations(self) -> SortedSet:
 		"""
 		Replies the bibliography citations that were specified in the AUX file.
 		:return: the set of citations.
-		:rtype: set[str]
+		:rtype: SortedSet
 		"""
-		if self.__citations is None:
-			return set()
 		return self.__citations
 
 	@property
@@ -147,13 +149,14 @@ class AuxiliaryCitationAnalyzer(Observer):
 		:return: the MD5 of the citations.
 		"""
 		if self.__md5 is None:
-			if self.__citations is None:
+			if not self.__citations_computed:
+				self.__citations_computed = True
 				self.run()
 			self.__md5 = md5(bytes('\\'.join(self.citations), 'UTF-8')).hexdigest()
 		return self.__md5
 
 	@override
-	def expand(self, parser : Parser, raw_text : str, name : str, *parameter : dict[str,Any]) -> str:
+	def expand(self, parser : Parser, raw_text : str, name : str, *parameters : TeXMacroParameter) -> str:
 		"""
 		Expand the given macro on the given parameters.
 		:param parser: reference to the parser.
@@ -162,8 +165,8 @@ class AuxiliaryCitationAnalyzer(Observer):
 		:type raw_text: str
 		:param name: Name of the macro.
 		:type name: str
-		:param parameter: Descriptions of the values passed to the TeX macro.
-		:type parameter: dict[str,str]
+		:param parameters: Descriptions of the values passed to the TeX macro.
+		:type parameters: dict[str,str]
 		:return: the result of expansion of the macro, or None to not replace the macro by something (the macro is used as-is)
 		:rtype: str
 		"""
@@ -171,55 +174,53 @@ class AuxiliaryCitationAnalyzer(Observer):
 			callback_name = name[1:]
 			if callback_name in self.__expand_registry:
 				func = self.__expand_registry[callback_name]
-				func(self, parameter)
+				func(self, list(parameters))
 			else:
 				func = self.__expand_registry['_ELSE']
-				func(self, parameter)
+				func(self, list(parameters))
 		return ''
 
 	# noinspection PyPep8Naming
 	@expand_function
-	def _expand___ELSE(self, parameter : list[dict[str,Any]]):
-		if parameter and len(parameter) > 1 and 'text' in parameter[1] and parameter[1]['text']:
-			for bibdb in re.split(r'\s*,\s*', parameter[1]['text']):
-				if bibdb:
-					self.__citations.add(bibdb)
+	def _expand___ELSE(self, parameters : list[TeXMacroParameter]):
+		assert len(parameters) > 1 and parameters[1].text
+		for bibkey in re.split(r'\s*,\s*', parameters[1].text):
+			if bibkey:
+				self.__citations.add(bibkey)
 
 	@expand_function
-	def _expand__bibdata(self, parameter : list[dict[str,Any]]):
-		if parameter and len(parameter) > 1 and 'text' in parameter[1] and parameter[1]['text']:
-			for bibdb in re.split(r'\s*,\s*', parameter[1]['text']):
-				if bibdb:
-					self.__databases.add(bibdb)
+	def _expand__bibdata(self, parameters : list[TeXMacroParameter]):
+		assert len(parameters) > 1 and parameters[1].text
+		for bibdb in re.split(r'\s*,\s*', parameters[1].text):
+			if bibdb:
+				self.__databases.add(bibdb)
 
 	@expand_function
-	def _expand__bibstyle(self, parameter : list[dict[str,Any]]):
-		if parameter and len(parameter) > 1 and 'text' in parameter[1] and parameter[1]['text']:
-			for bibdb in re.split(r'\s*,\s*', parameter[1]['text']):
-				if bibdb:
-					self.__styles.add(bibdb)
+	def _expand__bibstyle(self, parameters : list[TeXMacroParameter]):
+		assert len(parameters) > 1 and parameters[1].text
+		for bibst in re.split(r'\s*,\s*', parameters[1].text):
+			if bibst:
+				self.__styles.add(bibst)
 
 	# noinspection DuplicatedCode
 	def run(self):
 		"""
 		Run the process for extracting the data from the AUX file.
 		"""
-		with open(self.filename) as f:
-			content = f.read()
+		self.__citations = SortedSet()
+		if os.path.isfile(self.filename):
+			with open(self.filename) as f:
+				content = f.read()
 
-		self.__citations = set()
+			parser = TeXParser()
+			parser.observer = self
+			parser.filename = self.filename
 
-		parser = TeXParser()
-		parser.observer = self
-		parser.filename = self.filename
+			for k, v in self.__MACROS.items():
+				parser.add_text_mode_macro(k, v)
+				parser.add_math_mode_macro(k, v)
 
-		for k, v in self.__MACROS.items():
-			parser.add_text_mode_macro(k, v)
-			parser.add_math_mode_macro(k, v)
-
-		parser.parse(content)
-
-		self.__citations = sorted(self.__citations)
+			parser.parse(content)
 
 	@override
 	def text(self, parser: Parser, text: str):
@@ -343,27 +344,35 @@ class BiblatexCitationAnalyzer(Observer):
 
 		self.__citations = sorted(citations)
 
+	@override
 	def text(self, parser: Parser, text: str):
 		pass
 
+	@override
 	def comment(self, parser: Parser, raw: str, comment: str) -> str | None:
 		return None
 
+	@override
 	def open_block(self, parser: Parser, text: str) -> str | None:
 		return None
 
+	@override
 	def close_block(self, parser: Parser, text: str) -> str | None:
 		return None
 
+	@override
 	def open_math(self, parser: Parser, inline: bool) -> str | None:
 		return None
 
+	@override
 	def close_math(self, parser: Parser, inline: bool) -> str | None:
 		return None
 
+	@override
 	def find_macro(self, parser: Parser, name: str, special: bool, math: bool) -> str | None:
 		return None
 
-	def expand(self, parser: Parser, raw_text: str, name: str, *parameter: dict[str, Any]) -> str | None:
+	@override
+	def expand(self, parser: Parser, raw_text: str, name: str, *parameter: TeXMacroParameter) -> str | None:
 		return None
 

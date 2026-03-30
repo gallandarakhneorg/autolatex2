@@ -92,8 +92,8 @@ translator_function: |
     			outputbasename = _outwoext + "_" + id
     			figureFile = os.path.join(_outdir, outputbasename + ext2)
     			
-    			(sout, serr, sex, retcode) = Runner.run_command('inkscape', '--export-id', id, '--export-id-only', '--export-area-page', opt, '--export-filename=' + figureFile, '--export-overwrite', "--file=" + _in)
-    			Runner.check_runner_status(serr, sex, retcode)
+    			runner_output = Runner.run_command('inkscape', '--export-id', id, '--export-id-only', '--export-area-page', opt, '--export-filename=' + figureFile, '--export-overwrite', "--file=" + _in)
+    			Runner.check_runner_status(runner_output)
     			imageinclusions.append("\\node<" + str(overlay_spec) + "> (X) {\\includegraphics[width=" + str(width) + "em]{" + str(outputbasename) + str(ext2) + "}};%")
     			layerIndex = layerIndex + 1
     if not imageinclusions:

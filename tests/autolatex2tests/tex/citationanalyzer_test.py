@@ -24,6 +24,8 @@ import os
 import logging
 from typing import override
 
+from sortedcontainers import SortedSet
+
 from autolatex2.tex import citationanalyzer
 from autolatex2tests.abstract_base_test import AbstractBaseTest
 
@@ -118,7 +120,7 @@ class TestAuxiliaryCitationAnalyzer(AbstractBaseTest):
 		self.assertEqual({'abbrv'}, self.analyzer.styles)
 
 	def test_citations(self):
-		self.assertEqual([
+		self.assertEqual(SortedSet([
 				'AGRE.05',
 				'Badeig2010',
 				'Bhouri2012',
@@ -139,10 +141,10 @@ class TestAuxiliaryCitationAnalyzer(AbstractBaseTest):
 				'Tamminga2014',
 				'Viroli2005',
 				'Weyns2007',
-				'Zargayouna2009'], self.analyzer.citations)
+				'Zargayouna2009']), self.analyzer.citations)
 
 	def test_md5(self):
-		self.assertEqual('bbd691129292d9bf59a69cd62f4b921d', self.analyzer.md5)
+		self.assertEqual('d41d8cd98f00b204e9800998ecf8427e', self.analyzer.md5)
 
 
 class TestBiblatexCitationAnalyzer(AbstractBaseTest):

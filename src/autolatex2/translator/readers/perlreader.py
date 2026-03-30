@@ -30,10 +30,7 @@ from autolatex2.config.configobj import Config
 from autolatex2.translator.readers.abstractreader import AbstractTransdefReader
 from autolatex2.translator.readers.transdefline import TransdefLine
 import autolatex2.utils.utilfunctions as genutils
-
-import gettext
-_T = gettext.gettext
-
+from autolatex2.utils.i18n import T
 
 class PerlTransdefReader(AbstractTransdefReader):
 	"""
@@ -57,7 +54,7 @@ class PerlTransdefReader(AbstractTransdefReader):
 		:return: the content of the translator file
 		:rtype: dict[str,TransdefLine]
 		"""
-		content = dict()
+		content : dict[str,TransdefLine] = dict()
 		with open(filename) as f:
 			lineno = 0
 			eol = False
@@ -96,10 +93,10 @@ class PerlTransdefReader(AbstractTransdefReader):
 								eol = None
 								content[var.upper()] = TransdefLine(var.upper(),  lineno,  value,  interpreter.lower() if interpreter else None)
 						elif not re.match(r'^\s*$', line):
-							logging.error(_T("Line outside a definition (%s:%d).") % (filename, lineno))
+							logging.error(T("Line outside a definition (%s:%d).") % (filename, lineno))
 
 		if eol:
-			logging.error(_T("The block for the variable '%s' is not closed. Keyword '%s' was not found (%s:%s).")
+			logging.error(T("The block for the variable '%s' is not closed. Keyword '%s' was not found (%s:%s).")
 				% (curvar, eol, filename, lineno))
 
 		# Translate the values into suitable Python objects
@@ -122,10 +119,10 @@ class PerlTransdefReader(AbstractTransdefReader):
 					content['OUTPUT_EXTENSIONS'].value_list.append(e)
 
 		if 'TRANSLATOR_PERL_DEPENDENCIES' in content and content['TRANSLATOR_PERL_DEPENDENCIES'] and content['TRANSLATOR_PERL_DEPENDENCIES'].value:
-			logging.warning(_T("The key 'TRANSLATOR_PERL_DEPENDENCIES' is no more supported in the translator files. Please use 'TRANSLATOR_PYTHON_DEPENDENCIES'"))
+			logging.warning(T("The key 'TRANSLATOR_PERL_DEPENDENCIES' is no more supported in the translator files. Please use 'TRANSLATOR_PYTHON_DEPENDENCIES'"))
 
 		if 'TRANSLATOR_PYTHON_DEPENDENCIES' in content and content['TRANSLATOR_PYTHON_DEPENDENCIES'] and content['TRANSLATOR_PYTHON_DEPENDENCIES'].value:
-			content['TRANSLATOR_PYTHON_DEPENDENCIES'].value_list = re.split(r'\s+', content['TRANSLATOR_PYTHON_DEPENDENCIES']['value'] or '')
+			content['TRANSLATOR_PYTHON_DEPENDENCIES'].value_list = re.split(r'\s+', content['TRANSLATOR_PYTHON_DEPENDENCIES'].value or '')
 
 		# Ensure that the command line is a list
 		if 'COMMAND_LINE' in content and content['COMMAND_LINE'] and content['COMMAND_LINE'].value:

@@ -30,16 +30,16 @@ class ViewerConfig:
 	"""
 
 	def __init__(self):
-		self.__view_enable = False
-		self.__viewer_cli = None
-		self.__async_view_enable = False
+		self.__view_enable : bool = False
+		self.__viewer_cli : list[str] = list()
+		self.__async_view_enable : bool = False
 
 	def reset_internal_attributes(self):
 		"""
 		Reset the internal attributes.
 		"""
 		self.__view_enable = False
-		self.__viewer_cli = None
+		self.__viewer_cli = list()
 		self.__async_view_enable = False
 
 	@property
@@ -82,7 +82,7 @@ class ViewerConfig:
 	def viewer_cli(self) -> list[str]:
 		"""
 		Replies the command-line for the viewer.
-		:rtype: list
+		:rtype: list[str]
 		"""
 		return self.__viewer_cli
 
@@ -90,7 +90,7 @@ class ViewerConfig:
 	def viewer_cli(self, cli : list[str] | str | None):
 		"""
 		Set the command-line for the viewer.
-		:type cli: str or list
+		:type cli: list[str] | str | None
 		"""
 		if cli is None:
 			self.__viewer_cli = list()

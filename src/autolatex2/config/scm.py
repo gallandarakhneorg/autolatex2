@@ -30,8 +30,8 @@ class ScmConfig:
 	"""
 
 	def __init__(self):
-		self.__commit_cli = list()
-		self.__update_cli = list()
+		self.__commit_cli : list[str] = list()
+		self.__update_cli : list[str] = list()
 
 	def reset_internal_attributes(self):
 		"""
@@ -45,7 +45,7 @@ class ScmConfig:
 		"""
 		Replies the command-line for commiting to the SCM system.
 		:return: The CLI
-		:rtype: list
+		:rtype: list[str]
 		"""
 		return self.__commit_cli
 
@@ -53,8 +53,9 @@ class ScmConfig:
 	def commit_cli(self, cli : list[str] | str | None):
 		"""
 		Change the command-line for commiting to the SCM system.
-		:return: The CLI
-		:rtype: list or str
+		:return: The CLI. If None, the CLI is setto empty. If a single string is passed, it is parsed
+		using the genutils.parse_cli() function.
+		:rtype: list[str] | str | None
 		"""
 		if cli is None:
 			self.__commit_cli = list()
@@ -68,7 +69,7 @@ class ScmConfig:
 		"""
 		Replies the command-line for updating the current folder from the SCM system.
 		:return: The CLI
-		:rtype: list
+		:rtype: list[str]
 		"""
 		return self.__update_cli
 
@@ -76,8 +77,9 @@ class ScmConfig:
 	def update_cli(self, cli : list[str] | str | None):
 		"""
 		Change the command-line for updating the current folder from the SCM system.
-		:return: The CLI
-		:rtype: list or str
+		:return: The CLI. If None, the CLI is setto empty. If a single string is passed, it is parsed
+		using the genutils.parse_cli() function.
+		:rtype: list[str] | str | None
 		"""
 		if cli is None:
 			self.__update_cli = list()

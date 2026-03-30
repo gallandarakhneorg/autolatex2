@@ -25,6 +25,7 @@ import tempfile
 import shutil
 import textwrap
 from typing import override
+from unittest import skip
 
 from autolatex2.config.translator import TranslatorLevel
 from autolatex2.translator.translatorrepository import TranslatorRepository, TranslatorConflictError
@@ -128,7 +129,7 @@ class TestTranslatorRepositoryInit(AbstractBaseTest):
 		translators = self.repo._read_directory(directory=self.directory, recursive=False, warn=False)
 		self.assertSetEqual(
 				{ 'svg2pdf', 'dot2pdf' },
-				{ k for (k, v) in translators.items() })
+				{ k for k, v in translators })
 		self.assertEqual(
 					os.path.join(self.directory, 'svg2pdf.transdef'),
 					translators['svg2pdf'].filename)
@@ -137,7 +138,7 @@ class TestTranslatorRepositoryInit(AbstractBaseTest):
 		translators = self.repo._read_directory(directory=self.directory, recursive=True, warn=False)
 		self.assertSetEqual(
 				{ 'svg2pdf', 'dot2pdf', 'svg2pdf+tex', 'uml2pdf_umbrello' },
-				{ k for (k, v) in translators.items() })
+				{ k for k, v in translators })
 		self.assertEqual(
 					os.path.join(self.directory, 'subdir', 'svg2pdf.transdef'),
 					translators['svg2pdf'].filename)
@@ -161,9 +162,9 @@ class TestTranslatorRepositoryShared(AbstractBaseTest):
 		self.config.translators.is_translator_fileformat_1_enable = True
 		self.repo = TranslatorRepository(self.config)
 		translators = self.repo._read_directory(directory=self.directory, recursive=True, warn=False)
-		for translator in translators:
-			self.repo._installed_translators[TranslatorLevel.USER][translator] = translators[translator]
-			self.repo._installed_translator_names.add(translator)
+		for translator_name, translator in translators:
+			self.repo._installed_translators[TranslatorLevel.USER][translator_name] = translator
+			self.repo._translator_names.add(translator_name)
 
 	@override
 	def tearDown(self):
@@ -171,25 +172,62 @@ class TestTranslatorRepositoryShared(AbstractBaseTest):
 			shutil.rmtree(self.directory)
 			self.directory = None
 
+	def test_getIncludedTranslatorNamesWithLevels_noConfig(self):
+		included = self.repo.get_included_translator_names_with_levels()
+		self.assertEqual(4, len(included))
+		self.assertIn('svg2pdf', included)
+		self.assertEqual(TranslatorLevel.USER, included['svg2pdf'])
+		self.assertIn('svg2pdf+tex', included)
+		self.assertEqual(TranslatorLevel.USER, included['svg2pdf+tex'])
+		self.assertIn('dot2pdf', included)
+		self.assertEqual(TranslatorLevel.USER, included['dot2pdf'])
+		self.assertIn('uml2pdf_umbrello', included)
+		self.assertEqual(TranslatorLevel.USER, included['uml2pdf_umbrello'])
+
 	def test_getIncludedTranslatorsWithLevels_noConfig(self):
+		svg2pdf = self.repo.get_object_for('svg2pdf')
+		texsvg2pdf = self.repo.get_object_for('svg2pdf+tex')
+		dot2pdf = self.repo.get_object_for('dot2pdf')
+		uml2pdf = self.repo.get_object_for('uml2pdf_umbrello')
 		included = self.repo.get_included_translators_with_levels()
-		self.assertDictEqual({
-				'svg2pdf': TranslatorLevel.USER,
-				'svg2pdf+tex': TranslatorLevel.USER,
-				'dot2pdf': TranslatorLevel.USER,
-				'uml2pdf_umbrello': TranslatorLevel.USER,
-				}, included)
+		self.assertEqual(4, len(included))
+		self.assertIn(svg2pdf, included)
+		self.assertEqual(TranslatorLevel.USER, included[svg2pdf])
+		self.assertIn(texsvg2pdf, included)
+		self.assertEqual(TranslatorLevel.USER, included[texsvg2pdf])
+		self.assertIn(dot2pdf, included)
+		self.assertEqual(TranslatorLevel.USER, included[dot2pdf])
+		self.assertIn(uml2pdf, included)
+		self.assertEqual(TranslatorLevel.USER, included[uml2pdf])
+
+	def test_getIncludedTranslatorNamesWithLevels_config(self):
+		self.config.translators.set_included('svg2pdf', TranslatorLevel.SYSTEM, False)
+		self.config.translators.set_included('svg2pdf', TranslatorLevel.DOCUMENT, True)
+		self.config.translators.set_included('dot2pdf', TranslatorLevel.USER, False)
+		included = self.repo.get_included_translator_names_with_levels()
+		self.assertEqual(3, len(included))
+		self.assertIn('svg2pdf', included)
+		self.assertEqual(TranslatorLevel.DOCUMENT, included['svg2pdf'])
+		self.assertIn('svg2pdf+tex', included)
+		self.assertEqual(TranslatorLevel.USER, included['svg2pdf+tex'])
+		self.assertIn('uml2pdf_umbrello', included)
+		self.assertEqual(TranslatorLevel.USER, included['uml2pdf_umbrello'])
 
 	def test_getIncludedTranslatorsWithLevels_config(self):
+		svg2pdf = self.repo.get_object_for('svg2pdf')
+		texsvg2pdf = self.repo.get_object_for('svg2pdf+tex')
+		uml2pdf = self.repo.get_object_for('uml2pdf_umbrello')
 		self.config.translators.set_included('svg2pdf', TranslatorLevel.SYSTEM, False)
 		self.config.translators.set_included('svg2pdf', TranslatorLevel.DOCUMENT, True)
 		self.config.translators.set_included('dot2pdf', TranslatorLevel.USER, False)
 		included = self.repo.get_included_translators_with_levels()
-		self.assertDictEqual({
-				'svg2pdf': TranslatorLevel.DOCUMENT,
-				'svg2pdf+tex': TranslatorLevel.USER,
-				'uml2pdf_umbrello': TranslatorLevel.USER,
-				}, included)
+		self.assertEqual(3, len(included))
+		self.assertIn(svg2pdf, included)
+		self.assertEqual(TranslatorLevel.DOCUMENT, included[svg2pdf])
+		self.assertIn(texsvg2pdf, included)
+		self.assertEqual(TranslatorLevel.USER, included[texsvg2pdf])
+		self.assertIn(uml2pdf, included)
+		self.assertEqual(TranslatorLevel.USER, included[uml2pdf])
 
 	def test__buildIncludedTranslatorDict(self):
 		svg2pdf = self.repo.get_object_for('svg2pdf')
@@ -199,11 +237,13 @@ class TestTranslatorRepositoryShared(AbstractBaseTest):
 		self.config.translators.set_included('svg2pdf', TranslatorLevel.DOCUMENT, True)
 		self.config.translators.set_included('dot2pdf', TranslatorLevel.USER, False)
 		included = self.repo._build_included_translator_dict()
-		self.assertDictEqual({
-				'svg': svg2pdf,
-				'ltx.svg': texsvg2pdf,
-				'uml': uml2pdf,
-				}, included)
+		self.assertEqual(3, len(included))
+		self.assertIn('svg', included)
+		self.assertEqual(svg2pdf, included['svg'])
+		self.assertIn('ltx.svg', included)
+		self.assertEqual(texsvg2pdf, included['ltx.svg'])
+		self.assertIn('uml', included)
+		self.assertEqual(uml2pdf, included['uml'])
 
 
 
@@ -223,9 +263,9 @@ class TestTranslatorRepositoryConflict(AbstractBaseTest):
 		self.config.translators.is_translator_fileformat_1_enable = True
 		self.repo = TranslatorRepository(self.config)
 		translators = self.repo._read_directory(directory=self.directory, recursive=True, warn=False)
-		for translator in translators:
-			self.repo._installed_translators[1][translator] = translators[translator]
-			self.repo._installed_translator_names.add(translator)
+		for source, translator in translators:
+			self.repo._installed_translators[TranslatorLevel.USER][source] = translator
+			self.repo._translator_names.add(translator.name)
 		self.config.translators.set_included('svg2pdf', TranslatorLevel.SYSTEM, False)
 		self.config.translators.set_included('svg2pdf', TranslatorLevel.DOCUMENT, True)
 		self.config.translators.set_included('svg2png', TranslatorLevel.SYSTEM, True)
@@ -241,12 +281,14 @@ class TestTranslatorRepositoryConflict(AbstractBaseTest):
 		svg2pdf = self.repo.get_object_for('svg2pdf')
 		svg2png = self.repo.get_object_for('svg2png')
 		conflicts = self.repo._detect_conflicts()
-		self.assertListEqual([
-				{},
-				{},
-				{
-					'svg': { svg2pdf, svg2png },
-				}], conflicts)
+		self.assertEqual(1, len(conflicts))
+		self.assertEqual(0, len(conflicts[TranslatorLevel.SYSTEM]))
+		self.assertEqual(0, len(conflicts[TranslatorLevel.USER]))
+		self.assertEqual(1, len(conflicts[TranslatorLevel.DOCUMENT]))
+		self.assertIn('svg', conflicts[TranslatorLevel.DOCUMENT])
+		self.assertEqual(2, len(conflicts[TranslatorLevel.DOCUMENT]['svg']))
+		self.assertIn(svg2pdf, conflicts[TranslatorLevel.DOCUMENT]['svg'])
+		self.assertIn(svg2png, conflicts[TranslatorLevel.DOCUMENT]['svg'])
 
 	def test__failOnConflict(self):
 		self.repo.get_object_for('svg2pdf')

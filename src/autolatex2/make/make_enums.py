@@ -80,24 +80,3 @@ class GlossaryCompiler(IntEnum):
 	Type of glossary compilers supported by AutoLaTeX.
 	"""
 	makeglossaries = TeXTools.makeglossaries
-
-
-
-@unique
-class FileType(IntEnum):
-	"""
-	Type of file in the AutoLaTeX making process.
-	"""
-	tex = 0
-	pdf = 1
-	ps = 3
-	bib = 4
-	bbl = 5
-	bst = 6
-	bbc = 7
-	cbx = 8
-	idx = 9
-	ind = 10
-	glo = 11
-	gls = 12
-	sty = 13

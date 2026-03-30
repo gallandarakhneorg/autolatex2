@@ -29,11 +29,11 @@ translator_python_dependencies:
     - import autolatex2.utils.utilfunctions as genutils
 translator_function: |
     epsFile = genutils.basename2(_in,  _inexts)
-    sout, serr, sex, retcode = Runner.run_command( 'asy', '-o', epsFile, _in)
-    Runner.check_runner_status(serr, sex, retcode)
+    runner_output = Runner.run_command( 'asy', '-o', epsFile, _in)
+    Runner.check_runner_status(runner_output)
     if _pdfmode:
     	epsFile = epsFile + '.eps'
-    	_runner.generate_image(in_file = epsFile, out_file = _out, only_more_recent = False,  ignore_debug_feature = False)
+    	_runner.generate_image(in_file = epsFile, out_file = _out, only_more_recent = False)
     	genutils.unlink(epsFile)
 ...
 

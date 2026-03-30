@@ -37,25 +37,25 @@ class TestRunner(AbstractBaseTest):
 
 
 	def test_run_python_valid1(self):
-		sout, serr, sex, retcode = Runner.run_python('myvar = \'abc\'')
-		self.assertEqual('', serr)
-		self.assertEqual('', sout)
-		self.assertIsNone(sex)
-		self.assertEqual(0, retcode)
+		output = Runner.run_python('myvar = \'abc\'')
+		self.assertEqual('', output.error_output)
+		self.assertEqual('', output.standard_output)
+		self.assertIsNone(output.exception)
+		self.assertEqual(0, output.return_code)
 
 	def test_run_python_valid2(self):
-		sout, serr, sex, retcode = Runner.run_python('myvar = \'abc\'\nprint(myvar)')
-		self.assertEqual('', serr)
-		self.assertEqual('abc\n', sout)
-		self.assertIsNone(sex)
-		self.assertEqual(0, retcode)
+		output = Runner.run_python('myvar = \'abc\'\nprint(myvar)')
+		self.assertEqual('', output.error_output)
+		self.assertEqual('abc\n', output.standard_output)
+		self.assertIsNone(output.exception)
+		self.assertEqual(0, output.return_code)
 
 	def test_run_python_valid3(self):
-		sout, serr, sex, retcode = Runner.run_python('import sys\nmyvar = \'abc\'\nsys.stderr.write(myvar)')
-		self.assertEqual('abc', serr)
-		self.assertEqual('', sout)
-		self.assertIsNone(sex)
-		self.assertEqual(0, retcode)
+		output = Runner.run_python('import sys\nmyvar = \'abc\'\nsys.stderr.write(myvar)')
+		self.assertEqual('abc', output.error_output)
+		self.assertEqual('', output.standard_output)
+		self.assertIsNone(output.exception)
+		self.assertEqual(0, output.return_code)
 
 	def test_run_python_valid4(self):
 		with self.assertRaises(NotImplementedError):
@@ -66,11 +66,11 @@ class TestRunner(AbstractBaseTest):
 			Runner.run_python('raise NotImplementedError', intercept_error = False, show_script_on_error = False)
 
 	def test_run_python_valid6(self):
-		sout, serr, sex, retcode = Runner.run_python('raise NotImplementedError', intercept_error = True, show_script_on_error = False)
-		self.assertEqual('', serr)
-		self.assertEqual('', sout)
-		self.assertIsInstance(sex, NotImplementedError)
-		self.assertNotEqual(0, retcode)
+		output = Runner.run_python('raise NotImplementedError', intercept_error = True, show_script_on_error = False)
+		self.assertEqual('', output.error_output)
+		self.assertEqual('', output.standard_output)
+		self.assertIsInstance(output.exception, NotImplementedError)
+		self.assertNotEqual(0, output.return_code)
 
 	def test_run_python_invalid1(self):
 		with self.assertRaises(SyntaxError):
@@ -81,65 +81,65 @@ class TestRunner(AbstractBaseTest):
 			Runner.run_python(script = 'print(1', intercept_error = False,  show_script_on_error = False)
 
 	def test_run_python_invalid3(self):
-		sout, serr, sex, retcode = Runner.run_python(script = 'print(1', intercept_error = True,  show_script_on_error = False)
-		self.assertEqual('', serr)
-		self.assertEqual('', sout)
-		self.assertIsInstance(sex, SyntaxError)
-		self.assertNotEqual(0, retcode)
+		output = Runner.run_python(script = 'print(1', intercept_error = True,  show_script_on_error = False)
+		self.assertEqual('', output.error_output)
+		self.assertEqual('', output.standard_output)
+		self.assertIsInstance(output.exception, SyntaxError)
+		self.assertNotEqual(0, output.return_code)
 
 
 
 	def test_run_command_valid1(self):
-		sout, serr, sex, retcode = Runner.run_command(self.PYTHON_CMD, '-c', 'print(123)')
-		self.assertEqual('', serr)
-		self.assertEqual('123\n', sout)
-		self.assertIsNone(sex)
-		self.assertEqual(0, retcode)
+		output = Runner.run_command(self.PYTHON_CMD, '-c', 'print(123)')
+		self.assertEqual('', output.error_output)
+		self.assertEqual('123\n', output.standard_output)
+		self.assertIsNone(output.exception)
+		self.assertEqual(0, output.return_code)
 
 	def test_run_command_valid2(self):
-		sout, serr, sex, retcode = Runner.run_command(self.PYTHON_CMD, '-c', "import sys\nsys.stderr.write('123\\n')")
-		self.assertEqual('123\n', serr)
-		self.assertEqual('', sout)
-		self.assertIsNone(sex)
-		self.assertEqual(0, retcode)
+		output = Runner.run_command(self.PYTHON_CMD, '-c', "import sys\nsys.stderr.write('123\\n')")
+		self.assertEqual('123\n', output.error_output)
+		self.assertEqual('', output.standard_output)
+		self.assertIsNone(output.exception)
+		self.assertEqual(0, output.return_code)
 
 	def test_run_command_invalid1(self):
-		sout, serr, sex, retcode = Runner.run_command(self.PYTHON_CMD, '-c', "sys.stderr.write('123\\n')")
-		self.assertIn('NameError: name \'sys\' is not defined', serr)
-		self.assertEqual('', sout)
-		self.assertIsInstance(sex, CommandExecutionError)
-		self.assertNotEqual(0, sex.errno)
-		self.assertNotEqual(0, retcode)
-		self.assertEqual(sex.errno, retcode)
+		output = Runner.run_command(self.PYTHON_CMD, '-c', "sys.stderr.write('123\\n')")
+		self.assertIn('NameError: name \'sys\' is not defined', output.error_output)
+		self.assertEqual('', output.standard_output)
+		self.assertIsInstance(output.exception, CommandExecutionError)
+		self.assertNotEqual(0, output.exception.errno)
+		self.assertNotEqual(0, output.return_code)
+		self.assertEqual(output.exception.errno, output.return_code)
 
 
 
 
 	def test_run_script_valid1(self):
 		script = 'print(123)'
-		sout, serr, sex, retcode = Runner.run_script(script, self.PYTHON_CMD, '-')
-		self.assertEqual('', serr)
-		self.assertEqual('123\n', sout)
-		self.assertIsNone(sex)
-		self.assertEqual(0, retcode)
+		output = Runner.run_script(script, self.PYTHON_CMD, '-')
+		self.assertEqual('', output.error_output)
+		self.assertEqual('123\n', output.standard_output)
+		self.assertIsNone(output.exception)
+		self.assertEqual(0, output.return_code)
 
 	def test_run_script_valid2(self):
 		script = 'import sys\nsys.stderr.write(\'123\\n\')'
-		sout, serr, sex, retcode = Runner.run_script(script, self.PYTHON_CMD, '-')
-		self.assertEqual('', sout)
-		self.assertEqual('123\n', serr)
-		self.assertIsNone(sex)
-		self.assertEqual(0, retcode)
+		output = Runner.run_script(script, self.PYTHON_CMD, '-')
+		self.assertEqual('', output.standard_output)
+		self.assertEqual('123\n', output.error_output)
+		self.assertIsNone(output.exception)
+		self.assertEqual(0, output.return_code)
 
 	def test_run_script_invalid1(self):
 		script = 'sys.stderr.write(\'123\\n\')'
-		sout, serr, sex, retcode = Runner.run_script(script, self.PYTHON_CMD, '-')
-		self.assertIn('NameError: name \'sys\' is not defined', serr)
-		self.assertEqual('', sout)
-		self.assertIsInstance(sex, CommandExecutionError)
-		self.assertNotEqual(0, sex.errno)
-		self.assertNotEqual(0, retcode)
-		self.assertEqual(sex.errno, retcode)
+		output = Runner.run_script(script, self.PYTHON_CMD, '-')
+		self.assertIn('NameError: name \'sys\' is not defined', output.error_output)
+		self.assertEqual('', output.standard_output)
+		self.assertIsInstance(output.exception, CommandExecutionError)
+		self.assertNotEqual(0, output.exception.errno)
+		self.assertNotEqual(0, output.return_code)
+		self.assertEqual(output.exception.errno, output.return_code)
 
 
 

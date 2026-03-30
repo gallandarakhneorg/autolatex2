@@ -31,6 +31,7 @@ from sortedcontainers import SortedSet
 from autolatex2.cli.abstract_actions import AbstractMakerAction
 from autolatex2.make.filedescription import FileDescription
 from autolatex2.utils.extprint import eprint
+import autolatex2.utils.utilfunctions as genutils
 from autolatex2.utils.i18n import T
 
 @unique
@@ -49,6 +50,7 @@ class _TreeNode:
 	Node in the dependency tree.
 	"""
 	filename: str
+	timestamp : float
 	dependencies : list['_TreeNode'] = field(default_factory=list)
 	depth: int = 0
 	is_cycle: bool = False
@@ -111,6 +113,7 @@ class _DependencyTreeBuilder:
 			# Create a node marking the cycle
 			node = _TreeNode(
 				filename=filename,
+				timestamp=genutils.get_file_last_change(filename),
 				dependencies=[],
 				depth=depth,
 				is_cycle=True,
@@ -132,6 +135,7 @@ class _DependencyTreeBuilder:
 		# Create node
 		node = _TreeNode(
 			filename=filename,
+			timestamp=genutils.get_file_last_change(filename),
 			dependencies=[],
 			depth=depth
 		)
@@ -147,11 +151,12 @@ class _DependencyTreeBuilder:
 				# Dependency not found - create a placeholder node
 				missing_node = _TreeNode(
 					filename=dep,
+					timestamp=genutils.get_file_last_change(dep),
 					dependencies=[],
 					depth=depth + 1,
-					is_cycle=False
+					is_cycle=False,
+					info=T('Dependency not found')
 				)
-				missing_node.info = T('Dependency not found')
 				node.dependencies.append(missing_node)
 				continue
 
@@ -206,6 +211,10 @@ class MakerAction(AbstractMakerAction):
 			action='store_true',
 			help=T('Don\'t read the auxilliary files for building the dependency tree'))
 
+		self.parse_cli.add_argument('--times',
+			action='store_true',
+			help=T('Show the change times for each file'))
+
 		self.parse_cli.add_argument('--list',
 			action='store_true',
 			help=T('Show the dependency as a list'))
@@ -228,7 +237,7 @@ class MakerAction(AbstractMakerAction):
 					self._show_dependency_set(deps)
 				else:
 					deps = self._build_dependency_tree(dependencies)
-					self._show_dependency_tree(deps)
+					self._show_dependency_tree(deps, cli_arguments.times)
 		except BaseException as ex:
 			logging.error(str(ex))
 			return False
@@ -279,7 +288,7 @@ class MakerAction(AbstractMakerAction):
 			eprint(dep)
 
 	# noinspection PyMethodMayBeStatic
-	def _show_dependency_tree(self, node : _TreeNode|None, indent: str = "",
+	def _show_dependency_tree(self, node : _TreeNode|None, show_timestamps : bool, indent: str = "",
 			   is_last: bool = True):
 		"""
 		Show the provided dependency tree.
@@ -294,12 +303,13 @@ class MakerAction(AbstractMakerAction):
 			# Print current node
 			marker = "└── " if is_last else "├── "
 			cycle_marker = " 🔄" if node.is_cycle else ""
-			error_marker = " ❌" if node.info is not None else ""
-			print(f"{indent}{marker}{node.filename}{cycle_marker}{error_marker}")
+			error_marker = f" ❌ {node.info}" if node.info is not None else ""
+			timestamp = f" ({node.timestamp})" if show_timestamps else ""
+			print(f"{indent}{marker}{node.filename}{timestamp}{cycle_marker}{error_marker}")
 
 			# Process children
 			if node.dependencies:
 				child_indent = indent + ("    " if is_last else "│   ")
 				for i, child in enumerate(node.dependencies):
 					is_last_child = (i == len(node.dependencies) - 1)
-					self._show_dependency_tree(child, child_indent, is_last_child)
+					self._show_dependency_tree(child, show_timestamps, child_indent, is_last_child)

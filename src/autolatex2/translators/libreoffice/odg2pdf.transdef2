@@ -39,7 +39,7 @@ translator_function: |
     		break
     if not bin:
     	raise Exception("Unable to retreive the binary file of Libre Office or Open Office")
-    sout, serr, sex, retcode = Runner.run_command(bin, '--headless', '--nologo', '--convert-to', _outmode, '--outdir', _outdir, _in)
-    Runner.check_runner_status(serr, sex, retcode)
+    runner_output = Runner.run_command(bin, '--headless', '--nologo', '--convert-to', _outmode, '--outdir', _outdir, _in)
+    Runner.check_runner_status(runner_output)
 ...
 

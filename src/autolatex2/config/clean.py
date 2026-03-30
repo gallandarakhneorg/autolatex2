@@ -33,8 +33,8 @@ class CleanConfig:
 	"""
 
 	def __init__(self):
-		self.__clean_files = list()
-		self.__cleanall_files = list()
+		self.__clean_files : list[str] = list()
+		self.__cleanall_files : list[str] = list()
 
 	def reset_internal_attributes(self):
 		"""
@@ -56,7 +56,10 @@ class CleanConfig:
 	def clean_files(self, files : list[str] | str | None):
 		"""
 		Change the list of files to be removed durin the "clean" stage.
-		:param files: the specification of filenames. This specification may be a list of filenames or a single string containing te filenames separated by the path seperator, e.g., ':' on Unix systems and ';' on Windows systems.
+		:param files: the specification of filenames. This specification may be a list of filenames or a single
+		string containing te filenames separated by the path seperator, e.g., ':' on Unix systems and ';' on
+		Windows systems.
+		:type files: list[str] | str | Nona
 		"""
 		if files is None:
 			self.__clean_files = list()
@@ -87,7 +90,10 @@ class CleanConfig:
 	def cleanall_files(self, files : list[str] | str | None):
 		"""
 		Change the list of files to be removed durin the "cleanall" stage.
-		:param files: the specification of filenames. This specification may be a list of filenames or a single string containing te filenames separated by the path seperator, e.g., ':' on Unix systems and ';' on Windows systems.
+		:param files: the specification of filenames. This specification may be a list of filenames or a single
+		 string containing te filenames separated by the path seperator, e.g., ':' on Unix systems and ';'
+		 on Windows systems.
+		 :type files: list[str] | str | None
 		"""
 		if files is None:
 			self.__cleanall_files = list()

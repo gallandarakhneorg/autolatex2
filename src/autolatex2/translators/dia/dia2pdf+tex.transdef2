@@ -40,10 +40,10 @@ translator_python_dependencies:
     - import autolatex2.utils.utilfunctions as genutils
 translator_function: |
     fig_file = genutils.basename2(_out,  _outexts) + '+tex.fig'
-    sout, serr, sex, retcode = Runner.run_command('dia', '--nosplash', '-t', 'fig', "--export=" + fig_file, _in)
-    Runner.check_runner_status(serr, sex, retcode)
+    runner_output = Runner.run_command('dia', '--nosplash', '-t', 'fig', "--export=" + fig_file, _in)
+    Runner.check_runner_status(runner_output)
     try:
-    	_runner.generate_image(in_file = fig_file, out_file = _out, only_more_recent = False,  ignore_debug_feature = True)
+    	_runner.generate_image(in_file = fig_file, out_file = _out, only_more_recent = False)
     finally:
     	genutils.unlink(fig_file)
 ...

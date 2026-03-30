@@ -33,9 +33,9 @@ translator_function: |
     	Runner.check_runner_exit_code(retcode)
     else:
     	svgFile = _outwoext + '.svg'
-    	sout, serr, sex, retcode = Runner.run_command('dot', '-Tsvg', _in, '-o', svgFile)
-    	Runner.check_runner_status(serr, sex, retcode)
-    	_runner.generate_image(translator_name = 'svg2pdf_inkscape', in_file = svgFile, out_file = _out, pdf_mode = _pdfmode, only_more_recent = False,  ignore_debug_feature = True)
+    	runner_output = Runner.run_command('dot', '-Tsvg', _in, '-o', svgFile)
+    	Runner.check_runner_status(runner_output)
+    	_runner.generate_image(translator_name = 'svg2pdf_inkscape', in_file = svgFile, out_file = _out, pdf_mode = _pdfmode, only_more_recent = False)
     	genutils.unlink(svgFile)
 ...
 

@@ -24,9 +24,10 @@ TeX parser.
 
 import re
 import abc
-from typing import override, Any
+from typing import override
 
 from autolatex2.tex.parser import Parser
+from autolatex2.tex.utils import TeXMacroParameter
 
 
 class Observer(abc.ABC):
@@ -135,7 +136,7 @@ class Observer(abc.ABC):
 		raise NotImplementedError
 
 	@abc.abstractmethod
-	def expand(self, parser : Parser, raw_text : str, name : str, *parameter : dict[str,Any]) -> str:
+	def expand(self, parser : Parser, raw_text : str, name : str, *parameter : TeXMacroParameter) -> str:
 		"""
 		Expand the given macro on the given parameters.
 		:param parser: reference to the parser.
@@ -145,8 +146,8 @@ class Observer(abc.ABC):
 		:param name: Name of the macro.
 		:type name: str
 		:param parameter: Descriptions of the values passed to the TeX macro.
-		:type parameter: dict[str,str]
-		:return: the result of the expand of the macro, or None to not replace the macro by something (the macro is used as-is)
+		:type parameter: TeXMacroParameter
+		:return: the result of the expansion of the macro, or None to not replace the macro by something (the macro is used as-is)
 		:rtype: str
 		"""
 		raise NotImplementedError
@@ -260,7 +261,7 @@ class ReinjectObserver(Observer):
 			return '\\]'
 
 	@override
-	def expand(self, parser : Parser, raw_text : str, name : str, *parameter : dict[str,Any]) -> str:
+	def expand(self, parser : Parser, raw_text : str, name : str, *parameter : TeXMacroParameter) -> str:
 		"""
 		Expand the given macro on the given parameters.
 		:param parser: reference to the parser.
@@ -270,7 +271,7 @@ class ReinjectObserver(Observer):
 		:param name: Name of the macro.
 		:type name: str
 		:param parameter: Descriptions of the values passed to the TeX macro.
-		:type parameter: dict[str,Any]
+		:type parameter: TeXMacroParameter
 		:return: the result of the expand of the macro, or None to not replace the macro by something (the macro is used as-is)
 		:rtype: str
 		"""
