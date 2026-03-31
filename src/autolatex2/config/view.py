@@ -26,7 +26,7 @@ import autolatex2.utils.utilfunctions as genutils
 
 class ViewerConfig:
 	"""
-	Configuration of a AutoLaTeX instance.
+	Configuration of a program instance.
 	"""
 
 	def __init__(self):

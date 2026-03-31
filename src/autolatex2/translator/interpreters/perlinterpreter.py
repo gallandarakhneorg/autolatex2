@@ -19,7 +19,7 @@
 # 330, Boston, MA 02111-1307, USA.
 
 """
-Perl implementation of an interpreter for the AutoLaTeX translators.
+Perl implementation of an interpreter for the translators.
 """
 
 import io
@@ -34,7 +34,7 @@ from autolatex2.utils.runner import ScriptOutput
 
 class TranslatorInterpreter(AbstractTranslatorInterpreter):
 	"""
-	Definition of a Perl implementation of an interpreter for the AutoLaTeX translators.
+	Definition of a Perl implementation of an interpreter for the translators.
 	"""
 
 	def __init__(self,  configuration : Config):
@@ -149,7 +149,7 @@ class TranslatorInterpreter(AbstractTranslatorInterpreter):
 	def run(self, code : str) -> ScriptOutput:
 		"""
 		Run the interpreter.
-		:param code: The Perl code to interprete.
+		:param code: The Perl code to interpret.
 		:type code: str
 		:return: A quadruplet containing the standard output, the
 				 error output, the exception, the return code.

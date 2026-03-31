@@ -191,7 +191,7 @@ class TestTranslatorRunner(AbstractBaseTest):
 			self.directory2 = None
 
 
-	def test_getSourceImages_notRecursive(self):
+	def test_get_source_images_notRecursive(self):
 		self.config.translators.recursive_image_path = False
 		images = self.runner.get_source_images()
 		self.assertSetEqual(
@@ -200,7 +200,7 @@ class TestTranslatorRunner(AbstractBaseTest):
 			}, images)
 
 
-	def test_getSourceImages_recursive(self):
+	def test_get_source_images_recursive(self):
 		self.config.translators.recursive_image_path = True
 		images = self.runner.get_source_images()
 		self.assertSetEqual(
@@ -216,7 +216,7 @@ class TestTranslatorRunner(AbstractBaseTest):
 		actual = self.runner.get_translator_for(filename)
 		self.assertEqual(expected, actual)
 		
-	def test_getTranslatorFor(self):
+	def test_get_translator_for(self):
 		self.__assert_gtf('img1.svg', 'svg2pdf')
 		self.__assert_gtf('img1.svg+tex',  'svg2pdf+tex')
 		self.__assert_gtf('img1+tex.svg', 'svg2pdf+tex')

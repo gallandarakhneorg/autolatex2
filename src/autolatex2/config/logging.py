@@ -35,7 +35,7 @@ class LoggingConfig:
 
 	def __init__(self):
 		self.__message : str = ''
-		self.__level : LoggingConfig = LoggingConfig.DEFAULT_LEVEL
+		self.__level : int = LoggingConfig.DEFAULT_LEVEL
 
 	def reset_internal_attributes(self):
 		"""

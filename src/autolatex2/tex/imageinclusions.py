@@ -298,11 +298,11 @@ class ImageInclusions(Observer):
 		if t:
 			r = re.match(r'^\s*(?:\{([^}]+)}|([^,]+))\s*[,;]?\s*(.*)$', t)
 			while r:
-				path = r.group(1) or r.group(2)
-				if not os.path.isabs(path):
-					path = os.path.normpath(os.path.join(self.__directory_name, path))
+				graphic_path = r.group(1) or r.group(2)
+				if not os.path.isabs(graphic_path):
+					graphic_path = os.path.normpath(os.path.join(self.__directory_name, graphic_path))
 				t = r.group(3)
-				self.__include_paths.insert(0, path)
+				self.__include_paths.insert(0, graphic_path)
 				r = re.match(r'^\s*(?:\{([^}]+)}|([^,]+))\s*[,;]?\s*(.*)$', t) if t else None
 		return None
 
@@ -388,7 +388,7 @@ class ImageInclusions(Observer):
 	# noinspection DuplicatedCode
 	def __create_mapping(self, filename : str, ext : str) -> str:
 		"""
-		Compute an unique filename, and map it to the source file.
+		Compute a unique filename, and map it to the source file.
 		:param filename: The filename to translate.
 		:type filename: str
 		:param ext: The filename extension to remove.
@@ -465,7 +465,7 @@ class ImageInclusions(Observer):
 				selected_name1 = None
 				selected_name2 = None
 				for filename in filenames:
-					ext = os.path.splitext(filename)[1] or ''
+					ext = str(os.path.splitext(filename)[1]) or ''
 					tex_name = self.__create_mapping(filename, ext) + ext
 					if filenames[filename]:
 						if not selected_name1:

@@ -36,7 +36,7 @@ class AbstractTransdefReader(ABC):
 
 	def __init__(self, configuration : Config):
 		"""
-		Contructor.
+		Constructor.
 		:param configuration: the global configuration.
 		:type configuration: Config
 		"""

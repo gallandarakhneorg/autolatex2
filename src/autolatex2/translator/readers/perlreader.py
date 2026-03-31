@@ -34,12 +34,12 @@ from autolatex2.utils.i18n import T
 
 class PerlTransdefReader(AbstractTransdefReader):
 	"""
-	Reader for the version 1 (original) transdef format (for the Perl version of AutoLaTeX).
+	Reader for the version 1 (original) transdef format (for the Perl version of the program).
 	"""
 
 	def __init__(self, configuration : Config):
 		"""
-		Contructor.
+		Constructor.
 		:param configuration: the global configuration.
 		:type configuration: Config
 		"""
@@ -57,7 +57,7 @@ class PerlTransdefReader(AbstractTransdefReader):
 		content : dict[str,TransdefLine] = dict()
 		with open(filename) as f:
 			lineno = 0
-			eol = False
+			eol = None
 			curvar = None
 			for line in f.readlines():
 				lineno = lineno + 1

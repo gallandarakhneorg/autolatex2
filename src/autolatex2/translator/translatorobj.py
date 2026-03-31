@@ -50,7 +50,7 @@ class Translator:
 				<li><code>source2target+target2_variant</code></li>
 				</li>
 		:type: str
-		:param configuration: The current AutoLaTeX configuration.
+		:param configuration: The current program configuration.
 		:type configuration: Config
 		"""
 		self.configuration = configuration
@@ -179,13 +179,13 @@ class Translator:
 		return self.__basename
 
 	@property
-	def filename(self) -> str | None:
+	def filename(self) -> str:
 		"""
 		Replies the filename of the translator.
 		:return: The filename or None.
-		:rtype: str | None
+		:rtype: str
 		"""
-		return self.__filename
+		return self.__filename or ''
 
 	@filename.setter
 	def filename(self, name : str | None):
@@ -244,7 +244,8 @@ class Translator:
 		"""
 		if self.__file_content is None:
 			self.__file_content = self.__read_translator_file(self.filename)
-		if 'INPUT_EXTENSIONS' in self.__file_content and self.__file_content['INPUT_EXTENSIONS'] and self.__file_content['INPUT_EXTENSIONS'].value_list:
+		if (self.__file_content is not None and 'INPUT_EXTENSIONS' in self.__file_content and
+				self.__file_content['INPUT_EXTENSIONS'] and self.__file_content['INPUT_EXTENSIONS'].value_list):
 			return list(self.__file_content['INPUT_EXTENSIONS'].value_list)
 		return list()
 
@@ -255,7 +256,8 @@ class Translator:
 		"""
 		if self.__file_content is None:
 			self.__file_content = self.__read_translator_file(self.filename)
-		if 'OUTPUT_EXTENSIONS' in self.__file_content and self.__file_content['OUTPUT_EXTENSIONS'] and self.__file_content['OUTPUT_EXTENSIONS'].value:
+		if (self.__file_content is not None and 'OUTPUT_EXTENSIONS' in self.__file_content and
+				self.__file_content['OUTPUT_EXTENSIONS'] and self.__file_content['OUTPUT_EXTENSIONS'].value):
 			return list(self.__file_content['OUTPUT_EXTENSIONS'].value_list)
 		return list()
 
@@ -266,10 +268,12 @@ class Translator:
 		"""
 		if self.__file_content is None:
 			self.__file_content = self.__read_translator_file(self.filename)
-		if 'COMMAND_LINE' in self.__file_content and self.__file_content['COMMAND_LINE'] and self.__file_content['COMMAND_LINE'].value_list:
-			return self.__file_content['COMMAND_LINE'].value_list
+		if (self.__file_content is not None and 'COMMAND_LINE' in self.__file_content and
+				self.__file_content['COMMAND_LINE'] and self.__file_content['COMMAND_LINE'].value_list):
+			return list(self.__file_content['COMMAND_LINE'].value_list)
 		return None
 
+	# noinspection DuplicatedCode
 	def get_embedded_function(self) -> str | None:
 		"""
 		Replies the embedded function to run if specified in the translator definition file.
@@ -277,10 +281,12 @@ class Translator:
 		"""
 		if self.__file_content is None:
 			self.__file_content = self.__read_translator_file(self.filename)
-		if 'TRANSLATOR_FUNCTION' in self.__file_content and self.__file_content['TRANSLATOR_FUNCTION'] and self.__file_content['TRANSLATOR_FUNCTION'].value:
+		if (self.__file_content is not None and 'TRANSLATOR_FUNCTION' in self.__file_content and
+				self.__file_content['TRANSLATOR_FUNCTION'] and self.__file_content['TRANSLATOR_FUNCTION'].value):
 			return self.__file_content['TRANSLATOR_FUNCTION'].value
 		return None
 
+	# noinspection DuplicatedCode
 	def get_embedded_function_interpreter(self) -> str | None:
 		"""
 		Replies the interpreter for the embedded function to run if specified in the translator definition file.
@@ -288,7 +294,8 @@ class Translator:
 		"""
 		if self.__file_content is None:
 			self.__file_content = self.__read_translator_file(self.filename)
-		if 'TRANSLATOR_FUNCTION' in self.__file_content and self.__file_content['TRANSLATOR_FUNCTION'] and self.__file_content['TRANSLATOR_FUNCTION'].interpreter:
+		if (self.__file_content is not None and 'TRANSLATOR_FUNCTION' in self.__file_content and
+				self.__file_content['TRANSLATOR_FUNCTION'] and self.__file_content['TRANSLATOR_FUNCTION'].interpreter):
 			return self.__file_content['TRANSLATOR_FUNCTION'].interpreter
 		return None
 
@@ -299,8 +306,9 @@ class Translator:
 		"""
 		if self.__file_content is None:
 			self.__file_content = self.__read_translator_file(self.filename)
-		if 'TRANSLATOR_PYTHON_DEPENDENCIES' in self.__file_content and self.__file_content['TRANSLATOR_PYTHON_DEPENDENCIES'] and self.__file_content['TRANSLATOR_PYTHON_DEPENDENCIES'].value_list:
-			return self.__file_content['TRANSLATOR_PYTHON_DEPENDENCIES'].value_list
+		if (self.__file_content is not None and 'TRANSLATOR_PYTHON_DEPENDENCIES' in self.__file_content and
+				self.__file_content['TRANSLATOR_PYTHON_DEPENDENCIES'] and self.__file_content['TRANSLATOR_PYTHON_DEPENDENCIES'].value_list):
+			return list(self.__file_content['TRANSLATOR_PYTHON_DEPENDENCIES'].value_list)
 		return None
 
 	def get_constants(self, list_separator : str = ' ') -> dict[str,Any]:
@@ -314,6 +322,7 @@ class Translator:
 		"""
 		if self.__file_content is None:
 			self.__file_content = self.__read_translator_file(self.filename)
+		assert self.__file_content is not None
 		variables = dict()
 		for k, v in self.__file_content.items():
 			if k not in [ 'INPUT_EXTENSIONS', 'OUTPUT_EXTENSIONS', 'FILES_TO_CLEAN', 'TRANSLATOR_PERL_DEPENDENCIES', 
@@ -336,10 +345,12 @@ class Translator:
 		if self.__temporary_file_patterns is None:
 			if self.__file_content is None:
 				self.__file_content = self.__read_translator_file(self.filename)
+			assert self.__file_content is not None
 			if 'TEMPORARY_FILES' in self.__file_content and self.__file_content['TEMPORARY_FILES'] and self.__file_content['TEMPORARY_FILES'].value_list:
 				self.__temporary_file_patterns = list(self.__file_content['TEMPORARY_FILES'].value_list)
 			else:
 				self.__temporary_file_patterns = list()
+		assert self.__temporary_file_patterns is not None
 		return self.__temporary_file_patterns
 
 
@@ -351,10 +362,12 @@ class Translator:
 		if self.__target_file_patterns is None:
 			if self.__file_content is None:
 				self.__file_content = self.__read_translator_file(self.filename)
+			assert self.__file_content is not None
 			if 'ALL_OUTPUT_FILES' in self.__file_content and self.__file_content['ALL_OUTPUT_FILES'] and self.__file_content['ALL_OUTPUT_FILES'].value_list:
 				self.__target_file_patterns = list(self.__file_content['ALL_OUTPUT_FILES'].value_list)
 			else:
 				self.__target_file_patterns = list()
+			assert self.__target_file_patterns is not None
 			if '$out' not in self.__target_file_patterns:
 				self.__target_file_patterns.append('$out')
 		return self.__target_file_patterns

@@ -105,7 +105,7 @@ class TestPosixConfig(AbstractTestConfig):
 
 	def test_document_directory_getter(self):
 		directory = self.config.document_directory
-		self.assertIsNone(directory)
+		self.assertFalse(directory)
 
 	def test_document_directory_setter(self):
 		pass
@@ -120,7 +120,7 @@ class TestPosixConfig(AbstractTestConfig):
 
 
 	def test_name_getter(self):
-		self.assertIsNone(self.config.name)
+		self.assertFalse(self.config.name)
 
 	def test_name_setter(self):
 		self.config.name = "myname"
@@ -129,7 +129,7 @@ class TestPosixConfig(AbstractTestConfig):
 
 
 	def test_launch_name_getter(self):
-		self.assertIsNone(self.config.launch_name)
+		self.assertFalse(self.config.launch_name)
 
 	def test_launch_name_setter(self):
 		self.config.launch_name = "myname"
@@ -253,7 +253,7 @@ class TestNtConfig(AbstractTestConfig):
 
 	def test_document_directory_getter(self):
 		directory = self.config.document_directory
-		self.assertIsNone(directory)
+		self.assertFalse(directory)
 
 	def test_document_directory_setter(self):
 		pass
@@ -262,7 +262,7 @@ class TestNtConfig(AbstractTestConfig):
 
 	def test_document_filename_getter(self):
 		name = self.config.document_filename
-		self.assertIsNone(name)
+		self.assertFalse(name)
 
 	def test_document_filename_setter(self):
 		pass
@@ -277,7 +277,7 @@ class TestNtConfig(AbstractTestConfig):
 
 
 	def test_name_getter(self):
-		self.assertIsNone(self.config.name)
+		self.assertFalse(self.config.name)
 
 	def test_name_setter(self):
 		self.config.name = "myname"
@@ -286,7 +286,7 @@ class TestNtConfig(AbstractTestConfig):
 
 
 	def test_launch_name_getter(self):
-		self.assertIsNone(self.config.launch_name)
+		self.assertFalse(self.config.launch_name)
 
 	def test_launch_name_setter(self):
 		self.config.launch_name = "myname"
@@ -412,7 +412,7 @@ class TestOtherConfig(AbstractTestConfig):
 
 	def test_document_directory_getter(self):
 		directory = self.config.document_directory
-		self.assertIsNone(directory)
+		self.assertFalse(directory)
 
 	def test_document_directory_setter(self):
 		pass
@@ -427,7 +427,7 @@ class TestOtherConfig(AbstractTestConfig):
 
 
 	def test_name_getter(self):
-		self.assertIsNone(self.config.name)
+		self.assertFalse(self.config.name)
 
 	def test_name_setter(self):
 		self.config.name = "myname"
@@ -436,7 +436,7 @@ class TestOtherConfig(AbstractTestConfig):
 
 
 	def test_launch_name_getter(self):
-		self.assertIsNone(self.config.launch_name)
+		self.assertFalse(self.config.launch_name)
 
 	def test_launch_name_setter(self):
 		self.config.launch_name = "myname"

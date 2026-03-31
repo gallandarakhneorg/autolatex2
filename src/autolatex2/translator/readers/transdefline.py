@@ -31,7 +31,7 @@ class TransdefLine:
 	lineno : int
 	interpreter : str | None
 	value : str | None
-	value_list : list[str|None]
+	value_list : list[str]
 	
 	def __init__(self,  name : str,  lineno : int,  value : str | None,  interpreter : str | None):
 		"""
@@ -48,5 +48,10 @@ class TransdefLine:
 		self.name = name
 		self.lineno = lineno
 		self.value = value
-		self.value_list = list([value])
+		if value is None:
+			self.value_list = list()
+		elif isinstance(value, list):
+			self.value_list = value
+		else:
+			self.value_list = [ value ]
 		self.interpreter = interpreter

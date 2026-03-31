@@ -24,12 +24,12 @@ Tools that is extracting the dependencies of the TeX file.
 
 import os
 import re
+import json
 from typing import override, Any, Callable, Sized
 
 from autolatex2.tex.texobservers import Observer
 from autolatex2.tex.texparsers import Parser
 from autolatex2.tex.texparsers import TeXParser
-from autolatex2.tex import utils
 from autolatex2.tex.utils import FileType, TeXMacroParameter
 import  autolatex2.utils.utilfunctions as genutils
 
@@ -76,11 +76,24 @@ class DependencyDescription:
 		self.__filename : str = filename
 		self.__type : FileType = file_type
 		self.__has_change : bool = False
-		self.__change : float = float(0)
+		self.__change : float | None = None
 		self.__scopes : set[str] = set()
 		self.__output_files : list[str] = list()
 		self.add_scope(scope)
 		self.add_output_file(output_file)
+
+	def __str__(self):
+		return '->' + self.file_name
+
+	def __repr__(self):
+		json_content = {
+			'file_name': self.file_name,
+			'file_type': self.file_type,
+			'scopes': self.scopes,
+			'change': self.change,
+			'output_files': self.output_files
+		}
+		return json.dumps(json_content,  indent = 4)
 
 	@property
 	def file_name(self) -> str:
@@ -125,7 +138,7 @@ class DependencyDescription:
 			self.__output_files.append(output_file)
 
 	@property
-	def change(self) -> float:
+	def change(self) -> float | None:
 		"""
 		Replies the time of the last change for the file.
 		:rtype: float
@@ -167,6 +180,15 @@ class TypeDependencyRepository(Sized):
 			self.__database: dict[str, DependencyDescription] = database
 		self.__buffer_scopes : set[str] | None = None
 		self.__buffer_new_database : dict[str,dict[str, DependencyDescription]] | None = None
+
+	def __str__(self):
+		return str(self.__database.keys())
+
+	def __repr__(self):
+		json_content = list()
+		for dep in self:
+			json_content.append(repr(dep))
+		return json.dumps(json_content,  indent = 4)
 
 	def __len__(self) -> int:
 		return len(self.__database)
@@ -214,6 +236,7 @@ class TypeDependencyRepository(Sized):
 		"""
 		if self.__buffer_new_database is None:
 			self.__buffer_new_database = dict()
+		assert self.__buffer_new_database is not None
 		if scope not in self.__buffer_new_database:
 			self.__buffer_new_database[scope] = dict()
 			for name, dep in self.__database.items():
@@ -229,6 +252,7 @@ class TypeDependencyRepository(Sized):
 		"""
 		if self.__buffer_scopes is None:
 			self.__buffer_scopes = set()
+			assert self.__buffer_scopes is not None
 			for name, dep in self.__database.items():
 				if dep.scopes:
 					self.__buffer_scopes.update(dep.scopes)
@@ -243,6 +267,12 @@ class _DependencyRepository(Sized):
 	def __init__(self):
 		self.__database : dict[FileType,TypeDependencyRepository] = dict()
 		self.__buffer_bibliography_databases : set[str] | None = None
+
+	def __str__(self):
+		return str(self.__database.keys())
+
+	def __repr__(self):
+		return json.dumps(self.__database,  indent = 4)
 
 	def __len__(self) -> int:
 		return len(self.__database)
@@ -288,7 +318,8 @@ class _DependencyRepository(Sized):
 		"""
 		if self.__buffer_bibliography_databases is None:
 			self.__buffer_bibliography_databases = set()
-			for btype in FileType.biliography_types():
+			assert self.__buffer_bibliography_databases is not None
+			for btype in FileType.bibliography_types():
 				if btype in self.__database:
 					content = self.__database[btype]
 					if content:
@@ -302,7 +333,7 @@ class _DependencyRepository(Sized):
 		:type dependency_type: FileType
 		:param scope: The scope of the dependency to restrict to.
 		:type scope: str|None
-		:return: the set of dependencies. The replied dictionary maps the dependency filenames to their detailled descriptions
+		:return: the set of dependencies. The replied dictionary maps the dependency filenames to their detailed descriptions
 		:rtype: TypeDependencyRepository
 		"""
 		if dependency_type not in self.__database:
@@ -600,7 +631,10 @@ class DependencyAnalyzer(Observer):
 		"""
 		# Special case: the bibunit
 		if self.__in_bibunit:
-			bib_db = bib_db + '.' + str(self.__bibunit_index)
+			bbl_file = genutils.basename2(bbl_file, '.bbl') + '.' + str(self.__bibunit_index)
+		if not os.path.isabs(bbl_file):
+			bbl_file = genutils.ensure_filename_extension(bbl_file, '.bbl')
+			bbl_file = os.path.normpath(os.path.join(self.root_directory, bbl_file))
 		for param in files:
 			value = param.text
 			if value:
@@ -674,10 +708,10 @@ class DependencyAnalyzer(Observer):
 		for param in parameters:
 			value = param.text
 			if value:
-				if utils.is_tex_document(value):
+				if FileType.is_tex_document(value):
 					tex_file = value
 				else:
-					tex_file = value + utils.get_tex_file_extensions()[0]
+					tex_file = value + FileType.tex_extensions()[0]
 				if not os.path.isabs(tex_file):
 					tex_file = os.path.normpath(os.path.join(self.root_directory, tex_file))
 				if os.path.isfile(tex_file):

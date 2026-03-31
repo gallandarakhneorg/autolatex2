@@ -19,7 +19,7 @@
 # 330, Boston, MA 02111-1307, USA.
 
 """
-Shell implementation of an interpreter for the AutoLaTeX translators.
+Shell implementation of an interpreter for the translators.
 """
 
 import pprint
@@ -33,7 +33,7 @@ from autolatex2.utils.runner import ScriptOutput
 
 class TranslatorInterpreter(AbstractTranslatorInterpreter):
 	"""
-	Definition of a Shell implementation of an interpreter for the AutoLaTeX translators.
+	Definition of a Shell implementation of an interpreter for the translators.
 	"""
 
 	def __init__(self,  configuration : Config):

@@ -68,7 +68,7 @@ class TranslatorRunner:
 	@property
 	def translators_repository(self) -> TranslatorRepository:
 		"""
-		Replies the repostory of translators that is used by this runner.
+		Replies the repository of translators that is used by this runner.
 		:return: The repository of translators.
 		:rtype: TranslatorRepository
 		"""
@@ -103,6 +103,7 @@ class TranslatorRunner:
 		if self.__images is None:
 			self.__images = set()
 			# Add the images that were manually specified
+			assert self.__images is not None
 			self.__images.update(self.configuration.translators.images_to_convert)
 
 			# Detect the image formats
@@ -416,24 +417,25 @@ class TranslatorRunner:
 		# Try to avoid the translation if the source file is no more recent than the target file.
 		if only_more_recent:
 			in_change = genutils.get_file_last_change(in_file)
-			out_change = genutils.get_file_last_change(out_file)
-			if out_change is None:
-				# No out file, try to detect other types of generated files
-				dir_name = os.path.dirname(out_file)
-				for filename in os.listdir(dir_name):
-					abs_path = os.path.join(dir_name, filename)
-					if not os.path.isdir(abs_path) and not genutils.is_hidden_file(abs_path):
-						bn = genutils.basename(filename, *out_exts)
-						m = re.match('^('+re.escape(bn+'_')+'.*)'+re.escape(out_ext)+'$', filename, re.S)
-						if m:
-							t = genutils.get_file_last_change(abs_path)
-							if t is not None and (out_change is None or t < out_change):
-								out_change = t
-								break
-			if out_change is not None and in_change <= out_change:
-				# No need to translate again
-				logging.log(LogLevel.FINE_INFO, T("%s is up-to-date") % (os.path.basename(out_file)))
-				return None
+			if in_change is not None:
+				out_change = genutils.get_file_last_change(out_file)
+				if out_change is None:
+					# No out file, try to detect other types of generated files
+					dir_name = os.path.dirname(out_file)
+					for filename in os.listdir(dir_name):
+						abs_path = os.path.join(dir_name, filename)
+						if not os.path.isdir(abs_path) and not genutils.is_hidden_file(abs_path):
+							bn = genutils.basename(filename, *out_exts)
+							m = re.match('^('+re.escape(bn+'_')+'.*)'+re.escape(out_ext)+'$', filename, re.S)
+							if m:
+								t = genutils.get_file_last_change(abs_path)
+								if t is not None and (out_change is None or t < out_change):
+									out_change = t
+									break
+				if out_change is not None and in_change <= out_change:
+					# No need to translate again
+					logging.log(LogLevel.FINE_INFO, T("%s is up-to-date") % (os.path.basename(out_file)))
+					return None
 
 		logging.info(T("%s -> %s") % (os.path.basename(in_file), os.path.basename(out_file)))
 

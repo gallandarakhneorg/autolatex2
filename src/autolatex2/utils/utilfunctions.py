@@ -74,12 +74,15 @@ def find_file_in_path(filename : str, use_environment_variable : bool = False) -
 	:rtype: str
 	"""
 	if use_environment_variable:
-		path = os.getenv("PYTHONPATH")
-		elements = path.split(os.pathsep)
+		search_path = os.getenv("PYTHONPATH")
+		if search_path:
+			elements = search_path.split(os.pathsep)
+		else:
+			elements = list()
 	else:
 		elements = sys.path
 	for root in elements:
-		if root is None or root == '':
+		if not root:
 			fn = os.path.join(os.curdir, filename)
 		else:
 			fn = os.path.join(root, filename)
@@ -178,6 +181,23 @@ def get_filename_extension_from(name : str, *ext : str) -> str|None:
 	return None
 
 
+def ensure_filename_extension(name : str, *ext : str) -> str:
+	"""
+	Ensure that the given filename has the specified file extension. If there is multiple extensions
+	provided, then the first one is selected as the reference.
+	:param name: The filename.
+	:type name: str
+	:param ext: The extensions to search for.
+	:type ext: list[str]
+	:return: The filename with a correct extension.
+	:rtype: str
+	"""
+	for extension in ext:
+		if name.endswith(extension):
+			return name
+	return name + ext[0]
+
+
 TO = TypeVar('TO')
 def first_of(*values : list[TO]) -> TO:
 	"""
@@ -239,7 +259,7 @@ def parse_cli(command_line : str, environment : dict[str,str] = None, exceptions
 	previous additional environment.
 	:param command_line: the command line to parse.
 	:type command_line: str
-	:param environment: a dictionnary of environment variables, mapping the variable names to their values.
+	:param environment: a dictionary of environment variables, mapping the variable names to their values.
 	:type environment: dict[str,str]
 	:param exceptions: The names of the environment variables to not expand.
 	:type exceptions: set[Any]

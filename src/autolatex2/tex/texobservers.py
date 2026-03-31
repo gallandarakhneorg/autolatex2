@@ -130,7 +130,7 @@ class Observer(abc.ABC):
 		:type special: bool
 		:param math: Indicates if the math mode is active.
 		:type math: bool
-		:return: the definition of the macro, ie. the macro prototype. See the class documentation for an explanation about the format of the macro prototype.
+		:return: the definition of the macro, i.e., the macro prototype. See the class documentation for an explanation about the format of the macro prototype.
 		:rtype: str | None
 		"""
 		raise NotImplementedError
@@ -272,7 +272,7 @@ class ReinjectObserver(Observer):
 		:type name: str
 		:param parameter: Descriptions of the values passed to the TeX macro.
 		:type parameter: TeXMacroParameter
-		:return: the result of the expand of the macro, or None to not replace the macro by something (the macro is used as-is)
+		:return: the result of the expansion of the macro, or None to not replace the macro by something (the macro is used as-is)
 		:rtype: str
 		"""
 		return raw_text

@@ -19,7 +19,7 @@
 # 330, Boston, MA 02111-1307, USA.
 
 """
-Configuration of a AutoLaTeX instance.
+Configuration of the program instance.
 """
 
 import os
@@ -29,7 +29,6 @@ import inspect
 from json import JSONEncoder
 from typing import override, Any
 
-import autolatex2.tex.utils as texutils
 from autolatex2.config.generation import GenerationConfig
 from autolatex2.config.translator import TranslatorConfig
 from autolatex2.config.view import ViewerConfig
@@ -38,12 +37,15 @@ from autolatex2.config.scm import ScmConfig
 from autolatex2.config.clean import CleanConfig
 
 import gettext
+
+from autolatex2.tex.utils import FileType
+
 _T = gettext.gettext
 
 
 class Config:
 	"""
-	Configuration of a AutoLaTeX instance.
+	Configuration of the program instance.
 	"""
 
 	DEFAULT_INFINITE_LOOP_DELAY : int = 2
@@ -109,7 +111,7 @@ class Config:
 	@override
 	def __str__(self) -> str:
 		"""
-		Replies the string representation of the AutoLaTeX configuration.
+		Replies the string representation of the program configuration.
 		:return: the string representation of the configuration.
 		:rtype: str
 		"""
@@ -118,7 +120,7 @@ class Config:
 	@override
 	def __repr__(self) -> str:
 		"""
-		Replies the representation of the AutoLaTeX configuration.
+		Replies the representation of the program configuration.
 		:return: the representation of the configuration.
 		:rtype: str
 		"""
@@ -226,7 +228,7 @@ class Config:
 
 	def make_document_config_filename(self, directory : str) -> str:
 		"""
-		Replies the filename of the AutoLateX 'project' configuration when
+		Replies the filename of the 'project' configuration when
 		it is located in the given directory.
 		:param directory: The name of the directory in which the main document file is located.
 		:type directory: str
@@ -241,7 +243,7 @@ class Config:
 	@property
 	def user_config_directory(self) -> str:
 		"""
-		Replies the name of folder where the AutoLateX 'user' configuration is.
+		Replies the name of folder where the 'user' configuration is.
 		:return: The name of the user-level configuration folder.
 		:rtype: str
 		"""
@@ -252,7 +254,7 @@ class Config:
 				self.__user_directory = os.path.join(self.home_directory, "Local Settings", "Application Data", "autolatex")
 			else:
 				self.__user_directory = os.path.join(self.home_directory, "autolatex")
-		return self.__user_directory
+		return self.__user_directory or ''
 
 	# noinspection PyMethodMayBeStatic
 	def _isdir(self, directory : str) -> bool:
@@ -268,7 +270,7 @@ class Config:
 	@property
 	def user_config_file(self) -> str:
 		"""
-		Replies the name of file where the AutoLateX 'user' configuration is.
+		Replies the name of file where the 'user' configuration is.
 		:return: The name of the file in which the user-level configuration is stored.
 		:rtype: str
 		"""
@@ -282,12 +284,12 @@ class Config:
 				self.__user_file = os.path.join(self.home_directory, "Local Settings", "Application Data", "autolatex.conf")
 			else:
 				self.__user_file = os.path.join(self.home_directory, "autolatex.conf")
-		return self.__user_file
+		return self.__user_file or ''
 
 	@property
 	def system_config_file(self) -> str:
 		"""
-		Replies the name of file where the AutoLateX 'system' configuration is.
+		Replies the name of file where the 'system' configuration is.
 		:return: The name of the file in which the system-level configuration is stored.
 		:rtype: str
 		"""
@@ -300,7 +302,7 @@ class Config:
 		:return: the name of the directory in which the current TeX document is located.
 		:rtype: str
 		"""
-		return self.__document_directory
+		return self.__document_directory or ''
 
 	@document_directory.setter
 	def document_directory(self, folder : str):
@@ -318,7 +320,7 @@ class Config:
 		:return: the name of the filein if the current TeX document.
 		:rtype: str
 		"""
-		return self.__document_filename
+		return self.__document_filename or ''
 
 	@document_filename.setter
 	def document_filename(self, filename: str):
@@ -348,7 +350,7 @@ class Config:
 		document.
 		:param current_document: The path to the current LaTeX document.
 		:type current_document: str
-		:return: The path to the folder where the AutoLaTeX configuration was found.
+		:return: The path to the folder where the program configuration was found.
 		         It is 'current_document' or a parent directory of 'current_document'.
 		:rtype: str | None
 		"""
@@ -370,7 +372,7 @@ class Config:
 			adir = os.path.dirname(cfg_file)
 		else:
 			ext = os.path.splitext(current_document)[-1]
-			if texutils.is_tex_file_extension(ext):
+			if FileType.is_tex_extension(ext):
 				adir = document_dir
 		
 		if adir is None:
@@ -389,13 +391,13 @@ class Config:
 	@property
 	def installation_directory(self) -> str:
 		"""
-		Replies the directory in which the AutoLaTeX is installed.
-		:return: The installation directory of AutoLaTeX.
+		Replies the directory in which the program is installed.
+		:return: The installation directory of the program.
 		:rtype: str
 		"""
 		if self.__installation_directory is None:
 			root = os.path.abspath(os.sep)
-			path = os.path.dirname(__file__)
+			path : str = os.path.dirname(__file__)
 			while path and path != root and os.path.isdir(path):
 				filename = os.path.join(path, 'VERSION')
 				if os.path.isfile(filename):
@@ -404,26 +406,26 @@ class Config:
 							content = myfile.read().strip()
 						if content.startswith('autolatex'):
 							self.__installation_directory = path
-							return self.__installation_directory
+							return self.__installation_directory or ''
 					except:
 						pass			
 				path = os.path.dirname(path)
-		return self.__installation_directory
+		return self.__installation_directory or ''
 
 	@property
 	def name(self) -> str:
 		"""
-		Replies the base filename of the main AutoLaTeX script.
-		:return: The AutoLaTeX main script filename.
+		Replies the base filename of the main script.
+		:return: The main script filename.
 		:rtype: str
 		"""
-		return self.__autolatex_script_name
+		return self.__autolatex_script_name or ''
 
 	@name.setter
 	def name(self, name : str):
 		"""
-		Change the base filename of the main AutoLaTeX script.
-		:param name: The AutoLaTeX main script filename.
+		Change the base filename of the main script.
+		:param name: The main script filename.
 		:type: str
 		"""
 		self.__autolatex_script_name = name
@@ -434,12 +436,12 @@ class Config:
 	def launch_name(self) -> str:
 		"""
 		Replies the base filename of the command which permits
-		to launch AutoLaTeX. It could differ from the AutoLaTeX name
+		to launch the program. It could differ from the name
 		due to several links.
-		:return: The launchable AutoLaTeX script filename.
+		:return: The launchable script filename.
 		:rtype: str
 		"""
-		return self.__autolatex_launch_name
+		return self.__autolatex_launch_name or ''
 
 	@launch_name.setter
 	def launch_name(self, name : str):
@@ -457,11 +459,11 @@ class Config:
 	@property
 	def version(self) -> str:
 		"""
-		Replies the current version of AutoLaTeX.
+		Replies the current version of the program.
 		This number is extracted from the VERSION filename if
 		it exists.
 		This value must be set with a call to setAutoLaTeXInfo().
-		:return: The AutoLaTeX version number.
+		:return: The version number.
 		:rtype: str
 		"""
 		if self.__autolatex_version is None:
@@ -476,7 +478,7 @@ class Config:
 						raise IOError(_T("invalid line in the VERSION file: %s") % line)
 			else:
 				raise IOError(_T("installation directory cannot be detected"))
-		return self.__autolatex_version
+		return self.__autolatex_version or ''
 
 	@property
 	def generation(self) -> GenerationConfig:
@@ -487,6 +489,7 @@ class Config:
 		"""
 		if self.__generation is None:
 			self.__generation = GenerationConfig()
+		assert self.__generation is not None
 		return self.__generation
 
 	@generation.setter
@@ -507,6 +510,7 @@ class Config:
 		"""
 		if self.__view is None:
 			self.__view = ViewerConfig()
+		assert self.__view is not None
 		return self.__view
 
 	@view.setter
@@ -527,6 +531,7 @@ class Config:
 		"""
 		if self.__translation is None:
 			self.__translation = TranslatorConfig()
+		assert self.__translation is not None
 		return self.__translation
 
 	@translators.setter
@@ -547,6 +552,7 @@ class Config:
 		"""
 		if self.__logging is None:
 			self.__logging = LoggingConfig()
+		assert self.__logging is not None
 		return self.__logging
 
 	@logging.setter
@@ -567,6 +573,7 @@ class Config:
 		"""
 		if self.__scm is None:
 			self.__scm = ScmConfig()
+		assert self.__scm is not None
 		return self.__scm
 
 	@scm.setter
@@ -581,7 +588,7 @@ class Config:
 	@property
 	def infinite_loop(self) -> bool:
 		"""
-		Replies if AutoLaTeX runs an infinite loop on the generation.
+		Replies if the program runs an infinite loop on the generation.
 		The "infiniteLoopDelay" property indicates the delay between two runs.
 		:return: True if infinite loop is activated.
 		:rtype: bool
@@ -601,7 +608,7 @@ class Config:
 	@property
 	def infinite_loop_delay(self) -> int:
 		"""
-		Replies the delay between two runs of AutoLaTeX when it is running in infinite loop.
+		Replies the delay between two runs of the program when it is running in infinite loop.
 		:return: The number of seconds to wait.
 		:rtype: int
 		"""
@@ -646,18 +653,19 @@ class Config:
 	@property
 	def clean(self) -> CleanConfig:
 		"""
-		Replies the configuration dedicated to the cleanning feature.
+		Replies the configuration dedicated to the cleaning feature.
 		:return: the cleaning configuration.
 		:rtype: CleanConfig
 		"""
 		if self.__clean is None:
 			self.__clean = CleanConfig()
+		assert self.__clean is not None
 		return self.__clean
 
 	@clean.setter
 	def clean(self, config : CleanConfig):
 		"""
-		Set the configuration dedicated to the cleanning feature.
+		Set the configuration dedicated to the cleaning feature.
 		:param config: the cleaning configuration.
 		:type config: CleanConfig
 		"""

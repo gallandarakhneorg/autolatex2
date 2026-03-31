@@ -36,52 +36,32 @@ class TestUtils(AbstractBaseTest):
 		logging.getLogger().setLevel(logging.CRITICAL)
 
 
-
-	def test_getTeXFileExtensions(self):
-		self.assertEqual(['.tex', '.latex', '.ltx'], get_tex_file_extensions())
-
-	def test_isTeXFileExtension(self):
-		self.assertTrue(is_tex_file_extension('.tex'))
-		self.assertTrue(is_tex_file_extension('.latex'))
-		self.assertTrue(is_tex_file_extension('.ltx'))
-		self.assertTrue(is_tex_file_extension('.TeX'))
-		self.assertTrue(is_tex_file_extension('.LaTeX'))
-		self.assertFalse(is_tex_file_extension('.doc'))
-
-	def test_isTeXdocument(self):
-		self.assertTrue(is_tex_document('file.tex'))
-		self.assertTrue(is_tex_document('file.latex'))
-		self.assertTrue(is_tex_document('file.ltx'))
-		self.assertTrue(is_tex_document('file.TeX'))
-		self.assertTrue(is_tex_document('file.LaTeX'))
-		self.assertFalse(is_tex_document('file.doc'))
-
-	def test_extractTeXWarningFromLine_00(self):
+	def test_extract_tex_warning_from_line_00(self):
 		wset = set()
 		self.assertTrue(extract_tex_warning_from_line('\n\nWarning: There were undefined references. re-run the LaTeX compiler', wset))
 		self.assertEqual(set([]), wset)
 	
-	def test_extractTeXWarningFromLine_01(self):
+	def test_extract_tex_warning_from_line_01(self):
 		wset = set()
 		self.assertFalse(extract_tex_warning_from_line('\n\nWarning: There were undefined references', wset))
 		self.assertEqual(set([TeXWarnings.undefined_reference]), wset)
 
-	def test_extractTeXWarningFromLine_02(self):
+	def test_extract_tex_warning_from_line_02(self):
 		wset = set()
 		self.assertFalse(extract_tex_warning_from_line('\n\nWarning: Citation XYZ undefined', wset))
 		self.assertEqual(set([TeXWarnings.undefined_citation]), wset)
 
-	def test_extractTeXWarningFromLine_03(self):
+	def test_extract_tex_warning_from_line_03(self):
 		wset = set()
 		self.assertFalse(extract_tex_warning_from_line('\n\nWarning: There were multiply-defined labels', wset))
 		self.assertEqual(set([TeXWarnings.multiple_definition]), wset)
 
-	def test_extractTeXWarningFromLine_04(self):
+	def test_extract_tex_warning_from_line_04(self):
 		wset = set()
 		self.assertFalse(extract_tex_warning_from_line('\n\nWarning: This is a warning', wset))
 		self.assertEqual(set([TeXWarnings.other_warning]), wset)
 
-	def test_parseTeXLogFile_noFatal(self):
+	def test_parse_tex_log_file_noFatal(self):
 		filename = genutils.find_file_in_path("test1.txt")
 		if filename:
 			filename = genutils.find_file_in_path("test1.txt", use_environment_variable=True)
@@ -90,7 +70,7 @@ class TestUtils(AbstractBaseTest):
 		self.assertEqual('', fatal_error)
 		self.assertEqual(164, len(blocks))
 
-	def test_parseTeXLogFile_fatal(self):
+	def test_parse_tex_log_file_fatal(self):
 		filename = genutils.find_file_in_path("test2.txt")
 		if filename:
 			filename = genutils.find_file_in_path("test2.txt", use_environment_variable=True)

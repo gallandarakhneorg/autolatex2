@@ -222,6 +222,7 @@ class TeXParser(Parser):
 				'xdef'              : '\\{}',
 				'xspace'            : '',
 			}
+		assert self.__default_text_mode_macros is not None
 		return self.__default_text_mode_macros
 
 	@property
@@ -362,6 +363,7 @@ class TeXParser(Parser):
 				'xspace'			: "",
 				'zeta'				: "",
 			}
+		assert self.__default_math_mode_macros is not None
 		return self.__default_math_mode_macros
 
 	@property
@@ -373,6 +375,7 @@ class TeXParser(Parser):
 		"""
 		if self.__default_text_mode_active_characters is None:
 			self.__default_text_mode_active_characters = dict()
+		assert self.__default_text_mode_active_characters is not None
 		return self.__default_text_mode_active_characters
 
 	@property
@@ -387,6 +390,7 @@ class TeXParser(Parser):
 				'_'		: "{}",
 				'^'		: "{}",
 			}
+		assert self.__default_math_mode_active_characters is not None
 		return self.__default_math_mode_active_characters
 
 	@property
@@ -400,6 +404,7 @@ class TeXParser(Parser):
 			self.__default_comment_characters = [
 				'%',
 			]
+		assert self.__default_comment_characters is not None
 		return self.__default_comment_characters
 
 	@property
@@ -409,6 +414,7 @@ class TeXParser(Parser):
 		:return: The observer.
 		:rtype: Observer
 		"""
+		assert self.__observer is not None
 		return self.__observer
 
 	@observer.setter
@@ -422,7 +428,7 @@ class TeXParser(Parser):
 
 	@property
 	def filename(self) -> str:
-		return self.__filename
+		return self.__filename or ''
 
 	@filename.setter
 	def filename(self, n : str):
@@ -456,11 +462,13 @@ class TeXParser(Parser):
 		:rtype: dict[str,str]
 		"""
 		self.__ensure_text_mode_macros()
+		assert self.__text_mode_macros is not None
 		return self.__text_mode_macros
 
 	def __ensure_text_mode_macros(self):
 		if self.__text_mode_macros is None:
 			self.__text_mode_macros = dict()
+			assert self.__text_mode_macros is not None
 			self.__text_mode_macros.update(self.default_text_mode_macros)
 
 	def add_text_mode_macro(self, name : str, prototype : str):
@@ -473,6 +481,7 @@ class TeXParser(Parser):
 		:type prototype: str
 		"""
 		self.__ensure_text_mode_macros()
+		assert self.__text_mode_macros is not None
 		self.__text_mode_macros[name] = prototype
 
 	@property
@@ -484,11 +493,13 @@ class TeXParser(Parser):
 		:rtype: dict[str : str]
 		"""
 		self.__ensure_math_mode_macros()
+		assert self.__math_mode_macros is not None
 		return self.__math_mode_macros
 
 	def __ensure_math_mode_macros(self):
 		if self.__math_mode_macros is None:
 			self.__math_mode_macros = dict()
+			assert self.__math_mode_macros is not None
 			self.__math_mode_macros.update(self.default_math_mode_macros)
 
 	def add_math_mode_macro(self, name : str, prototype : str):
@@ -501,6 +512,7 @@ class TeXParser(Parser):
 		:type prototype: str
 		"""
 		self.__ensure_math_mode_macros()
+		assert self.__math_mode_macros is not None
 		self.__math_mode_macros[name] = prototype
 
 	@property
@@ -512,11 +524,13 @@ class TeXParser(Parser):
 		:rtype: dict[str : str]
 		"""
 		self.__ensure_text_mode_active_characters()
+		assert self.__text_mode_active_characters is not None
 		return self.__text_mode_active_characters
 
 	def __ensure_text_mode_active_characters(self):
 		if self.__text_mode_active_characters is None:
 			self.__text_mode_active_characters = dict()
+			assert self.__text_mode_active_characters is not None
 			self.__text_mode_active_characters.update(self.default_text_mode_active_characters)
 
 	def add_text_mode_active_character(self, character: str, prototype : str):
@@ -529,6 +543,7 @@ class TeXParser(Parser):
 		:type prototype: str
 		"""
 		self.__ensure_text_mode_active_characters()
+		assert self.__text_mode_active_characters is not None
 		self.__text_mode_active_characters[character] = prototype
 		self.separators = None
 
@@ -541,11 +556,13 @@ class TeXParser(Parser):
 		:rtype: dict[str,str]
 		"""
 		self.__ensure_math_mode_active_characters()
+		assert self.__math_mode_active_characters is not None
 		return self.__math_mode_active_characters
 
 	def __ensure_math_mode_active_characters(self):
 		if self.__math_mode_active_characters is None:
 			self.__math_mode_active_characters = dict()
+			assert self.__math_mode_active_characters is not None
 			self.__math_mode_active_characters.update(self.default_math_mode_active_characters)
 
 	def add_math_mode_active_character(self, character : str, prototype : str):
@@ -558,6 +575,7 @@ class TeXParser(Parser):
 		:type prototype: str
 		"""
 		self.__ensure_math_mode_active_characters()
+		assert self.__math_mode_active_characters is not None
 		self.__math_mode_active_characters[character] = prototype
 		self.separators = None
 
@@ -570,6 +588,7 @@ class TeXParser(Parser):
 		"""
 		if self.__comment_characters is None:
 			self.__comment_characters = list()
+			assert self.__comment_characters is not None
 			self.__comment_characters.extend(self.default_comment_characters)
 		return self.__comment_characters
 
@@ -748,7 +767,7 @@ class TeXParser(Parser):
 		regex = '^(.*?)(\n|\r'
 		for s in separators:
 			regex += '|'
-			regex += '(?:' + re.escape(s) + ')'
+			regex += '(?:' + str(re.escape(s)) + ')'
 		regex += ')(.*)$'
 		r = re.match(regex, text, re.DOTALL)
 		while r:
@@ -822,6 +841,8 @@ class TeXParser(Parser):
 					expand_to, text = self.__run_cmd(prefix + cmd_name, trans, text, lineno)
 				else:
 					logging.warning(T("invalid syntax for the TeX command: %s (lineno: %d)"), prefix + text, lineno)
+		if expand_to is None:
+			expand_to = ''
 		return expand_to, text
 
 	def __parse_active_char(self, text : str, lineno : int) -> tuple[str,str]:
@@ -1101,7 +1122,7 @@ class TeXParser(Parser):
 				r = re.match(r'^([a-zA-Z]+\*?|.)(.*)$', text, re.DOTALL)
 				eaten += "\\" + r.group(1)
 				text = r.group(2)
-			elif (context_level <= 0) and (re.match(re.escape(end_delim), sep, re.DOTALL)): # The closing delimiter was found
+			elif (context_level <= 0) and (re.match(str(re.escape(end_delim)), str(sep), re.DOTALL)): # The closing delimiter was found
 				return context + eaten, text
 			else: # Unknow separator, treat as text
 				eaten += sep

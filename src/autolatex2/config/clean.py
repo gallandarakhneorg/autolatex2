@@ -26,7 +26,7 @@ import os
 
 class CleanConfig:
 	"""
-	Configuration of a AutoLaTeX instance.
+	Configuration of the program instance.
 	This configuration is based on two lists of filenames.
 	These filenames correspond to files that must be cleaned
 	during the "clean" state or the "cleanall" stage.

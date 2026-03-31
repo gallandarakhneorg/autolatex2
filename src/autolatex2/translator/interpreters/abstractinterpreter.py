@@ -19,7 +19,7 @@
 # 330, Boston, MA 02111-1307, USA.
 
 """
-Abstract implementation of an interpreter for the AutoLaTeX translators.
+Abstract implementation of an interpreter for the translators.
 """
 
 import pprint
@@ -32,7 +32,7 @@ from autolatex2.config.configobj import Config
 
 class AbstractTranslatorInterpreter(Runner):
 	"""
-	Definition of an abstract implementation of an interpreter for the AutoLaTeX translators.
+	Definition of an abstract implementation of an interpreter for the translators.
 	"""
 
 	def __init__(self,  configuration : Config):

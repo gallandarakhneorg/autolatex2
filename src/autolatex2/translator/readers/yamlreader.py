@@ -36,12 +36,12 @@ from autolatex2.utils.i18n import T
 
 class YamlTransdefReader(AbstractTransdefReader):
 	"""
-	Reader for the version 2 (Yaml-based) transdef format (for the Python version of AutoLaTeX).
+	Reader for the version 2 (Yaml-based) transdef format (for the Python version of the program).
 	"""
 
 	def __init__(self, configuration : Config):
 		"""
-		Contructor.
+		Constructor.
 		:param configuration: the global configuration.
 		:type configuration: Config
 		"""
@@ -93,7 +93,7 @@ class YamlTransdefReader(AbstractTransdefReader):
 					content['INPUT_EXTENSIONS'].value_list[i] = e
 			if content['INPUT_EXTENSIONS'] and content['INPUT_EXTENSIONS'].value_list and len(content['INPUT_EXTENSIONS'].value_list) > 0:
 				try:
-					content['INPUT_EXTENSIONS'].value = ' '.join(content['INPUT_EXTENSIONS'].value_list)
+					content['INPUT_EXTENSIONS'].value = ' '.join(*content['INPUT_EXTENSIONS'].value_list)
 				except:
 					content['INPUT_EXTENSIONS'].value = ''
 			else:
@@ -107,7 +107,7 @@ class YamlTransdefReader(AbstractTransdefReader):
 					content['OUTPUT_EXTENSIONS'].value_list[i] = e
 			if content['OUTPUT_EXTENSIONS'] and content['OUTPUT_EXTENSIONS'].value_list and len(content['OUTPUT_EXTENSIONS'].value_list) > 0:
 				try:
-					content['OUTPUT_EXTENSIONS'].value = ' '.join(content['OUTPUT_EXTENSIONS'].value_list)
+					content['OUTPUT_EXTENSIONS'].value = ' '.join(*content['OUTPUT_EXTENSIONS'].value_list)
 				except:
 					content['OUTPUT_EXTENSIONS'].value = ''
 			else:

@@ -545,11 +545,13 @@ class Flattener(Observer):
 		if t:
 			r = re.match(r'^\s*(?:\{([^}]+)}|([^,]+))\s*[,;]?\s*(.*)$', t)
 			while r:
-				path = r.group(1) or r.group(2)
-				if not os.path.isabs(path):
-					path = os.path.join(self.__dirname, path)
+				graphic_path = r.group(1)
+				if not graphic_path:
+					graphic_path = r.group(2) or ''
+				if not os.path.isabs(graphic_path):
+					graphic_path = os.path.join(self.__dirname, graphic_path)
 				t = r.group(3)
-				self.__include_paths.insert(0, path)
+				self.__include_paths.insert(0, graphic_path)
 				r = re.match(r'^\s*(?:\{([^}]+)}|([^,]+))\s*[,;]?\s*(.*)$', t) if t else None
 		return "\\graphicspath{{./}}"
 
@@ -734,7 +736,7 @@ class Flattener(Observer):
 				bib_name = self.__make_filename(param, '.bib')
 				if self.__is_document_file(bib_name):
 					lst.append(bib_name)
-			self.__default_bibliography = lst if lst else None
+			self.__default_bibliography = lst if lst else list()
 		return ''
 
 
@@ -831,7 +833,7 @@ class Flattener(Observer):
 	# noinspection DuplicatedCode
 	def __create_mapping(self, filename : str, ext : str) -> str:
 		"""
-                Compute an unique filename, and map it to the source file.
+                Compute a unique filename, and map it to the source file.
                 :param filename: The filename to translate.
                 :type filename: str
                 :param ext: The filename extension to remove.
@@ -908,7 +910,7 @@ class Flattener(Observer):
 				selected_name1 = None
 				selected_name2 = None
 				for filename in filenames:
-					ext = os.path.splitext(filename)[1] or ''
+					bn, ext = os.path.splitext(filename)
 					tex_name = self.__create_mapping(filename, ext) + ext
 					if filenames[filename]:
 						if not selected_name1:

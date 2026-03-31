@@ -35,7 +35,7 @@ class GenerationConfig:
 		self.__makeindex : bool = True
 		self.__biblio : bool = True
 		self.__synctex : bool = False
-		self.__latex_compiler : str = ''
+		self.__latex_compiler : str | None = None
 		self.__latex_cli : list[str] = list()
 		self.__latex_flags : list[str] = list()
 		self.__bibtex_cli : list[str] = list()
@@ -69,7 +69,7 @@ class GenerationConfig:
 		self.__makeindex = True
 		self.__biblio = True
 		self.__synctex = False
-		self.__latex_compiler = ''
+		self.__latex_compiler = None
 		self.__latex_cli = list()
 		self.__latex_flags = list()
 		self.__bibtex_cli = list()
@@ -185,20 +185,20 @@ class GenerationConfig:
 		self.__synctex = enable
 
 	@property
-	def latex_compiler(self) -> str:
+	def latex_compiler(self) -> str | None:
 		"""
 		Replies the name of the latex compiler to use. If None, the latex compiler will be determined later.
-		:return: pdflatex, latex, xelatex, lualatex.
-		:rtype: str
+		:return: pdflatex, latex, xelatex, lualatex. Or None if undefined.
+		:rtype: str | None
 		"""
 		return self.__latex_compiler
 
 	@latex_compiler.setter
-	def latex_compiler(self, name : str):
+	def latex_compiler(self, name : str | None):
 		"""
 		Set the name of the latex compiler to use.
 		:param name: Must be one of pdflatex, latex, xelatex, lualatex.  If None, the latex compiler will be determined later.
-		:type name: str
+		:type name: str | None
 		"""
 		self.__latex_compiler = name
 
@@ -507,8 +507,10 @@ class GenerationConfig:
 		parsed using the genutils.parse_cli() method.
 		:type flags: list[str] | str | None
 		"""
-		if flags is None or isinstance(flags, list):
-			self.__makeglossary_flags = flags
+		if flags is None:
+			self.__makeglossary_flags = list()
+		elif isinstance(flags, list):
+				self.__makeglossary_flags = flags
 		else:
 			self.__makeglossary_flags = genutils.parse_cli(flags)
 
@@ -610,7 +612,7 @@ class GenerationConfig:
 		Replies filename that is the MakeIndex style to be used.
 		:rtype: str
 		"""
-		return self.__makeindex_style_filename
+		return self.__makeindex_style_filename or ''
 
 	@makeindex_style_filename.setter
 	def makeindex_style_filename(self, filename : str):

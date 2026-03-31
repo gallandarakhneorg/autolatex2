@@ -26,7 +26,7 @@ import os
 import re
 import logging
 from argparse import ArgumentError
-from typing import override, Any
+from typing import override, Iterator, Self
 
 from sortedcontainers import SortedSet
 
@@ -62,13 +62,13 @@ class SourceTranslatorMapping:
 	def __len__(self) -> int:
 		return len(self.__translators)
 
-	def __iter__(self) -> Any:
-		class _Iter:
-			def __init__(self, iterator):
-				self.__iterator = iterator
-			def __iter__(self):
+	def __iter__(self) -> Iterator[tuple[str,Translator]]:
+		class _Iter(Iterator):
+			def __init__(self, iterator : Iterator):
+				self.__iterator : Iterator = iterator
+			def __iter__(self) -> Self:
 				return self
-			def __next__(self):
+			def __next__(self) -> tuple[str,Translator]:
 				name, translator = self.__iterator.__next__()
 				return name, translator
 		return _Iter(self.__translators.items().__iter__())
@@ -92,17 +92,17 @@ class SourceTranslatorMapping:
 		"""
 		self.__translators.update(new_data.__translators)
 
-	def translators(self) -> Any:
+	def translators(self) -> Iterator[Translator]:
 		"""
 		Replies the iterator on the translators that are stored in this set.
 		:return: the iterator on the translators.
 		"""
-		class _Iter:
-			def __init__(self, iterator):
-				self.__iterator = iterator
-			def __iter__(self):
+		class _Iter(Iterator):
+			def __init__(self, iterator : Iterator):
+				self.__iterator : Iterator = iterator
+			def __iter__(self) -> Self:
 				return self
-			def __next__(self):
+			def __next__(self) -> Translator:
 				translator = self.__iterator.__next__()
 				return translator
 		return _Iter(self.__translators.values().__iter__())
@@ -160,11 +160,11 @@ class ConflictMapping:
 	def __len__(self):
 		return len(self.__conflicts)
 
-	def __iter__(self):
-		class _Iter:
-			def __init__(self, iterator):
-				self.__iterator = iterator
-			def __next__(self):
+	def __iter__(self) -> Iterator[tuple[str,set[Translator]]]:
+		class _Iter(Iterator):
+			def __init__(self, iterator : Iterator):
+				self.__iterator : Iterator = iterator
+			def __next__(self) -> tuple[str,set[Translator]]:
 				name, translators = self.__iterator.__next__()
 				return name, translators
 		return _Iter(self.__conflicts.items().__iter__())
@@ -507,6 +507,7 @@ class TranslatorRepository:
 					first_translator = translator
 				else:
 					exclude_msg += "[%s]\ninclude module = no\n" % translator.name
+			assert first_translator is not None
 			raise TranslatorConflictError(T("Several possibilities exist for generating a figure from a %s file:\n%s\n\nYou must specify which to include (resp. exclude) with --include (resp. --exclude).\n\nIt is recommended to update your %s file with the following configuration for each translator to exclude (example on the translator %s):\n\n%s\n" %
 							(source,
 							 msg,

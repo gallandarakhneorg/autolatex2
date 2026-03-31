@@ -213,6 +213,30 @@ class TestUtils(AbstractBaseTest):
 	def test_get_filename_extension_from_wo_ext_wo_exts(self):
 		self.assertIsNone(genutils.get_filename_extension_from('the_filename'))
 
+	def test_ensure_filename_extension_oneext_exist(self):
+		self.assertEqual('the_filename.myext', genutils.ensure_filename_extension('the_filename.myext', '.myext'))
+
+	def test_ensure_filename_extension_oneext_noexist(self):
+		self.assertEqual('the_filename.myext', genutils.ensure_filename_extension('the_filename', '.myext'))
+
+	def test_ensure_filename_extension_oneext_otherext(self):
+		self.assertEqual('the_filename.jpg.myext', genutils.ensure_filename_extension('the_filename.jpg', '.myext'))
+
+	def test_ensure_filename_extension_twoext_exist0(self):
+		self.assertEqual('the_filename.myext', genutils.ensure_filename_extension('the_filename.myext', '.myext', '.pdf'))
+
+	def test_ensure_filename_extension_twoext_exist1(self):
+		self.assertEqual('the_filename.pdf', genutils.ensure_filename_extension('the_filename.pdf', '.myext', '.pdf'))
+
+	def test_ensure_filename_extension_twoext_noexist(self):
+		self.assertEqual('the_filename.myext', genutils.ensure_filename_extension('the_filename', '.myext', '.pdf'))
+
+	def test_ensure_filename_extension_twoext_otherext(self):
+		self.assertEqual('the_filename.jpg.myext', genutils.ensure_filename_extension('the_filename.jpg', '.myext', '.pdf'))
+
+
+
+
 if __name__ == '__main__':
 	unittest.main()
 

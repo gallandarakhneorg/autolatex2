@@ -19,12 +19,12 @@
 # 330, Boston, MA 02111-1307, USA.
 
 """
-Python implementation of an interpreter for the AutoLaTeX translators.
+Python implementation of an interpreter for the translators.
 """
 
 import shutil
 import re
-from typing import override, Any
+from typing import override
 
 from autolatex2.translator.interpreters.abstractinterpreter import AbstractTranslatorInterpreter
 from autolatex2.config.configobj import Config
@@ -33,7 +33,7 @@ from autolatex2.utils.runner import ScriptOutput
 
 class TranslatorInterpreter(AbstractTranslatorInterpreter):
 	"""
-	Definition of a Python implementation of an interpreter for the AutoLaTeX translators.
+	Definition of a Python implementation of an interpreter for the translators.
 	"""
 
 	def __init__(self,  configuration : Config):
@@ -106,7 +106,7 @@ class TranslatorInterpreter(AbstractTranslatorInterpreter):
 	def run(self, code : str, show_script_on_error : bool = True) -> ScriptOutput:
 		"""
 		Run the interpreter.
-		:param code: The Python code to interprete.
+		:param code: The Python code to interpret.
 		:type code: str
 		:param show_script_on_error: Indicates if the script must be output on the standard error output in case of an error. Default is True.
 		:type show_script_on_error: bool

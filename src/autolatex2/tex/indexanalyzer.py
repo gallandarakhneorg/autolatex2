@@ -101,6 +101,7 @@ class IndexAnalyzer(Observer):
 		"""
 		self.__filename = n
 
+	# noinspection DuplicatedCode
 	@property
 	def md5(self) -> str:
 		"""
@@ -112,6 +113,7 @@ class IndexAnalyzer(Observer):
 				self.__indexes_computed = True
 				self.run()
 			self.__md5 = md5(bytes('\\'.join(self.indexes), 'UTF-8')).hexdigest()
+		assert self.__md5 is not None
 		return self.__md5
 
 	# noinspection DuplicatedCode

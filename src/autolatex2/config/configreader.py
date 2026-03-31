@@ -19,7 +19,7 @@
 # 330, Boston, MA 02111-1307, USA.
 
 """
-Reader of AutoLaTeX Configuration.
+Reader of the program configuration.
 """
 
 import logging
@@ -37,7 +37,7 @@ from autolatex2.utils.i18n import T
 
 class OldStyleConfigReader:
 	"""
-	Reader of AutoLaTeX Configuration that is written with the old-style format (ini file).
+	Reader of the program configuration that is written with the old-style format (ini file).
 	"""
 	
 	def __init__(self):
@@ -302,20 +302,20 @@ class OldStyleConfigReader:
 		return None
 
 	# noinspection PyMethodMayBeStatic
-	def _ensure_ascendent_compatibility(self, value : str) -> str:
+	def _ensure_ascendent_compatibility(self, value : str | None) -> str:
 		if value:
 			m = re.match(r'^(.*?)\s*#.*$', value)
 			if m:
 				return m.group(1)
-		return value
+		return value or ''
 
-	def to_path(self, value : str) -> str:
+	def to_path(self, value : str | None) -> str:
 		if value:
 			return genutils.abs_path(value, self._base_dir)
-		return value
+		return value or ''
 
 	@staticmethod
-	def to_bool(value : str, default : bool) -> bool:
+	def to_bool(value : str, default : bool | None) -> bool:
 		"""
 		Convert a string to a bool. This function takes care of strings as "True", "False", "Yes", "No", "t", "f", "y", "n", "1", "0".
 		:param value: the value to convert.
@@ -328,7 +328,7 @@ class OldStyleConfigReader:
 		if value:
 			v = value.lower()
 			return v == 'true' or v == 'yes' or v == 't' or v =='y' or v =='1'
-		return default
+		return default or False
 
 	@staticmethod
 	def to_path_list(value : str) -> list:
@@ -359,11 +359,11 @@ class OldStyleConfigReader:
 		return None
 
 	@staticmethod
-	def to_kw(value : str, default : str) -> str:
+	def to_kw(value : str, default : str | None) -> str:
 		"""
 		Convert a string to string-based keyword.
 		:param value: the value to convert.
-		:type value: str
+		:type value: str | None
 		:param default: the default value.
 		:type: str
 		:return: the keyword.
@@ -371,7 +371,7 @@ class OldStyleConfigReader:
 		"""
 		if value:
 			return value.lower()
-		return default
+		return default or ''
 
 	# noinspection PyBroadException,DuplicatedCode
 	def read_system_config_safely(self, config : Config = None) -> Config:

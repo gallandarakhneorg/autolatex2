@@ -30,7 +30,7 @@ from typing import Any, override
 @unique
 class LogLevel(IntEnum):
 	"""
-	Logging levels for AutoLaTeX.
+	Logging levels for the program.
 	"""
 	OFF = logging.CRITICAL + 10
 	CRITICAL = logging.CRITICAL
@@ -150,7 +150,7 @@ def add_logging_level(level_name : str, level_num : int, method_name : str = Non
 	Comprehensively adds a new logging level to the `logging` module and the
 	currently configured logging class.
 
-	To avoid accidental clobberings of existing attributes, this method will
+	To avoid accidental clobbering of existing attributes, this method will
 	raise an "AttributeError" if the level name is already an attribute of the
 	"logging" module or if the method name is already present.
 	
@@ -206,7 +206,7 @@ def provide_logging_level(level_name : str, level_num : int, method_name : str =
 
 def ensure_autolatex_logging_levels():
 	"""
-	Ensure the loggig levels that are suitable fir AutoLaTeX.
+	Ensure the logging levels that are suitable for the program.
 	"""
 	provide_logging_level('FINE_WARNING', LogLevel.FINE_WARNING)
 	provide_logging_level('FINE_INFO', LogLevel.FINE_INFO)

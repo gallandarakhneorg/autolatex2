@@ -21,7 +21,6 @@
 """
 General utilities for TeX.
 """
-import dataclasses
 import os
 import re
 from enum import IntEnum, unique
@@ -50,23 +49,43 @@ class TeXWarnings(IntEnum):
 @unique
 class FileType(IntEnum):
 	"""
-	Type of file in the AutoLaTeX making process.
+	Type of file in the making process.
 	"""
-	bbc = 1
-	bbl = 2
-	bbx = 3
-	bib = 4
-	bst = 5
-	cbx = 6
-	cls = 7
-	glo = 8
-	gls = 9
-	idx = 10
-	ind = 11
-	pdf = 12
-	ps = 13
-	sty = 14
-	tex = 15
+	aux = 1
+	bbc = 2
+	bbl = 3
+	bbx = 4
+	bib = 5
+	bst = 6
+	cbx = 7
+	cls = 8
+	glo = 9
+	gls = 10
+	idx = 11
+	ind = 12
+	pdf = 13
+	ps = 14
+	sty = 15
+	tex = 16
+
+	def extension(self) -> str:
+		"""
+		Replies the major filename extension for the current file type.
+		:return: The major filename extension prefixed with '.'.
+		:rtype: str
+		"""
+		return '.' + self.name
+
+	def extensions(self) -> list[str]:
+		"""
+		Replies the supported filename extensions for current file type.
+		:return: The list of the filename extensions.
+		:rtype: list[str]
+		"""
+		if self == FileType.tex:
+			return ['.tex', '.latex', '.ltx']
+		else:
+			return [ '.' + self.name ]
 
 	@staticmethod
 	def output_types() -> list['FileType']:
@@ -84,16 +103,71 @@ class FileType(IntEnum):
 		:return: the list of file types.
 		:rtype: list[FileType]
 		"""
-		return [FileType.cls, FileType.sty, FileType.tex]
+		return [FileType.tex, FileType.cls, FileType.sty]
 
 	@staticmethod
-	def biliography_types() -> list['FileType']:
+	def tex_extensions() -> list[str]:
+		"""
+		Replies the supported filename extensions for TeX files.
+		:return: The list of the filename extensions.
+		:rtype: list[str]
+		"""
+		exts = list()
+		for ext in FileType.tex_types():
+			exts.extend(ext.extensions())
+		return exts
+
+	@staticmethod
+	def is_tex_extension(ext : str) -> bool:
+		"""
+		Test if a given string is a standard extension for TeX document. The ext must start with a '.'.
+		The test is case-insensitive.
+		:param ext: The extension to test.
+		:type ext: str
+		:return: True if the extension is for a TeX/LaTeX file; otherwise False.
+		:rtype: bool
+		"""
+		ext = ext.lower()
+		for file_type in FileType.tex_types():
+			if ext in file_type.extensions():
+				return True
+		return False
+
+	@staticmethod
+	def is_tex_document(filename : str) -> bool:
+		"""
+		Replies if the given filename is a TeX document.
+		The test is case-insensitive.
+		:param filename: The filename to test.
+		:type filename: str
+		:return: True if the extension is for a TeX/LaTeX file; otherwise False.
+		:rtype: bool
+		"""
+		if filename:
+			ext = os.path.splitext(filename)[-1]
+			return FileType.is_tex_extension(ext)
+		return False
+
+	@staticmethod
+	def bibliography_types() -> list['FileType']:
 		"""
 		Replies all the file types that are related to the bibliography.
 		:return: the list of file types.
 		:rtype: list[FileType]
 		"""
-		return [FileType.bbc, FileType.bbl, FileType.bbx, FileType.bib, FileType.bst, FileType.cbx]
+		return [FileType.bib, FileType.bbl, FileType.bst, FileType.bbc, FileType.bbx, FileType.cbx]
+
+	@staticmethod
+	def bibliography_extensions() -> list[str]:
+		"""
+		Replies the supported filename extensions for bibliography files.
+		:return: The list of the filename extensions.
+		:rtype: list[str]
+		"""
+		exts = list()
+		for ext in FileType.bibliography_types():
+			exts.extend(ext.extensions())
+		return exts
 
 	@staticmethod
 	def glossary_types() -> list['FileType']:
@@ -105,6 +179,18 @@ class FileType(IntEnum):
 		return [FileType.glo, FileType.gls]
 
 	@staticmethod
+	def glossary_extensions() -> list[str]:
+		"""
+		Replies the supported filename extensions for glossary files.
+		:return: The list of the filename extensions.
+		:rtype: list[str]
+		"""
+		exts = list()
+		for ext in FileType.glossary_types():
+			exts.extend(ext.extensions())
+		return exts
+
+	@staticmethod
 	def index_types() -> list['FileType']:
 		"""
 		Replies all the file types that are related to the index.
@@ -112,6 +198,18 @@ class FileType(IntEnum):
 		:rtype: list[FileType]
 		"""
 		return [FileType.idx, FileType.ind]
+
+	@staticmethod
+	def index_extensions() -> list[str]:
+		"""
+		Replies the supported filename extensions for index files.
+		:return: The list of the filename extensions.
+		:rtype: list[str]
+		"""
+		exts = list()
+		for ext in FileType.index_types():
+			exts.extend(ext.extensions())
+		return exts
 
 
 
@@ -125,67 +223,6 @@ class TeXMacroParameter:
 	optional : bool = False
 	evaluable : bool = True
 	macro_name : bool = False
-
-
-def get_tex_file_extensions() -> list[str]:
-	"""
-	Replies the supported filename extensions for TeX files.
-	:return: The list of the filename extensions.
-	:rtype: list
-	"""
-	return ['.tex', '.latex', '.ltx']
-
-def get_aux_file_extensions() -> list[str]:
-	"""
-	Replies the supported filename extensions for auxilliary files.
-	:return: The list of the filename extensions.
-	:rtype: list
-	"""
-	return ['.aux']
-
-def get_index_file_extensions() -> list[str]:
-	"""
-	Replies the supported filename extensions for Index files.
-	".idx" at index 0 and ".ind" is at index 1.
-	:return: The list of the filename extensions.
-	:rtype: list
-	"""
-	return ['.idx',  '.ind']
-
-def get_glossary_file_extensions() -> list[str]:
-	"""
-	Replies the supported filename extensions for glossary files.
-	".glo" at index 0 and ".gls" is at index 1.
-	:return: The list of the filename extensions.
-	:rtype: list
-	"""
-	return ['.glo',  '.gls',  '.acr',  '.not']
-
-def is_tex_file_extension(ext : str) -> bool:
-	"""
-	Test if a given string is a standard extension for TeX document.
-	The test is case-insensitive.
-	:param ext: The extension to test.
-	:type ext: str
-	:return: True if the extension is for a TeX/LaTeX file; otherwise False.
-	:rtype: bool
-	"""
-	ext = ext.lower()
-	return ext in get_tex_file_extensions()
-
-def is_tex_document(filename : str) -> bool:
-	"""
-	Replies if the given filname is a TeX document.
-	The test is case-insensitive.
-	:param filename: The filename to test.
-	:type filename: str
-	:return: True if the extension is for a TeX/LaTeX file; otherwise False.
-	:rtype: bool
-	"""
-	if filename:
-		ext = os.path.splitext(filename)[-1]
-		return is_tex_file_extension(ext)
-	return False
 
 def extract_tex_warning_from_line(line : str, warnings : set[TeXWarnings]) -> bool:
 	"""
@@ -231,7 +268,7 @@ def parse_tex_log_file(log_filename : str) -> tuple[str,list[str]]:
 	if one, and the second member is the list of log blocks.
 	:param log_filename: The filename of the log file.
 	:type log_filename: str
-	:return: A tuple with the fatal errorn, followed by a list of log blocks.
+	:return: A tuple with the fatal error, followed by a list of log blocks.
 	:rtype: tuple[str,list[str]]
 	"""
 	blocks = list()
@@ -259,13 +296,13 @@ def parse_tex_log_file(log_filename : str) -> tuple[str,list[str]]:
 def find_aux_files(tex_file : str, selector : Callable[[str], bool] | None = None) -> list[str]:
 	"""
 	Recursively find all aux files that are located in the same folder as the given TeX file, or
-	in one of its subfolders. For subfolders, it is mandatory that a tex file with the name basename
-	as the aux file exists. In the folder of the provided tex file, all the aux files are considered.
-	:param tex_file: The filename of the tex file.
+	in one of its subfolders. For subfolders, it is mandatory that a TeX file with the name basename
+	as the aux file exists. In the folder of the provided TeX file, all the aux files are considered.
+	:param tex_file: The filename of the TeX file.
 	:type tex_file: str
-	:param selector: A lambda function that permits is used as a filtering function for the auxilliary files.
-	The lambda takes one formal argument that is the auxilliary file's name. It replies True if the
-	auxilliary file is accepted; Otherwise False.
+	:param selector: A lambda function that permits is used as a filtering function for the auxiliary files.
+	The lambda takes one formal argument that is the auxiliary file's name. It replies True if the
+	auxiliary file is accepted; Otherwise False.
 	:type selector: Callable[[str], bool] | None
 	:return: the list of the aux files that are validated the constraints and the given lambda selector.
 	:rtype: list[str]
@@ -285,20 +322,20 @@ def find_aux_files(tex_file : str, selector : Callable[[str], bool] | None = Non
 			if selector is None or selector(candidate_name):
 				aux_files.append(candidate_name)
 		else:
-			additional_tex_file = genutils.basename2(candidate_name, *get_aux_file_extensions()) + '.tex'
+			additional_tex_file = genutils.basename2(candidate_name, *FileType.aux.extensions()) + '.tex'
 			if os.path.isfile(additional_tex_file) and (selector is None or selector(candidate_name)):
 				aux_files.append(candidate_name)
 	return aux_files
 
 def create_extended_tex_filename(filename : str) -> str:
 	"""
-	Replies the filename of the TeX file when it is extende with specific AutoLaTeX code.
+	Replies the filename of the TeX file when it is extending with code dedicated to the extended warning support.
 	:param filename: the original filename.
 	:type filename: str
 	:return: the filename for the extended TeX code.
 	:rtype: str
 	"""
-	ext = genutils.get_filename_extension_from(filename, *get_tex_file_extensions())
+	ext = genutils.get_filename_extension_from(filename, *FileType.tex_extensions())
 	if ext is not None:
 		new_basename = genutils.basename2(filename, ext)
 	else:
@@ -310,13 +347,13 @@ def create_extended_tex_filename(filename : str) -> str:
 
 def get_original_tex_filename(filename : str) -> str:
 	"""
-	Replies the filename of the TeX file when it is extende with specific AutoLaTeX code.
+	Replies the filename of the TeX file when it is extending with specific code for supporting extended warnings.
 	:param filename: the original filename.
 	:type filename: str
 	:return: the filename for the extended TeX code.
 	:rtype: str
 	"""
-	ext = genutils.get_filename_extension_from(filename, *get_tex_file_extensions())
+	ext = genutils.get_filename_extension_from(filename, *FileType.tex_extensions())
 	if ext is not None:
 		new_basename = genutils.basename2(filename, ext)
 	else:

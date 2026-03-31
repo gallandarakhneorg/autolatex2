@@ -31,10 +31,10 @@ class Translation:
         Construct a Translation object.
         :param domain: the name of the localized domain.
         :type domain: str
-        :param locale_folder: Simple name of the folder that must contain localized tets.
+        :param locale_folder: Simple name of the folder that must contain localized texts.
         :type: Simple
         """
-        root_folder = os.path.dirname(os.path.dirname(__file__))
+        root_folder = os.path.dirname(os.path.dirname(str(__file__)))
         self.locale_dir : str = os.path.normpath(os.path.join(root_folder, locale_folder))
         self.domain : str = domain
         self._setup()

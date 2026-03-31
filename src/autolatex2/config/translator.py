@@ -45,7 +45,7 @@ class TranslatorLevel(IntEnum):
 
 class TranslatorConfig:
 	"""
-	Configuration of the AutoLaTeX translators.
+	Configuration of the translators.
 	"""
 
 	def __init__(self):	
@@ -203,7 +203,7 @@ class TranslatorConfig:
 	def image_paths(self, path : list[str] | None):
 		"""
 		Set the image paths for the translators.
-		:param path: The image paths. None is equivalet to an empty list.
+		:param path: The image paths. None is equivalent to an empty list.
 		:type path: list[str] | None
 		"""
 		if path is None:
@@ -285,6 +285,7 @@ class TranslatorConfig:
 		"""
 		if level is None or level == TranslatorLevel.NEVER:
 			level = TranslatorLevel.SYSTEM
+		assert level is not None
 		if included is None:
 			if translator in self.__inclusions[level.value]:
 				del self.__inclusions[level.value][translator]

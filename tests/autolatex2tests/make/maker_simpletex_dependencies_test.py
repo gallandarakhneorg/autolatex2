@@ -24,6 +24,8 @@ import os
 import shutil
 from typing import override
 
+from sortedcontainers import SortedSet
+
 from autolatex2.config.configobj import Config
 from autolatex2.make.filedescription import FileDescription
 from autolatex2.make.maker import AutoLaTeXMaker
@@ -55,7 +57,7 @@ class TestDependenciesMaker(AbstractBaseTest):
 		self.__texa_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'test12a.tex'))
 		self.__texb_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'test12b.tex'))
 		self.__bib_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'test5.bib'))
-		self.__bbl_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'test5.bbl'))
+		self.__bbl_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'rootfile.bbl'))
 		self.__aux_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'rootfile.aux'))
 		self.__img_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'test12img.pdf'))
 		self.__pdf_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'rootfile.pdf'))
@@ -81,7 +83,18 @@ class TestDependenciesMaker(AbstractBaseTest):
 	def __assertDependencies(self, name : str, expected : dict, actual : FileDescription):
 		self.assertEqual(expected['output_filename'], actual.output_filename, 'Invalid output files for %s' % name)
 		self.assertEqual(expected['input_filename'], actual.input_filename, 'Invalid input files for %s' % name)
-		self.assertEqual(set(expected['dependencies']), set(actual.dependencies), 'Invalid dependencies for %s' % name)
+
+		expected_deps = SortedSet()
+		for d in expected['dependencies']:
+			expected_deps.add(d)
+		expected_deps = "\n".join(expected_deps)
+
+		actual_deps = SortedSet()
+		for d in actual.dependencies:
+			actual_deps.add(d)
+		actual_deps = "\n".join(actual_deps)
+
+		self.assertEqual(expected_deps, actual_deps, 'Invalid dependencies for %s' % name)
 
 	def assertDependencies(self, expected : dict, actual : dict):
 		for fn, expectedItem in expected.copy().items():
@@ -92,7 +105,6 @@ class TestDependenciesMaker(AbstractBaseTest):
 			else:
 				self.fail('Unexpected dependency file: ' + fn) 
 		self.assertEqual(0, len(expected))
-
 
 
 	def test_compute_dependencies_wo_aux(self):
@@ -169,7 +181,6 @@ class TestDependenciesMaker(AbstractBaseTest):
 				]
 			}
 		}, files)
-
 
 
 	def test_compute_dependencies_w_aux(self):

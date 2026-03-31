@@ -34,7 +34,7 @@ class DocumentDetector(Observer):
 	Observer on TeX parsing for detecting the documentclass macro inside a file.
 	"""
 
-	def __init__(self, filename : str = None, text : str = None, lineno : int = 1):
+	def __init__(self, filename : str | None = None, text : str | None = None, lineno : int = 1):
 		"""
 		Constructor.
 		:param filename: The name of the file.
@@ -44,12 +44,12 @@ class DocumentDetector(Observer):
 		:param lineno: The number of the first line.
 		:type lineno: int
 		"""
-		self.__filename : str = filename
-		if text is None:
+		self.__filename : str | None = filename
+		if text is None and self.__filename:
 			with open(self.__filename, 'rb') as f:
 				self.__content : str = f.read().decode('UTF-8')
 		else:
-			self.__content : str = text
+			self.__content : str = text or ''
 		self.__lineno : int = lineno
 		self.__latex_document : bool = False
 
@@ -78,7 +78,7 @@ class DocumentDetector(Observer):
 		:return: The filename.
 		:rtype: str
 		"""
-		return self.__filename
+		return self.__filename or ''
 
 	@filename.setter
 	def filename(self, n : str):

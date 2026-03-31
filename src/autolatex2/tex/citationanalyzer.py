@@ -92,7 +92,7 @@ class AuxiliaryCitationAnalyzer(Observer):
 	def styles(self) -> set[str]:
 		"""
 		Replies the bibliography styles that were specified in the AUX file.
-		:return: the set of styls.
+		:return: the set of styles.
 		:rtype: set[str]
 		"""
 		return self.__styles
@@ -153,6 +153,7 @@ class AuxiliaryCitationAnalyzer(Observer):
 				self.__citations_computed = True
 				self.run()
 			self.__md5 = md5(bytes('\\'.join(self.citations), 'UTF-8')).hexdigest()
+		assert self.__md5 is not None
 		return self.__md5
 
 	@override

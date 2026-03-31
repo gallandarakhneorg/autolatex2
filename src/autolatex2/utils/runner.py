@@ -27,7 +27,7 @@ import io
 import os
 import subprocess
 from abc import ABC
-from typing import override, Any
+from typing import override
 from dataclasses import dataclass
 
 from autolatex2.utils.i18n import T
@@ -111,7 +111,7 @@ class Runner(ABC):
 		:type code: int
 		"""
 		if code != 0:
-			raise Exception(T("Errorneous command with exit code %d") % code)
+			raise Exception(T("Erroneous command with exit code %d") % code)
 
 	@staticmethod
 	def run_python(script : str, intercept_error : bool = False, local_variables : dict = None, show_script_on_error : bool = True) -> ScriptOutput:
@@ -124,7 +124,7 @@ class Runner(ABC):
 		                       the exceptions are not intercepted, and they are
 		                       raised by this function. Default value is: False.
 		:type intercept_error: bool
-		:param local_variables: Dictionnary of the predefined elmeents (imports or local variables)
+		:param local_variables: Dictionary of the predefined elements (imports or local variables)
 		:type local_variables: dict
 		:param show_script_on_error: Indicates if the script must be output on the standard error output in case of an error. Default is True.
 		:type show_script_on_error: bool
@@ -253,15 +253,18 @@ class Runner(ABC):
 		:type cmd: str
 		:rtype: list[str]
 		"""
-		c = cmd[0]
+		cmdl = list(cmd)
+		c = cmdl[0]
 		if not os.path.isabs(c):
-			for p in os.getenv("PATH").split(os.pathsep):
-				fn = os.path.join(p, c)
-				if os.path.exists(fn):
-					cmd = list(cmd[1:])
-					cmd.insert(0, fn)
-					return cmd
-		return cmd
+			env_path = os.getenv("PATH")
+			if env_path:
+				for p in env_path.split(os.pathsep):
+					fn = os.path.join(p, c)
+					if os.path.exists(fn):
+						cmdl = cmdl[1:]
+						cmdl.insert(0, fn)
+						return cmdl
+		return cmdl
 
 	@staticmethod
 	def run_script(script : str, *interpreter : str) -> ScriptOutput:
