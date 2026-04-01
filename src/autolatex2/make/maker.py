@@ -999,7 +999,7 @@ class AutoLaTeXMaker(Runner):
 			assert tex_file is not None
 			if os.path.isfile(tex_file):
 				logging.debug(T("Computing dependencies for %s") % tex_file)
-				analyzer = DependencyAnalyzer(tex_file, root_dir)
+				analyzer = DependencyAnalyzer(tex_file, root_dir, tex_root_filename)
 				analyzer.run()
 				chg = self.__create_file_description(tex_file, FileType.tex, tex_file,
 													 main_filename=None if tex_file == tex_root_filename else tex_root_filename,
@@ -1031,6 +1031,13 @@ class AutoLaTeXMaker(Runner):
 						deps = analyzer.get_dependencies_for_type(dep_type)
 						if dep_type == FileType.bib:
 							for description in deps:
+								bib_file = description.file_name
+								self.__create_file_description(bib_file, FileType.bib, bib_file,
+								                               main_filename=tex_root_filename,
+								                               use_xindy=analyzer.is_xindy_index,
+								                               use_biber=analyzer.is_biber,
+								                               use_bibunits=analyzer.is_bibunits,
+								                               use_multibib=analyzer.is_multibib)
 								dep_bbl_files = description.output_files
 								if not dep_bbl_files:
 									# The name of the BBL file is from the basename of the AUX file,
@@ -1039,7 +1046,7 @@ class AutoLaTeXMaker(Runner):
 									dep_bbl_files = [bbl_file]
 								for bbl_file in dep_bbl_files:
 									bbl_file = genutils.abs_path(genutils.ensure_filename_extension(bbl_file, '.bbl'),
-																 os.path.dirname(description.file_name))
+																 os.path.dirname(bib_file))
 									aux_file = genutils.basename2(bbl_file, *FileType.bbl.extensions()) + '.aux'
 									self.__create_file_description(bbl_file, FileType.bbl, aux_file,
 																   main_filename=tex_root_filename,
@@ -1048,7 +1055,7 @@ class AutoLaTeXMaker(Runner):
 																   use_bibunits=analyzer.is_bibunits,
 																   use_multibib=analyzer.is_multibib)
 									self.__files[pdf_filename].dependencies.add(bbl_file)
-									self.__files[bbl_file].dependencies.add(description.file_name)
+									self.__files[bbl_file].dependencies.add(bib_file)
 									self.__files[bbl_file].dependencies.add(tex_file)
 									self.__files[bbl_file].use_xindy = analyzer.is_xindy_index
 									self.__files[bbl_file].use_biber = analyzer.is_biber

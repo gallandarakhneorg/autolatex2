@@ -373,13 +373,16 @@ class DependencyAnalyzer(Observer):
 		'defaultbibliographystyle'	: '!{}',
 	}
 
-	def __init__(self, filename : str, root_directory : str):
+	def __init__(self, filename : str, root_directory : str, main_filename : str):
 		"""
 		Constructor.
 		:param filename: The name of the file to parse.
 		:type filename: str
 		:param root_directory: The name of the root directory.
 		:type root_directory: str
+		:param main_filename: The name of the main TeX file that is used as the TeX entry point. This filename
+		 may differ from those provided as the filename argument for this function.
+		:type main_filename: str
 		"""
 		self.__full_expand_registry = FULL_EXPAND_REGISTRY
 		self.__prefix_expand_registry = PREFIX_EXPAND_REGISTRY
@@ -396,6 +399,7 @@ class DependencyAnalyzer(Observer):
 		self.__filename : str = filename
 		self.__basename : str = os.path.basename(os.path.splitext(filename)[0])
 		self.__root_directory : str = root_directory
+		self.__main_filename : str = main_filename
 		self.__explicit_bibliography : bool = False
 		self.__explicit_bibliography_style : bool = False
 		self.__default_bibliography : dict[str,list[TeXMacroParameter]] = dict()
@@ -418,6 +422,24 @@ class DependencyAnalyzer(Observer):
 		:type d: str
 		"""
 		self.__root_directory = d
+
+	@property
+	def main_filename(self) -> str:
+		"""
+		Replies the filename of the main TeX document that serves as the entry point for the TeX tools.
+		:return: The name of the main TeX document file.
+		:rtype: str
+		"""
+		return self.__main_filename
+
+	@main_filename.setter
+	def main_filename(self, f : str):
+		"""
+		Set the filename of the main TeX document that serves as the entry point for the TeX tools.
+		:param f: The name of the main TeX document file.
+		:type f: str
+		"""
+		self.__main_filename = f
 
 	@property
 	def basename(self) -> str:
@@ -797,7 +819,8 @@ class DependencyAnalyzer(Observer):
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol = False)
 	def _expand__bibliographyslide(self, name : str, parameters : list[TeXMacroParameter]):
-		self.__parse_bib_references(self.basename, self.basename + '.', TeXMacroParameter(text='biblio'))
+		# The name of the auxiliary file that contains the bibliography entry is based on: \jobname.\index.aux
+		self.__parse_bib_references(self.basename, self.__build_bibunit_auxiliary_basename_prefix(), TeXMacroParameter(text='biblio'))
 
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol = False)
@@ -807,7 +830,7 @@ class DependencyAnalyzer(Observer):
 		if tex_name == 'bibliographysection':
 			self.__in_bibunit = True
 			self.__bibunit_index = self.__bibunit_index + 1
-			self.__parse_bib_references(self.basename, self.basename + '.', TeXMacroParameter(text='biblio'))
+			self.__parse_bib_references(self.basename, self.__build_bibunit_auxiliary_basename_prefix(), TeXMacroParameter(text='biblio'))
 		elif tex_name == 'bibunit':
 			self.__in_bibunit = True
 			self.__bibunit_index = self.__bibunit_index + 1
@@ -907,6 +930,14 @@ class DependencyAnalyzer(Observer):
 	def _expand__defaultbibliographystyle(self, name : str, parameters : list[TeXMacroParameter]):
 		self.__default_bibliography_style[name] = parameters
 
+	def __build_bibunit_auxiliary_basename_prefix(self) -> str:
+		"""
+		Compute the prefix text that will serve as the starting value for the filename of Bibunits auxiliary files
+		according to the API and macros provided by S. Galland.
+		:return: The prefix.
+		:rtype: str
+		"""
+		return genutils.basename(self.main_filename, *FileType.tex_extensions()) + '.'
 
 	@override
 	def find_macro(self, parser : Parser, name : str, special : bool, math : bool) -> str | None:

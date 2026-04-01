@@ -54,7 +54,7 @@ class TestDependencyAnalyzer(AbstractBaseTest):
 		for filename in filenames:
 			fn = re.sub(r'\?\?\?', self.__lastFilename, filename)
 			pathlib.Path(os.path.join(self.__lastDirname, fn)).touch()
-		analyzer = dependencyanalyzer.DependencyAnalyzer(name, self.__lastDirname)
+		analyzer = dependencyanalyzer.DependencyAnalyzer(name, self.__lastDirname, self.__lastFilename)
 		analyzer.run()
 		os.remove(name)
 		for filename in filenames:

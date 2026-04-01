@@ -68,7 +68,7 @@ class _DependencyTreeBuilder:
 		:param dependencies: the list of all known file descriptions.
 		:type dependencies: dict[str, FileDescription]
         """
-		self.dependencies = dependencies
+		self._dependencies = dependencies
 		self._status : dict[str,_DependencyStatus] = {}
 		self._tree_nodes : dict[str,_TreeNode] = {}
 		self._cycles: list[list[str]] = []
@@ -81,10 +81,10 @@ class _DependencyTreeBuilder:
 		:return: The root of the dependency tree, or None if root not found.
 		:rtype: Optional[_TreeNode]
         """
-		if root_filename not in self.dependencies:
-			raise ValueError(T("Root file '%s' not found in dependencies") % root_filename)
+		if root_filename not in self._dependencies:
+			raise ValueError(T("Root file '%s' not found in computed dependencies") % root_filename)
 		# Reset state
-		self._status = {name: _DependencyStatus.UNVISITED for name in self.dependencies}
+		self._status = {name: _DependencyStatus.UNVISITED for name in self._dependencies}
 		self._tree_nodes = {}
 		self._cycles = []
 		# Build tree with cycle detection
@@ -130,7 +130,7 @@ class _DependencyTreeBuilder:
 		self._status[filename] = _DependencyStatus.VISITING
 
 		# Get file description
-		file_desc = self.dependencies[filename]
+		file_desc = self._dependencies[filename]
 
 		# Create node
 		node = _TreeNode(
@@ -147,7 +147,7 @@ class _DependencyTreeBuilder:
 		seen_deps: set[str] = set()  # Track to avoid duplicates at same level
 
 		for dep in file_desc.dependencies:
-			if dep not in self.dependencies:
+			if dep not in self._dependencies:
 				# Dependency not found - create a placeholder node
 				missing_node = _TreeNode(
 					filename=dep,
@@ -155,7 +155,7 @@ class _DependencyTreeBuilder:
 					dependencies=[],
 					depth=depth + 1,
 					is_cycle=False,
-					info=T('Dependency not found')
+					info=T('not defined in file descriptions')
 				)
 				node.dependencies.append(missing_node)
 				continue
@@ -233,8 +233,8 @@ class MakerAction(AbstractMakerAction):
 			for root_file in maker.root_files:
 				dependencies = maker.compute_dependencies(root_file, not cli_arguments.noauxfile)
 				if cli_arguments.list:
-					deps = self._build_dependency_set(dependencies)
-					self._show_dependency_set(deps)
+					deps, problems = self._build_dependency_set(dependencies)
+					self._show_dependency_set(deps, problems)
 				else:
 					deps = self._build_dependency_tree(dependencies)
 					self._show_dependency_tree(deps, cli_arguments.times)
@@ -244,32 +244,36 @@ class MakerAction(AbstractMakerAction):
 		return True
 
 	# noinspection PyMethodMayBeStatic
-	def _build_dependency_set(self, dependencies : tuple[str, dict[str, FileDescription]]) -> SortedSet:
+	def _build_dependency_set(self, dependencies : tuple[str, dict[str, FileDescription]]) -> tuple[SortedSet,dict[str,str]]:
 		"""
 		Build the set of all the files that are required for building the document.
 		:param dependencies: the detailed description of the dependency relationships per file.
 		:type dependencies: tuple[str, dict[str, FileDescription]]
 		:return: the set of filenames of the dependencies.
-		:rtype: set[str]
+		:rtype: tuple[str,dict[str,FileDescription]]
 		"""
+		problems : dict[str,str] = dict()
 		deps = SortedSet()
 		queue = deque()
 		queue.append(dependencies[0])
 		while queue:
 			current_file = queue.popleft()
-			if current_file in dependencies[1] and current_file not in deps:
-				description = dependencies[1][current_file]
-				deps.add(description.output_filename)
-				deps.add(description.input_filename)
-				for d in description.dependencies:
-					queue.append(d)
-		return deps
+			if current_file in dependencies[1]:
+				if current_file not in deps:
+					description = dependencies[1][current_file]
+					deps.add(description.output_filename)
+					for d in description.dependencies:
+						queue.append(d)
+			else:
+				problems[current_file] = T('not defined in file descriptions')
+		return deps, problems
 
 	# noinspection PyMethodMayBeStatic
 	def _build_dependency_tree(self, dependencies : tuple[str, dict[str, FileDescription]]) -> _TreeNode | None:
 		"""
 		Build the dependency tree of all the files that are required for building the document.
-		:param dependencies: the detailed description of the dependency relationships per file.
+		:param dependencies: the detailed description of the dependency relationships per file. The first element of
+		 the tuple is the root file in the dependency tree.
 		:type dependencies: tuple[str, dict[str, FileDescription]]
 		:return: the root of the dependency tree
 		:rtype: Optional[_TreeNode]
@@ -278,14 +282,17 @@ class MakerAction(AbstractMakerAction):
 		return builder.build_tree(dependencies[0])
 
 	# noinspection PyMethodMayBeStatic
-	def _show_dependency_set(self, dependencies : SortedSet):
+	def _show_dependency_set(self, dependencies : SortedSet, problems : dict[str,str]):
 		"""
 		Show the set of all the files that are required for building the document.
 		:param dependencies: the set of filenames of the dependencies.
 		:type dependencies: set[str]
+		:param problems: the set of problems that were found for the dependencies.
+		:type problems: dict[str,str]
 		"""
 		for dep in dependencies:
-			eprint(dep)
+			error_marker = f" ❌ {problems[dep]}" if dep in problems and problems[dep] else ""
+			eprint(f"{dep}{error_marker}")
 
 	# noinspection PyMethodMayBeStatic
 	def _show_dependency_tree(self, node : _TreeNode|None, show_timestamps : bool, indent: str = "",
