@@ -31,6 +31,7 @@ from autolatex2.tex.parser import Parser
 from autolatex2.tex.texobservers import Observer
 from autolatex2.tex.utils import TeXMacroParameter
 from autolatex2.utils.i18n import T
+from autolatex2.utils.extlogging import LogLevel
 
 
 class TeXParser(Parser):
@@ -111,6 +112,7 @@ class TeXParser(Parser):
 				'caption'	    	: '{}',
 				'centering'	    	: '-',
 				'cdot'              : '',
+				'cdots'             : '',
 				'cite'              : '[]{}',
 				'def'               : '\\{}',
 				'degree'            : '',
@@ -147,6 +149,8 @@ class TeXParser(Parser):
 				'Large'             : '-',
 				'LaTeX'             : '',
 				'large'             : '-',
+				'ldot'				: '',
+				'ldots'				: '',
 				'lnot'              : '',
 				'mdseries'          : '-',
 				'newcommand'        : '{}[][]{}',
@@ -222,6 +226,14 @@ class TeXParser(Parser):
 				'v'                 : '{}',
 				'xdef'              : '\\{}',
 				'xspace'            : '',
+				# From S. Galland templates
+				'animatedfigureslide': '[]{}!{}',
+				'figureslide': '[]{}!{}',
+				'libraryslide': '[]!{}{}{}{}{}',
+				'partnerlogo': '!{}',
+				'resolvedfilename': '',
+				'resolvepicturename': '!{}',
+				'sidecite': '!{}',
 			}
 		assert self.__default_text_mode_macros is not None
 		return self.__default_text_mode_macros
@@ -238,7 +250,11 @@ class TeXParser(Parser):
 				'}'					: '',
 				'{'					: '',
 				'&'					: '',
+				','                 : '',
+				';'                 : '',
+				'%'                 : '',
 				'_'					: '',
+				'\\'                : '',
 				'mathmicro'			: '',
 				'maththreesuperior'	: '',
 				'mathtwosuperior'	: '',
@@ -250,6 +266,7 @@ class TeXParser(Parser):
 				'bot'				: "",
 				'bullet'			: "",
 				'cap'				: "",
+				'cdot'				: "",
 				'cdots'				: "",
 				'chi'				: "",
 				'clubsuit'			: "",
@@ -288,6 +305,7 @@ class TeXParser(Parser):
 				'Lambda'			: "",
 				'langle'			: "",
 				'lceil'				: "",
+				'ldot'				: "",
 				'ldots'				: "",
 				'leftarrow'			: "",
 				'Leftarrow'			: "",
@@ -347,6 +365,7 @@ class TeXParser(Parser):
 				'supset'			: "",
 				'surd'				: "",
 				'tau'				: "",
+				'text'              : '{}',
 				'theta'				: "",
 				'Theta'				: "",
 				'times'				: "",
@@ -664,7 +683,7 @@ class TeXParser(Parser):
 					if c is not None:
 						self.observer.text(self, c)
 				else:
-					logging.warning(
+					logging.debug(
 						T("you try to close with a '\\$' a mathematical mode opened with '\\[' (%s:%d)") % (self.filename, lineno))
 			elif sep in self.comment_characters:
 				# Comment
@@ -685,7 +704,7 @@ class TeXParser(Parser):
 				if is_text or is_math:
 					if self.math_mode is not None:
 						if not is_math:
-							logging.warning(
+							logging.debug(
 								T("you cannot use in text mode the active character '%s', which is defined in math mode (%s:%d)") % (sep, self.filename, lineno))
 							if sep is not None:
 								self.observer.text(self, sep)
@@ -694,7 +713,7 @@ class TeXParser(Parser):
 							if c is not None:
 								self.observer.text(self, c)
 					elif not is_text:
-						logging.warning(
+						logging.debug(
 							T("you cannot use in math mode the active character '%s', which is defined in text mode (%s:%d)") % (sep, self.filename, lineno))
 						if sep is not None:
 							self.observer.text(self, sep)
@@ -841,7 +860,7 @@ class TeXParser(Parser):
 						trans = ''
 					expand_to, text = self.__run_cmd(prefix + cmd_name, trans, text, lineno)
 				else:
-					logging.warning(T("invalid syntax for the TeX command: %s (lineno: %d)"), prefix + text, lineno)
+					logging.log(LogLevel.FINE_WARNING, T("invalid syntax for the TeX command: %s (lineno: %d)"), prefix + text, lineno)
 		if expand_to is None:
 			expand_to = ''
 		return expand_to, text
@@ -865,7 +884,7 @@ class TeXParser(Parser):
 				trans = ''
 			expand_to, text = self.__run_cmd(active_char, trans, text, lineno)
 		else:
-			logging.warning(T("invalid syntax for the TeX active character: %s (lineno: %d)"), text, lineno)
+			logging.log(LogLevel.FINE_WARNING, T("invalid syntax for the TeX active character: %s (lineno: %d)"), text, lineno)
 			expand_to = text[0:1] if len(text) > 0 else ''
 			text = text[1:] if len(text) > 0 else ''
 
@@ -919,13 +938,13 @@ class TeXParser(Parser):
 		if found_math or found_text:
 			if self.math_mode is not None:
 				if not found_math:
-					logging.warning(T("the command %s%s was not defined for math-mode, assumes to use the text-mode version instead (lineno: %d)"),
+					logging.debug(T("the command %s%s was not defined for math-mode, assumes to use the text-mode version instead (lineno: %d)"),
 							( '' if special else '\\' ), name, lineno)
 					return text
 				else:
 					return math
 			elif not found_text:
-				logging.warning(T("the command %s%s was not defined for text-mode, assumes to use the math-mode version instead (lineno: %d)"),
+				logging.debug(T("the command %s%s was not defined for text-mode, assumes to use the math-mode version instead (lineno: %d)"),
 						( '' if special else '\\' ), name, lineno)
 				return math
 			else:
@@ -1070,7 +1089,7 @@ class TeXParser(Parser):
 						msg = text[0:50]
 						msg = re.sub('[\n\r]', '\\n', msg, 0, re.DOTALL)
 						msg = msg.replace("\t", "\\t")
-						logging.warning(T("expected a TeX macro for expanding the macro %s, here: '%s' (%s:%d)") % (macro, msg, self.filename, lineno))
+						logging.log(LogLevel.FINE_WARNING, T("expected a TeX macro for expanding the macro %s, here: '%s' (%s:%d)") % (macro, msg, self.filename, lineno))
 						extracted_parameters.append(
 							TeXMacroParameter(
 								index=param_index,
