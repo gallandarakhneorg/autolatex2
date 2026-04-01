@@ -999,7 +999,7 @@ class AutoLaTeXMaker(Runner):
 			assert tex_file is not None
 			if os.path.isfile(tex_file):
 				logging.debug(T("Computing dependencies for %s") % tex_file)
-				analyzer = DependencyAnalyzer(tex_file, root_dir, tex_root_filename)
+				analyzer = DependencyAnalyzer(tex_file, root_dir, tex_root_filename, self.__configuration.generation.include_extra_macros)
 				analyzer.run()
 				chg = self.__create_file_description(tex_file, FileType.tex, tex_file,
 													 main_filename=None if tex_file == tex_root_filename else tex_root_filename,

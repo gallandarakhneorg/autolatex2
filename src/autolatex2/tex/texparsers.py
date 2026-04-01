@@ -226,14 +226,6 @@ class TeXParser(Parser):
 				'v'                 : '{}',
 				'xdef'              : '\\{}',
 				'xspace'            : '',
-				# From S. Galland templates
-				'animatedfigureslide': '[]{}!{}',
-				'figureslide': '[]{}!{}',
-				'libraryslide': '[]!{}{}{}{}{}',
-				'partnerlogo': '!{}',
-				'resolvedfilename': '',
-				'resolvepicturename': '!{}',
-				'sidecite': '!{}',
 			}
 		assert self.__default_text_mode_macros is not None
 		return self.__default_text_mode_macros

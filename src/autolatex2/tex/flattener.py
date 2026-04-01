@@ -38,18 +38,25 @@ from autolatex2.tex.texparsers import TeXParser
 import autolatex2.utils.utilfunctions as genutils
 from autolatex2.tex.utils import TeXMacroParameter
 from autolatex2.utils.i18n import T
+import autolatex2.tex.extra_macros as extramacros
 
 FULL_EXPAND_REGISTRY : dict[str, Callable[[Any, Parser, str, list[TeXMacroParameter]], str]] = dict()
 
+EXTRA_FULL_EXPAND_REGISTRY : dict[str, Callable[[Any, Parser, str, list[TeXMacroParameter]], str]] = dict()
+
 PREFIX_EXPAND_REGISTRY : dict[str, Callable[[Any, Parser, str, list[TeXMacroParameter]], str]] = dict()
+
+EXTRA_PREFIX_EXPAND_REGISTRY : dict[str, Callable[[Any, Parser, str, list[TeXMacroParameter]], str]] = dict()
 
 
 # noinspection DuplicatedCode
-def expand_function(start_symbol : bool):
+def expand_function(start_symbol : bool, extra_macro : bool = False):
 	"""
 	Decorator to register functions with __expand__ prefix.
 	:param start_symbol: Marks the function as associated to the prefix of a LaTeX macro name.
 	:type start_symbol: bool
+	:param extra_macro: Marks the function as part of th supporting features for the extra macros. Default is False.
+	:type extra_macro: bool
 	:return: the decorator.
 	"""
 	def decorator(func: Callable) -> Callable:
@@ -59,9 +66,15 @@ def expand_function(start_symbol : bool):
 			raise NameError('Function name must start with \'_expand__\'')
 		func_name = str(func.__name__)[9:]
 		if start_symbol:
-			PREFIX_EXPAND_REGISTRY[func_name] = func
+			if extra_macro:
+				EXTRA_PREFIX_EXPAND_REGISTRY[func_name] = func
+			else:
+				PREFIX_EXPAND_REGISTRY[func_name] = func
 		else:
-			FULL_EXPAND_REGISTRY[func_name] = func
+			if extra_macro:
+				EXTRA_FULL_EXPAND_REGISTRY[func_name] = func
+			else:
+				FULL_EXPAND_REGISTRY[func_name] = func
 		return func
 	return decorator
 
@@ -82,17 +95,6 @@ class Flattener(Observer):
 		'includegraphics'				: '![]!{}',
 		'graphicspath'					: '![]!{}',
 		'pgfdeclareimage'				: '![]!{}!{}',
-		# S. Galland Figures
-		'includeanimatedfigure'			: '![]!{}',
-		'includeanimatedfigurewtex'		: '![]!{}',
-		'includefigurewtex'				: '![]!{}',
-		'includegraphicswtex'			: '![]!{}',
-		'mfigure'						: '![]!{}!{}!{}!{}',
-		'mfigure*'						: '![]!{}!{}!{}!{}',
-		'msubfigure'					: '![]!{}!{}!{}',
-		'msubfigure*'					: '![]!{}!{}!{}',
-		'mfiguretex'					: '![]!{}!{}!{}!{}',
-		'mfiguretex*'					: '![]!{}!{}!{}!{}',
 		# Biblatex
 		'addbibresource'				: '![]!{}',
 		'printbibliography'				: '![]',
@@ -107,17 +109,23 @@ class Flattener(Observer):
 		'end'							: '![]!{}',
 	}
 
-	def __init__(self, filename : str, output_directory : str):
+	def __init__(self, filename : str, output_directory : str, include_extra_macros : bool):
 		"""
 		Constructor.
 		:param filename: The name of the file to parse.
 		:type filename: str
 		:param output_directory: The name of the directory in which the document must be generated.
 		:type output_directory: ste
+		:param include_extra_macros: Indicates if the extra macros must be included in the dependency analysis.
+		:type include_extra_macros: bool
 		"""
-		# Following attributes are init in __init()
-		self.__full_expand_registry = FULL_EXPAND_REGISTRY
-		self.__prefix_expand_registry = PREFIX_EXPAND_REGISTRY
+		self.__include_extra_macros = include_extra_macros
+		if self.__include_extra_macros:
+			self.__full_expand_registry = FULL_EXPAND_REGISTRY | EXTRA_FULL_EXPAND_REGISTRY
+			self.__prefix_expand_registry = PREFIX_EXPAND_REGISTRY | EXTRA_FULL_EXPAND_REGISTRY
+		else:
+			self.__full_expand_registry = FULL_EXPAND_REGISTRY
+			self.__prefix_expand_registry = PREFIX_EXPAND_REGISTRY
 		self.__file_content_counter : int = 0
 		self.__embedded_files_added : set[str] = set()
 		self.__embedded_files : dict[str,str] = dict()
@@ -392,7 +400,7 @@ class Flattener(Observer):
 		tex_name = parameters[1].text
 		if tex_name == 'filecontents*':
 			self.__file_content_counter = self.__file_content_counter + 1
-		elif tex_name == 'bibliographysection' or tex_name == 'bibunit':
+		elif tex_name == 'bibunit' or (self.__include_extra_macros and tex_name == 'bibliographysection'):
 			self.__in_bibunit = True
 			self.__bibunits_aux_index = self.__bibunits_aux_index + 1
 			if not self.use_biblio:
@@ -413,15 +421,15 @@ class Flattener(Observer):
 				for key,  value in self.__embedded_files.items():
 					parser.put_back(value)
 				self.__embedded_files = dict()
-		elif tex_name == 'bibliographysection':
-			self._expand__putbib(parser, name, [ TeXMacroParameter(text='biblio') ])
-			self.__in_bibunit = False
-			if not self.use_biblio:
-				return '\\bibliographyslide'
 		elif tex_name == 'bibunit':
 			self.__in_bibunit = False
 			if not self.use_biblio:
 				return ''
+		elif self.__include_extra_macros and tex_name == 'bibliographysection':
+			self._expand__putbib(parser, name, [ TeXMacroParameter(text='biblio') ])
+			self.__in_bibunit = False
+			if not self.use_biblio:
+				return '\\bibliographyslide'
 		ret = name
 		if parameters[0].text:
 			ret += "[%s]" % parameters[0].text
@@ -510,19 +518,19 @@ class Flattener(Observer):
 		ret += "{%s}\n\n%%========= AUTOLATEX PREAMBLE\n\n" % tex_name
 		return ret
 
-	@expand_function(start_symbol=False)
+	@expand_function(start_symbol=False, extra_macro=True)
 	def _expand__includeanimatedfigure(self, parser: Parser, name: str, parameters: list[TeXMacroParameter]) -> str:
 		return self._expand__includegraphics(parser, name, parameters)
 
-	@expand_function(start_symbol=False)
+	@expand_function(start_symbol=False, extra_macro=True)
 	def _expand__includeanimatedfigurewtex(self, parser: Parser, name: str, parameters: list[TeXMacroParameter]) -> str:
 		return self._expand__includegraphics(parser, name, parameters)
 
-	@expand_function(start_symbol=False)
+	@expand_function(start_symbol=False, extra_macro=True)
 	def _expand__includefigurewtex(self, parser: Parser, name: str, parameters: list[TeXMacroParameter]) -> str:
 		return self._expand__includegraphics(parser, name, parameters)
 
-	@expand_function(start_symbol=False)
+	@expand_function(start_symbol=False, extra_macro=True)
 	def _expand__includegraphicswtex(self, parser: Parser, name: str, parameters: list[TeXMacroParameter]) -> str:
 		return self._expand__includegraphics(parser, name, parameters)
 
@@ -555,20 +563,20 @@ class Flattener(Observer):
 				r = re.match(r'^\s*(?:\{([^}]+)}|([^,]+))\s*[,;]?\s*(.*)$', t) if t else None
 		return "\\graphicspath{{./}}"
 
-	@expand_function(start_symbol=False)
+	@expand_function(start_symbol=False, extra_macro=True)
 	def _expand__mfigurestar(self, parser: Parser, name: str, parameters: list[TeXMacroParameter]) -> str:
 		return self._expand__mfigure(parser, name, parameters)
 
-	@expand_function(start_symbol=False)
-	def _expand__mfiguretex(self, parser: Parser, name: str, parameters: list[TeXMacroParameter]) -> str:
+	@expand_function(start_symbol=False, extra_macro=True)
+	def _expand__mfigurewtex(self, parser: Parser, name: str, parameters: list[TeXMacroParameter]) -> str:
 		return self._expand__mfigure(parser, name, parameters)
 
-	@expand_function(start_symbol=False)
-	def _expand__mfiguretexstar(self, parser: Parser, name: str, parameters: list[TeXMacroParameter]) -> str:
+	@expand_function(start_symbol=False, extra_macro=True)
+	def _expand__mfigurewtexstar(self, parser: Parser, name: str, parameters: list[TeXMacroParameter]) -> str:
 		return self._expand__mfigure(parser, name, parameters)
 
 	# noinspection PyUnusedLocal
-	@expand_function(start_symbol=False)
+	@expand_function(start_symbol=False, extra_macro=True)
 	def _expand__mfigure(self, parser: Parser, name: str, parameters: list[TeXMacroParameter]) -> str:
 		assert len(parameters) > 4
 		tex_name, prefix = self.__find_picture(parameters[2].text)
@@ -578,12 +586,12 @@ class Flattener(Observer):
 		ret += "{%s}{%s}{%s}{%s}" % (parameters[1].text, tex_name, parameters[3].text, parameters[4].text)
 		return ret
 
-	@expand_function(start_symbol=False)
+	@expand_function(start_symbol=False, extra_macro=True)
 	def _expand__msubfigurestar(self, parser: Parser, name: str, parameters: list[TeXMacroParameter]) -> str:
 		return self._expand__msubfigure(parser, name, parameters)
 
 	# noinspection PyUnusedLocal
-	@expand_function(start_symbol=False)
+	@expand_function(start_symbol=False, extra_macro=True)
 	def _expand__msubfigure(self, parser: Parser, name: str, parameters: list[TeXMacroParameter]) -> str:
 		assert len(parameters) > 3
 		tex_name, prefix = self.__find_picture(parameters[2].text)
@@ -721,7 +729,7 @@ class Flattener(Observer):
 		return self.__flatten_embedded_format()
 
 	# noinspection PyUnusedLocal
-	@expand_function(start_symbol=False)
+	@expand_function(start_symbol=False, extra_macro=True)
 	def _expand__bibliographyslide(self, parser: Parser, name: str, parameters: list[TeXMacroParameter]) -> str:
 		self._expand__putbib(parser, name, [ TeXMacroParameter(text='biblio') ])
 		return name
@@ -964,6 +972,11 @@ class Flattener(Observer):
 		for k, v in self.__MACROS.items():
 			parser.add_text_mode_macro(k, v)
 			parser.add_math_mode_macro(k, v)
+
+		if self.__include_extra_macros:
+			for k, v in extramacros.ALL_EXTRA_MACROS.items():
+				parser.add_text_mode_macro(k, v)
+				parser.add_math_mode_macro(k, v)
 
 		parser.parse(content)
 

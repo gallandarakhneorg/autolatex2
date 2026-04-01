@@ -30,6 +30,7 @@ class GenerationConfig:
 	"""
 
 	def __init__(self):
+		self.__include_extras_macros : bool = False
 		self.__is_pdf_mode : bool = True
 		self.__extended_warnings : bool = True
 		self.__makeindex : bool = True
@@ -64,6 +65,7 @@ class GenerationConfig:
 		"""
 		Reset the internal attributes.
 		"""
+		self.__include_extras_macros = False
 		self.__is_pdf_mode = True
 		self.__extended_warnings = True
 		self.__makeindex = True
@@ -93,6 +95,26 @@ class GenerationConfig:
 		self.__enable_biblio = True
 		self.__enable_index = True
 		self.__enable_glossary = True
+
+	@property
+	def include_extra_macros(self) -> bool:
+		"""
+		Replies if the definitions of the TeX macros and tools from the templates of S. Galland must be also supported
+		by this program.
+		:return: True if the extra macros are supported.
+		:rtype: bool
+		"""
+		return self.__include_extras_macros
+
+	@include_extra_macros.setter
+	def include_extra_macros(self, enable : bool):
+		"""
+		Set if the definitions of the TeX macros and tools from the templates of S. Galland must be also supported
+		by this program.
+		:param enable: True if extra acros should be supported.
+		:param enable: bool
+		"""
+		self.__include_extras_macros = enable
 
 	@property
 	def pdf_mode(self) -> bool:

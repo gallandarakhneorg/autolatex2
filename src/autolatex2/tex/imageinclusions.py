@@ -34,24 +34,33 @@ from autolatex2.tex.texparsers import TeXParser
 import autolatex2.utils.utilfunctions as genutils
 from autolatex2.tex.utils import TeXMacroParameter
 from autolatex2.utils.i18n import T
+import autolatex2.tex.extra_macros as extramacros
+
 
 EXPAND_REGISTRY : dict[str, Callable[[Any, Parser, list[TeXMacroParameter]], None]] = dict()
 
-def expand_function(func : Callable) -> Callable:
+EXTRA_EXPAND_REGISTRY : dict[str, Callable[[Any, Parser, list[TeXMacroParameter]], None]] = dict()
+
+# noinspection DuplicatedCode
+def expand_function(extra_macro : bool = False):
 	"""
 	Decorator to register functions with __expand__ prefix.
-	:param func: The function to be marked.
-	:type func: Callable
-	:return: the function.
-	:rtype: Callable
+	:param extra_macro: Marks the function as part of th supporting features for the extra macros. Default is False.
+	:type extra_macro: bool
+	:return: the decorator.
 	"""
-	# Store the function and its metadata
-	# Remove "_expand__" prefix
-	if not func.__name__.startswith('_expand__'):
-		raise NameError('Function name must start with \'_expand__\'')
-	func_name = str(func.__name__)[9:]
-	EXPAND_REGISTRY[func_name] = func
-	return func
+	def decorator(func: Callable) -> Callable:
+		# Store the function and its metadata
+		# Remove "_expand__" prefix
+		if not func.__name__.startswith('_expand__'):
+			raise NameError('Function name must start with \'_expand__\'')
+		func_name = str(func.__name__)[9:]
+		if extra_macro:
+			EXTRA_EXPAND_REGISTRY[func_name] = func
+		else:
+			EXPAND_REGISTRY[func_name] = func
+		return func
+	return decorator
 
 
 class ImageInclusions(Observer):
@@ -62,28 +71,24 @@ class ImageInclusions(Observer):
 	__MACROS : dict[str,str] = {
 		'input'							: '!{}',
 		'include'						: '!{}',
-		'includeanimatedfigure'			: '![]!{}',
-		'includeanimatedfigurewtex'		: '![]!{}',
-		'includefigurewtex'				: '![]!{}',
 		'includegraphics'				: '![]!{}',
-		'includegraphicswtex'			: '![]!{}',
 		'graphicspath'					: '![]!{}',
-		'mfigure'						: '![]!{}!{}!{}!{}',
-		'mfigure*'						: '![]!{}!{}!{}!{}',
-		'msubfigure'					: '![]!{}!{}!{}',
-		'msubfigure*'					: '![]!{}!{}!{}',
-		'mfiguretex'					: '![]!{}!{}!{}!{}',
-		'mfiguretex*'					: '![]!{}!{}!{}!{}',
 		'pgfdeclareimage'				: '![]!{}!{}',
 	}
 
-	def __init__(self, filename : str):
+	def __init__(self, filename : str, include_extra_macros : bool):
 		"""
 		Constructor.
 		:param filename: The name of the file to parse.
 		:type filename: str
+		:param include_extra_macros: Indicates if the extra macros must be included in the dependency analysis.
+		:type include_extra_macros: bool
 		"""
-		self.__expand_registry = EXPAND_REGISTRY
+		self.__include_extra_macros = include_extra_macros
+		if self.__include_extra_macros:
+			self.__expand_registry = EXPAND_REGISTRY | EXTRA_EXPAND_REGISTRY
+		else:
+			self.__expand_registry = EXPAND_REGISTRY
 		self.__filename : str = filename
 		self.__basename : str = os.path.basename(os.path.splitext(filename)[0])
 		self.__directory_name : str = os.path.dirname(filename)
@@ -267,19 +272,19 @@ class ImageInclusions(Observer):
 					return str(r)
 		return raw_text
 
-	@expand_function
+	@expand_function(extra_macro=True)
 	def _expand__includeanimatedfigure(self, parser : Parser, parameters : list[TeXMacroParameter]) -> str | None:
 		return self._expand__includegraphics(parser, parameters)
 
-	@expand_function
+	@expand_function(extra_macro=True)
 	def _expand__includeanimatedfigurewtex(self, parser : Parser, parameters : list[TeXMacroParameter]) -> str | None:
 		return self._expand__includegraphics(parser, parameters)
 
-	@expand_function
+	@expand_function(extra_macro=True)
 	def _expand__includefigurewtex(self, parser : Parser, parameters : list[TeXMacroParameter]) -> str | None:
 		return self._expand__includegraphics(parser, parameters)
 
-	@expand_function
+	@expand_function(extra_macro=True)
 	def _expand__includegraphicswtex(self, parser : Parser, parameters : list[TeXMacroParameter]) -> str | None:
 		return self._expand__includegraphics(parser, parameters)
 
@@ -306,32 +311,32 @@ class ImageInclusions(Observer):
 				r = re.match(r'^\s*(?:\{([^}]+)}|([^,]+))\s*[,;]?\s*(.*)$', t) if t else None
 		return None
 
-	@expand_function
+	@expand_function(extra_macro=True)
 	def _expand__mfigurestar(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
 		self._expand__mfigure(parser, parameters)
 		return None
 
-	@expand_function
+	@expand_function(extra_macro=True)
 	def _expand__mfiguretex(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
 		return self._expand__mfigure(parser, parameters)
 
-	@expand_function
+	@expand_function(extra_macro=True)
 	def _expand__mfiguretexstar(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
 		return self._expand__mfigure(parser, parameters)
 
 	# noinspection PyUnusedLocal
-	@expand_function
+	@expand_function(extra_macro=True)
 	def _expand__mfigure(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
 		assert len(parameters) > 2
 		self.__find_picture(parameters[2].text)
 		return None
 
-	@expand_function
+	@expand_function(extra_macro=True)
 	def _expand__msubfigurestar(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
 		return self._expand__msubfigurestar(parser, parameters)
 
 	# noinspection PyUnusedLocal
-	@expand_function
+	@expand_function(extra_macro=True)
 	def _expand__msubfigure(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
 		assert len(parameters) > 2
 		self.__find_picture(parameters[2].text)
@@ -515,6 +520,11 @@ class ImageInclusions(Observer):
 		parser = TeXParser()
 		parser.observer = self
 		parser.filename = self.filename
+
+		if self.__include_extra_macros:
+			for k, v in extramacros.ALL_EXTRA_MACROS.items():
+				parser.add_text_mode_macro(k, v)
+				parser.add_math_mode_macro(k, v)
 
 		for k, v in self.__MACROS.items():
 			parser.add_text_mode_macro(k, v)

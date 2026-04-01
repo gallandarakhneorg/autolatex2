@@ -86,7 +86,8 @@ class TestFlattener(AbstractBaseTest):
 					document.write(expected)
 					document.flush()
 			output = os.path.join(directory, 'output')
-			self.__flattener = flattener.Flattener(os.path.join(directory, input_file), output)
+			self.__flattener = flattener.Flattener(os.path.join(directory, input_file), output,
+												   include_extra_macros=True)
 			self.__flattener.use_biblio = use_biblio
 			self.__flattener.run()
 			for k, expected in self.__outputs.items():
@@ -1593,45 +1594,45 @@ class TestFlattener(AbstractBaseTest):
 
 
 
-	def test_mfiguretex_standard(self):
+	def test_mfigurewtex_standard(self):
 		self.inputs = { 'doc.tex' : r'''
 			\documentclass{article}
 			\begin{document}
-			\mfiguretex{param1}{figure}{param3}{param4}
+			\mfigurewtex{param1}{figure}{param3}{param4}
 			\end{document}
 			''' }
 		self.outputs = { 'doc.tex' : r'''
 			\documentclass{article}
 			\begin{document}
-			\mfiguretex{param1}{figure}{param3}{param4}
+			\mfigurewtex{param1}{figure}{param3}{param4}
 			\end{document}
 			''' }
 		self.assertFlat('doc.tex')
 
 
 
-	def test_mfiguretex_local_noFile(self):
+	def test_mfigurewtex_local_noFile(self):
 		self.inputs = { 'doc.tex' : r'''
 			\documentclass{myclass}
 			\begin{document}
-			\mfiguretex{param1}{figure}{param3}{param4}
+			\mfigurewtex{param1}{figure}{param3}{param4}
 			\end{document}
 			''' }
 		self.outputs = { 'doc.tex' : r'''
 			\documentclass{myclass}
 			\begin{document}
-			\mfiguretex{param1}{figure}{param3}{param4}
+			\mfigurewtex{param1}{figure}{param3}{param4}
 			\end{document}
 			''' }
 		self.assertFlat('doc.tex')
 
 
 
-	def test_mfiguretex_local_file(self):
+	def test_mfigurewtex_local_file(self):
 		self.inputs = { 'doc.tex' : r'''
 			\documentclass{myclass}
 			\begin{document}
-			\mfiguretex{param1}{figure}{param3}{param4}
+			\mfigurewtex{param1}{figure}{param3}{param4}
 			\end{document}
 			''',
 			'figure.pdf_tex' : r'''\includegraphics{figure.pdf}''',
@@ -1647,7 +1648,7 @@ class TestFlattener(AbstractBaseTest):
 			\includegraphics{figure.pdf}
 			\end{filecontents*}
 			%=======================================================
-			\mfiguretex{param1}{figure.pdf_tex}{param3}{param4}
+			\mfigurewtex{param1}{figure.pdf_tex}{param3}{param4}
 			\end{document}
 			''',
 			'figure.pdf' : r'''MYPDF''' }
@@ -1655,28 +1656,28 @@ class TestFlattener(AbstractBaseTest):
 
 
 
-	def test_mfiguretex_localsub1_noFile(self):
+	def test_mfigurewtex_localsub1_noFile(self):
 		self.inputs = { 'doc.tex' : r'''
 			\documentclass{myclass}
 			\begin{document}
-			\mfiguretex{param1}{./imgs/figure}{param3}{param4}
+			\mfigurewtex{param1}{./imgs/figure}{param3}{param4}
 			\end{document}
 			''' }
 		self.outputs = { 'doc.tex' : r'''
 			\documentclass{myclass}
 			\begin{document}
-			\mfiguretex{param1}{./imgs/figure}{param3}{param4}
+			\mfigurewtex{param1}{./imgs/figure}{param3}{param4}
 			\end{document}
 			''' }
 		self.assertFlat('doc.tex')
 
 
 
-	def test_mfiguretex_localsub1_file(self):
+	def test_mfigurewtex_localsub1_file(self):
 		self.inputs = { 'doc.tex' : r'''
 			\documentclass{myclass}
 			\begin{document}
-			\mfiguretex{param1}{./imgs/figure}{param3}{param4}
+			\mfigurewtex{param1}{./imgs/figure}{param3}{param4}
 			\end{document}
 			''',
 			'./imgs/figure.pdf_tex' : r'''\includegraphics{figure.pdf}''',
@@ -1692,7 +1693,7 @@ class TestFlattener(AbstractBaseTest):
 			\includegraphics{figure.pdf}
 			\end{filecontents*}
 			%=======================================================
-			\mfiguretex{param1}{figure.pdf_tex}{param3}{param4}
+			\mfigurewtex{param1}{figure.pdf_tex}{param3}{param4}
 			\end{document}
 			''',
 			'figure.pdf' : r'''MYPDF''' }
@@ -1700,31 +1701,31 @@ class TestFlattener(AbstractBaseTest):
 
 
 
-	def test_mfiguretex_localsub2_noFile(self):
+	def test_mfigurewtex_localsub2_noFile(self):
 		self.inputs = { 'doc.tex' : r'''
 			\documentclass{myclass}
 			\graphicspath{{./imgs/}}
 			\begin{document}
-			\mfiguretex{param1}{figure}{param3}{param4}
+			\mfigurewtex{param1}{figure}{param3}{param4}
 			\end{document}
 			''' }
 		self.outputs = { 'doc.tex' : r'''
 			\documentclass{myclass}
 			\graphicspath{{./}}
 			\begin{document}
-			\mfiguretex{param1}{figure}{param3}{param4}
+			\mfigurewtex{param1}{figure}{param3}{param4}
 			\end{document}
 			''' }
 		self.assertFlat('doc.tex')
 
 
 
-	def test_mfiguretex_localsub2_file(self):
+	def test_mfigurewtex_localsub2_file(self):
 		self.inputs = { 'doc.tex' : r'''
 			\documentclass{myclass}
 			\graphicspath{{./imgs/}}
 			\begin{document}
-			\mfiguretex{param1}{figure}{param3}{param4}
+			\mfigurewtex{param1}{figure}{param3}{param4}
 			\end{document}
 			''',
 			'imgs/figure.pdf' : r'''MYPDF''' }
@@ -1732,7 +1733,7 @@ class TestFlattener(AbstractBaseTest):
 			\documentclass{myclass}
 			\graphicspath{{./}}
 			\begin{document}
-			\mfiguretex{param1}{figure.pdf}{param3}{param4}
+			\mfigurewtex{param1}{figure.pdf}{param3}{param4}
 			\end{document}
 			''',
 			'figure.pdf' : r'''MYPDF''' }
@@ -1740,45 +1741,45 @@ class TestFlattener(AbstractBaseTest):
 
 
 
-	def test_mfiguretexstar_standard(self):
+	def test_mfigurewtexstar_standard(self):
 		self.inputs = { 'doc.tex' : r'''
 			\documentclass{article}
 			\begin{document}
-			\mfiguretex*{param1}{figure}{param3}{param4}
+			\mfigurewtex*{param1}{figure}{param3}{param4}
 			\end{document}
 			''' }
 		self.outputs = { 'doc.tex' : r'''
 			\documentclass{article}
 			\begin{document}
-			\mfiguretex*{param1}{figure}{param3}{param4}
+			\mfigurewtex*{param1}{figure}{param3}{param4}
 			\end{document}
 			''' }
 		self.assertFlat('doc.tex')
 
 
 
-	def test_mfiguretexstar_local_noFile(self):
+	def test_mfigurewtexstar_local_noFile(self):
 		self.inputs = { 'doc.tex' : r'''
 			\documentclass{myclass}
 			\begin{document}
-			\mfiguretex*{param1}{figure}{param3}{param4}
+			\mfigurewtex*{param1}{figure}{param3}{param4}
 			\end{document}
 			''' }
 		self.outputs = { 'doc.tex' : r'''
 			\documentclass{myclass}
 			\begin{document}
-			\mfiguretex*{param1}{figure}{param3}{param4}
+			\mfigurewtex*{param1}{figure}{param3}{param4}
 			\end{document}
 			''' }
 		self.assertFlat('doc.tex')
 
 
 
-	def test_mfiguretexstar_local_file(self):
+	def test_mfigurewtexstar_local_file(self):
 		self.inputs = { 'doc.tex' : r'''
 			\documentclass{myclass}
 			\begin{document}
-			\mfiguretex*{param1}{figure}{param3}{param4}
+			\mfigurewtex*{param1}{figure}{param3}{param4}
 			\end{document}
 			''',
 			'figure.pdf_tex' : r'''\includegraphics{figure.pdf}''',
@@ -1794,7 +1795,7 @@ class TestFlattener(AbstractBaseTest):
 			\includegraphics{figure.pdf}
 			\end{filecontents*}
 			%=======================================================
-			\mfiguretex*{param1}{figure.pdf_tex}{param3}{param4}
+			\mfigurewtex*{param1}{figure.pdf_tex}{param3}{param4}
 			\end{document}
 			''',
 			'figure.pdf' : r'''MYPDF''' }
@@ -1802,28 +1803,28 @@ class TestFlattener(AbstractBaseTest):
 
 
 
-	def test_mfiguretexstar_localsub1_noFile(self):
+	def test_mfigurewtexstar_localsub1_noFile(self):
 		self.inputs = { 'doc.tex' : r'''
 			\documentclass{myclass}
 			\begin{document}
-			\mfiguretex*{param1}{./imgs/figure}{param3}{param4}
+			\mfigurewtex*{param1}{./imgs/figure}{param3}{param4}
 			\end{document}
 			''' }
 		self.outputs = { 'doc.tex' : r'''
 			\documentclass{myclass}
 			\begin{document}
-			\mfiguretex*{param1}{./imgs/figure}{param3}{param4}
+			\mfigurewtex*{param1}{./imgs/figure}{param3}{param4}
 			\end{document}
 			''' }
 		self.assertFlat('doc.tex')
 
 
 
-	def test_mfiguretexstar_localsub1_file(self):
+	def test_mfigurewtexstar_localsub1_file(self):
 		self.inputs = { 'doc.tex' : r'''
 			\documentclass{myclass}
 			\begin{document}
-			\mfiguretex*{param1}{./imgs/figure}{param3}{param4}
+			\mfigurewtex*{param1}{./imgs/figure}{param3}{param4}
 			\end{document}
 			''',
 			'./imgs/figure.pdf_tex' : r'''\includegraphics{figure.pdf}''',
@@ -1839,7 +1840,7 @@ class TestFlattener(AbstractBaseTest):
 			\includegraphics{figure.pdf}
 			\end{filecontents*}
 			%=======================================================
-			\mfiguretex*{param1}{figure.pdf_tex}{param3}{param4}
+			\mfigurewtex*{param1}{figure.pdf_tex}{param3}{param4}
 			\end{document}
 			''',
 			'figure.pdf' : r'''MYPDF''' }
@@ -1847,31 +1848,31 @@ class TestFlattener(AbstractBaseTest):
 
 
 
-	def test_mfiguretexstar_localsub2_noFile(self):
+	def test_mfigurewtexstar_localsub2_noFile(self):
 		self.inputs = { 'doc.tex' : r'''
 			\documentclass{myclass}
 			\graphicspath{{./imgs/}}
 			\begin{document}
-			\mfiguretex*{param1}{figure}{param3}{param4}
+			\mfigurewtex*{param1}{figure}{param3}{param4}
 			\end{document}
 			''' }
 		self.outputs = { 'doc.tex' : r'''
 			\documentclass{myclass}
 			\graphicspath{{./}}
 			\begin{document}
-			\mfiguretex*{param1}{figure}{param3}{param4}
+			\mfigurewtex*{param1}{figure}{param3}{param4}
 			\end{document}
 			''' }
 		self.assertFlat('doc.tex')
 
 
 
-	def test_mfiguretexstar_localsub2_file(self):
+	def test_mfigurewtexstar_localsub2_file(self):
 		self.inputs = { 'doc.tex' : r'''
 			\documentclass{myclass}
 			\graphicspath{{./imgs/}}
 			\begin{document}
-			\mfiguretex*{param1}{figure}{param3}{param4}
+			\mfigurewtex*{param1}{figure}{param3}{param4}
 			\end{document}
 			''',
 			'imgs/figure.pdf' : r'''MYPDF''' }
@@ -1879,7 +1880,7 @@ class TestFlattener(AbstractBaseTest):
 			\documentclass{myclass}
 			\graphicspath{{./}}
 			\begin{document}
-			\mfiguretex*{param1}{figure.pdf}{param3}{param4}
+			\mfigurewtex*{param1}{figure.pdf}{param3}{param4}
 			\end{document}
 			''',
 			'figure.pdf' : r'''MYPDF''' }

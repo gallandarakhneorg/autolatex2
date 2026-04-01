@@ -134,6 +134,8 @@ class OldStyleConfigWriter:
 		
 		self.set(config_out, 'generation', 'generation type', 'pdf' if config.generation.pdf_mode else 'ps')
 
+		self.set(config_out, 'generation', 'include extra macros', self.to_bool(config.generation.include_extra_macros))
+
 		self.set(config_out, 'generation', 'tex compiler', config.generation.latex_compiler)
 
 		self.set(config_out, 'generation', 'synctex', self.to_bool(config.generation.synctex))

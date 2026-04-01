@@ -87,7 +87,9 @@ class MakerAction(AbstractMakerAction):
 				return False
 
 			# Create the flattening tool
-			flattener = Flattener(filename=root_file, output_directory=output_dir)
+			flattener = Flattener(filename=root_file,
+								  output_directory=output_dir,
+								  include_extra_macros=self.configuration.generation.include_extra_macros)
 			flattener.use_biblio = cli_arguments.externalbiblio
 			if not flattener.run():
 				return False

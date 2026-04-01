@@ -247,6 +247,12 @@ GLOBAL OPTIONS
         translator, and --include-path specifies where to find translator
         scripts.
 
+    --extramacro
+    --noextramacro
+        Enables or disables the supports of extra TeX and LaTeX macros and
+        environments. The list of these extra definitions in detailed in the
+        dedicated section of this documentation.
+
     -f file
     --file file
         Specifies the main LaTeX file to compile. If not specified,
@@ -1003,41 +1009,47 @@ CONFIGURATION FILE
     Several section names are reserved by AutoLaTeX; others are assumed to
     be translator configurations.
 
-   [Viewer] section
-    This section configures the viewer used by AutoLaTeX. Recognized
-    directives:
-
-    *view*: Indicates whether AutoLaTeX should launch a viewer after LaTeX
-    compilation. Accepted values: yes or no.
-    *viewer*: The path or command line of the viewer to launch. Accepted
-    value: any command line.
-
    [Generation] section
     This section configures the generation process used by AutoLaTeX.
     Recognized directives:
 
-    *main file*: Specifies the basename of the main TeX file to compile.
-    This option is only available in the project's configuration file.
+    *biber_cmd*: Specifies the Biber tool command line. Accepted value: any
+    command line.
+    *biber_flags*: Specifies options to pass to the Biber tool. Accepted
+    value: any command line.
+    *bibtex_cmd*: Specifies the BibTeX tool command line. Accepted value:
+    any command line.
+    *bibtex_flags*: Specifies options to pass to the BibTeX tool. Accepted
+    value: any command line.
+    *dvi2ps_cmd*: Specifies the dvips tool command line. Accepted value: any
+    command line.
+    *dvi2ps_flags*: Specifies options to pass to the dvips tool. Accepted
+    value: any command line.
     *generate images*: Indicates whether AutoLaTeX automatically generates
     figures. Accepted values: yes or no.
-    *image directory*: Specifies directories where AutoLaTeX finds pictures
-    to be processed by translators. Paths are separated by the
-    path-separator character (':' on Unix, ';' on Windows).
     *generation type*: Indicates the type of generation. Accepted values:
 
         pdf - generate a PDF document
         dvi - generate a DVI or XDV document
         ps - generate a PS document
 
-    *tex compiler*: Indicates the TeX compiler to use. Accepted values:
-
-        latex - use latex
-        pdflatex - use pdflatex
-        xelatex - use xelatex
-        lualatex - use lualatex
-
-    *synctex*: Indicates whether the output document should be produced with
-    SyncTeX support.
+    *image directory*: Specifies directories where AutoLaTeX finds pictures
+    to be processed by translators. Paths are separated by the
+    path-separator character (':' on Unix, ';' on Windows).
+    *include extra macros*: Specifies if the definition of extra TeX macros
+    (not from TeX or LaTeX standards) must be included and supported by
+    AutoLaTeX.
+    *latex_cmd*: Specifies the LaTeX tool command line. Accepted value: any
+    command line.
+    *latex_flags*: Specifies options to pass to the LaTeX tool. Accepted
+    value: any command line.
+    *main file*: Specifies the basename of the main TeX file to compile.
+    This option is only available in the project's configuration file. See
+    the section on extra macros for the details of the supported macros.²
+    *makeglossaries_cmd*: Specifies the MakeGlossaries tool command line.
+    Accepted value: any command line.
+    *makeglossaries_flags*: Specifies options to pass to the MakeGlossaries
+    tool. Accepted value: any command line.
     *makeindex style*: Specifies the style to be used by MakeIndex. This is
     a comma-separated list of values in order of preference. Values include:
 
@@ -1055,34 +1067,23 @@ CONFIGURATION FILE
         If the list contains multiple values, AutoLaTeX applies the
         corresponding behaviors in sequence.
 
+    *makeindex_cmd*: Specifies the MakeIndex tool command line. Accepted
+    value: any command line.
+    *makeindex_flags*: Specifies options to pass to the MakeIndex tool.
+    Accepted value: any command line.
+    *synctex*: Indicates whether the output document should be produced with
+    SyncTeX support.
+    *tex compiler*: Indicates the TeX compiler to use. Accepted values:
+
+        latex - use latex
+        pdflatex - use pdflatex
+        xelatex - use xelatex
+        lualatex - use lualatex
+
     *translator include path*: Specifies additional directories from which
     translator scripts can be loaded. This is a list of paths separated by
     commas or the operating system's path separator (':' on Unix, ';' on
     Windows). If a path contains a comma, enclose it in quotes.
-    *latex_cmd*: Specifies the LaTeX tool command line. Accepted value: any
-    command line.
-    *bibtex_cmd*: Specifies the BibTeX tool command line. Accepted value:
-    any command line.
-    *biber_cmd*: Specifies the Biber tool command line. Accepted value: any
-    command line.
-    *makeglossaries_cmd*: Specifies the MakeGlossaries tool command line.
-    Accepted value: any command line.
-    *makeindex_cmd*: Specifies the MakeIndex tool command line. Accepted
-    value: any command line.
-    *dvi2ps_cmd*: Specifies the dvips tool command line. Accepted value: any
-    command line.
-    *latex_flags*: Specifies options to pass to the LaTeX tool. Accepted
-    value: any command line.
-    *bibtex_flags*: Specifies options to pass to the BibTeX tool. Accepted
-    value: any command line.
-    *biber_flags*: Specifies options to pass to the Biber tool. Accepted
-    value: any command line.
-    *makeglossaries_flags*: Specifies options to pass to the MakeGlossaries
-    tool. Accepted value: any command line.
-    *makeindex_flags*: Specifies options to pass to the MakeIndex tool.
-    Accepted value: any command line.
-    *dvi2ps_flags*: Specifies options to pass to the dvips tool. Accepted
-    value: any command line.
 
    [Clean] section
     This section configures the cleaning features of AutoLaTeX (targets
@@ -1101,15 +1102,122 @@ CONFIGURATION FILE
     *scm update*: Specifies the command line to use when updating the local
     copy.
 
+   [Viewer] section
+    This section configures the viewer used by AutoLaTeX. Recognized
+    directives:
+
+    *view*: Indicates whether AutoLaTeX should launch a viewer after LaTeX
+    compilation. Accepted values: yes or no.
+    *viewer*: The path or command line of the viewer to launch. Accepted
+    value: any command line.
+
    Translator section
     A translator section shares the name of the translator it configures.
     Recognized directives:
 
-    *include module*: Indicates whether the translator should be loaded by
-    default. Accepted values: yes or no.
     *files to convert*: A list of files to be converted by this translator.
     Files are separated by the operating system's path separator (':' on
     Unix, ';' on Windows).
+    *include module*: Indicates whether the translator should be loaded by
+    default. Accepted values: yes or no.
+
+EXTRA TEX AND LATEX MACROS
+    The recognition of the following TeX and LaTeX macros have been included
+    in AutoLaTeX. These macros are not part of the standard TeX
+    distributions. They are usually part of TeX templates provided by the
+    authors of AutoLaTeX.
+
+    *   \animatedfigureslide[options]{title}{path}: a Beamer slide that
+        contains a single animated figure. The concept of animated figure is
+        based on the AutoLaTeX translators "+layers" as defined above.
+        Provided by the TeX-templates from
+        <https://github.com/gallandarakhneorg/tex-templates>.
+
+    *   \begin{bibliographysection}\end{bibliographysection}: equivalent to
+        \begin{bibunit}\end{bibunit} with a bibliography slide added at the
+        end of the section with \bibliographyslide. Provided by the
+        TeX-templates from
+        <https://github.com/gallandarakhneorg/tex-templates>.
+
+    *   \bibliographyslide: a Beamer slide with a Bibunits bibliography.
+        Provided by the TeX-templates from
+        <https://github.com/gallandarakhneorg/tex-templates>.
+
+    *   \figureslide[options]{title}{path}: a Beamer slide that contains a
+        single figure. Provided by the TeX-templates from
+        <https://github.com/gallandarakhneorg/tex-templates>.
+
+    *   \includeanimatedfigure[options]{path}: See above. Provided by
+        AutoLaTeX.
+
+    *   \includeanimatedfigurewtex[options]{path}: See above. Provided by
+        AutoLaTeX.
+
+    *   \includefigurewtex[options]{path}: See above. Provided by AutoLaTeX.
+
+    *   \includegraphicswtex[options]{path}: See above. Provided by
+        AutoLaTeX.
+
+    *   \libraryslide[options]{picture}{title}{authors}{how
+        published}{isbn}: a Beamer slide that shows a description of a book.
+        Provided by the TeX-templates from
+        <https://github.com/gallandarakhneorg/tex-templates>.
+
+    *   \mfigure[position]{include graphics
+        options}{filename}{caption}{label}[source text]: Include a floating
+        figure with the given arguments. Provided by the tex-upmethodology
+        from <https://github.com/gallandarakhneorg/tex-upmethodology>.
+
+    *   \mfigure*[position]{include graphics
+        options}{filename}{caption}{label}[source text]: Include a floating
+        figure with the given arguments. Provided by the tex-upmethodology
+        from <https://github.com/gallandarakhneorg/tex-upmethodology>.
+
+    *   \msubfigure{filename}{caption}: Include a subfigure with the given
+        arguments in a floating figure. Provided by the tex-upmethodology
+        from <https://github.com/gallandarakhneorg/tex-upmethodology>.
+
+    *   \msubfigure*{filename}{caption}: Include a subfigure with the given
+        arguments in a floating figure. Provided by the tex-upmethodology
+        from <https://github.com/gallandarakhneorg/tex-upmethodology>.
+
+    *   \mfigurewtex[position]{include graphics
+        options}{filename}{caption}{label}: Include a floating figure
+        embedding TeX macros and with the given arguments. The concept of
+        figure with embedded TeX is based on the AutoLaTeX translators
+        "+tex" as defined above. Provided by the tex-upmethodology from
+        <https://github.com/gallandarakhneorg/tex-upmethodology>.
+
+    *   \mfigurewtex*[position]{include graphics
+        options}{filename}{caption}{label}: Include a floating figure
+        embedding TeX macros and with the given arguments. The concept of
+        figure with embedded TeX is based on the AutoLaTeX translators
+        "+tex" as defined above. Provided by the tex-upmethodology from
+        <https://github.com/gallandarakhneorg/tex-upmethodology>.
+
+    *   \partnerlogo{path}: specification of a logo for an associated
+        partner in Beamer template. Provided by the TeX-templates from
+        <https://github.com/gallandarakhneorg/tex-templates>.
+
+    *   \resolvedfilename: result of the resolution of a picture name. See
+        \resolvepicturename below. Provided by the TeX-templates from
+        <https://github.com/gallandarakhneorg/tex-templates>.
+
+    *   \resolvepicturename{name}: search for a picture with the given
+        basename inside one of the figure's paths and with one of the
+        supported image filename extensions. The found filename for the
+        picture is stored in the macro \resolvedfilename. Provided by the
+        TeX-templates from
+        <https://github.com/gallandarakhneorg/tex-templates>.
+
+    *   \sidecite{bibtex identifiers}: in a Beamer template, add a note on
+        the side of the slide that is equivalent to \cite{bibtex
+        identifiers}. Provided by the TeX-templates from
+        <https://github.com/gallandarakhneorg/tex-templates>.
+
+    *   \sidenote{text}: in a Beamer template, add a text on the side of the
+        slide. Provided by the TeX-templates from
+        <https://github.com/gallandarakhneorg/tex-templates>.
 
 BUG REPORT AND FEEDBACK
     To report bugs, provide feedback, or suggest new features (in preferred
@@ -1138,7 +1246,7 @@ INSTALLATION
 
     cd path_to_autoloader_sources/
 
-    ./setup.py build install
+    ./setup.py build install --optimize --install-layout deb
 
 AUTOLATEX LICENSE
     GNU Lesser General Public License (LGPL)

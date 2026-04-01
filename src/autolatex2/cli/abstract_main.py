@@ -392,6 +392,27 @@ class AbstractAutoLaTeXMain(ABC):
 			nargs = 0,
 			help = T('Disable the generation of the output file with SyncTeX'))
 
+		# --extramacros
+		# --noextramacros
+		extramacros_group = tex_group.add_mutually_exclusive_group()
+
+		class ExtramacrosAction(argparse.Action):
+			@override
+			def __call__(self, parser, namespace, value, option_string=None):
+				outer.configuration.generation.include_extra_macros = self.const
+
+		extramacros_group.add_argument('--extramacro',
+			action = ExtramacrosAction,
+			const = True,
+			nargs = 0,
+			help = T('Enable the support of the extra TeX and LaTeX macros and environments'))
+
+		synctex_group.add_argument('--noextramacro',
+			action = ExtramacrosAction,
+			const = False,
+			nargs = 0,
+			help = T('Disable the support of the extra TeX and LaTeX macros and environments'))
+
 
 	def _add_standard_cli_options_translator(self):
 		"""

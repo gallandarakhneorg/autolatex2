@@ -143,7 +143,8 @@ class MakerAction(AbstractMakerAction):
 
 		included_images = set()
 		for root_file in maker.root_files:
-			parser = ImageInclusions(filename = root_file)
+			parser = ImageInclusions(filename=root_file,
+									 include_extra_macros=self.configuration.generation.include_extra_macros)
 			if not parser.run():
 				return False
 			images = parser.get_included_figures()

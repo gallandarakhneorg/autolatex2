@@ -39,8 +39,7 @@ from autolatex2.config.clean import CleanConfig
 import gettext
 
 from autolatex2.tex.utils import FileType
-
-_T = gettext.gettext
+from autolatex2.utils.i18n import T
 
 
 class Config:
@@ -475,9 +474,9 @@ class Config:
 				if m:
 					self.__autolatex_version = m.group(1)
 					if not self.__autolatex_version:
-						raise IOError(_T("invalid line in the VERSION file: %s") % line)
+						raise IOError(T("invalid line in the VERSION file: %s") % line)
 			else:
-				raise IOError(_T("installation directory cannot be detected"))
+				raise IOError(T("installation directory cannot be detected"))
 		return self.__autolatex_version or ''
 
 	@property

@@ -31,18 +31,25 @@ from autolatex2.tex.texobservers import Observer
 from autolatex2.tex.texparsers import Parser
 from autolatex2.tex.texparsers import TeXParser
 from autolatex2.tex.utils import FileType, TeXMacroParameter
-import  autolatex2.utils.utilfunctions as genutils
+import autolatex2.utils.utilfunctions as genutils
+import autolatex2.tex.extra_macros as extramacros
 
 FULL_EXPAND_REGISTRY : dict[str, Callable[[Any, str, list[TeXMacroParameter]], None]] = dict()
 
+EXTRA_FULL_EXPAND_REGISTRY : dict[str, Callable[[Any, str, list[TeXMacroParameter]], None]] = dict()
+
 PREFIX_EXPAND_REGISTRY : dict[str, Callable[[Any, str, list[TeXMacroParameter]], None]] = dict()
 
+EXTRA_PREFIX_EXPAND_REGISTRY : dict[str, Callable[[Any, str, list[TeXMacroParameter]], None]] = dict()
+
 # noinspection DuplicatedCode
-def expand_function(start_symbol : bool):
+def expand_function(start_symbol : bool, extra_macro : bool = False):
 	"""
 	Decorator to register functions with __expand__ prefix.
 	:param start_symbol: Marks the function as associated to the prefix of a LaTeX macro name.
 	:type start_symbol: bool
+	:param extra_macro: Marks the function as part of th supporting features for the extra macros. Default is False.
+	:type extra_macro: bool
 	:return: the decorator.
 	"""
 	def decorator(func: Callable) -> Callable:
@@ -52,9 +59,15 @@ def expand_function(start_symbol : bool):
 			raise NameError('Function name must start with \'_expand__\'')
 		func_name = str(func.__name__)[9:]
 		if start_symbol:
-			PREFIX_EXPAND_REGISTRY[func_name] = func
+			if extra_macro:
+				EXTRA_PREFIX_EXPAND_REGISTRY[func_name] = func
+			else:
+				PREFIX_EXPAND_REGISTRY[func_name] = func
 		else:
-			FULL_EXPAND_REGISTRY[func_name] = func
+			if extra_macro:
+				EXTRA_FULL_EXPAND_REGISTRY[func_name] = func
+			else:
+				FULL_EXPAND_REGISTRY[func_name] = func
 		return func
 	return decorator
 
@@ -368,12 +381,11 @@ class DependencyAnalyzer(Observer):
 		'begin'						: '![]!{}![]',
 		'end'						: '!{}',
 		'putbib'					: '![]',
-		'bibliographyslide'			: '',
 		'defaultbibliography'		: '!{}',
 		'defaultbibliographystyle'	: '!{}',
 	}
 
-	def __init__(self, filename : str, root_directory : str, main_filename : str):
+	def __init__(self, filename : str, root_directory : str, main_filename : str, include_extra_macros : bool):
 		"""
 		Constructor.
 		:param filename: The name of the file to parse.
@@ -383,9 +395,16 @@ class DependencyAnalyzer(Observer):
 		:param main_filename: The name of the main TeX file that is used as the TeX entry point. This filename
 		 may differ from those provided as the filename argument for this function.
 		:type main_filename: str
+		:param include_extra_macros: Indicates if the extra macros must be included in the dependency analysis.
+		:type include_extra_macros: bool
 		"""
-		self.__full_expand_registry = FULL_EXPAND_REGISTRY
-		self.__prefix_expand_registry = PREFIX_EXPAND_REGISTRY
+		self.__include_extra_macros = include_extra_macros
+		if self.__include_extra_macros:
+			self.__full_expand_registry = FULL_EXPAND_REGISTRY | EXTRA_FULL_EXPAND_REGISTRY
+			self.__prefix_expand_registry = PREFIX_EXPAND_REGISTRY | EXTRA_FULL_EXPAND_REGISTRY
+		else:
+			self.__full_expand_registry = FULL_EXPAND_REGISTRY
+			self.__prefix_expand_registry = PREFIX_EXPAND_REGISTRY
 		self.__is_multibib : bool = False
 		self.__bibunit_index : int = 0
 		self.__in_bibunit : bool = False
@@ -778,24 +797,6 @@ class DependencyAnalyzer(Observer):
 		bibdb = self.__extract_bibdb('\\bibliographystyle', name)
 		self.__analyse_bst_specification(bibdb, parameters)
 
-
-	def __analyse_bst_specification(self, bib_db : str, parameters: list[TeXMacroParameter]):
-		for param in parameters:
-			value = param.text
-			if value:
-				for svalue in re.split('\\s*,\\s*', value.strip()):
-					if svalue:
-						self.__explicit_bibliography_style = True
-						if svalue.endswith('.bst'):
-							bst_file = svalue
-						else:
-							bst_file = svalue + '.bst'
-						if not os.path.isabs(bst_file):
-							bst_file = os.path.normpath(os.path.join(self.root_directory, bst_file))
-						if os.path.isfile(bst_file):
-							self.__dependency_repository.update(FileType.bst, bst_file, scope=bib_db)
-
-
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol = False)
 	def _expand__addbibresource(self, name : str, parameters : list[TeXMacroParameter]):
@@ -817,7 +818,7 @@ class DependencyAnalyzer(Observer):
 			self.__parse_bib_references(bibdb, bbl_file, TeXMacroParameter(text=self.basename))
 
 	# noinspection PyUnusedLocal
-	@expand_function(start_symbol = False)
+	@expand_function(start_symbol = False, extra_macro=True)
 	def _expand__bibliographyslide(self, name : str, parameters : list[TeXMacroParameter]):
 		# The name of the auxiliary file that contains the bibliography entry is based on: \jobname.\index.aux
 		self.__parse_bib_references(self.basename, self.__build_bibunit_auxiliary_basename_prefix(), TeXMacroParameter(text='biblio'))
@@ -827,23 +828,23 @@ class DependencyAnalyzer(Observer):
 	def _expand__begin(self, name : str, parameters : list[TeXMacroParameter]):
 		assert len(parameters) > 1
 		tex_name = parameters[1].text
-		if tex_name == 'bibliographysection':
-			self.__in_bibunit = True
-			self.__bibunit_index = self.__bibunit_index + 1
-			self.__parse_bib_references(self.basename, self.__build_bibunit_auxiliary_basename_prefix(), TeXMacroParameter(text='biblio'))
-		elif tex_name == 'bibunit':
+		if tex_name == 'bibunit':
 			self.__in_bibunit = True
 			self.__bibunit_index = self.__bibunit_index + 1
 			assert len(parameters) > 2
 			if parameters[2].text:
 				self.__analyse_bst_specification(self.basename, [ parameters[2] ])
+		elif self.__include_extra_macros and tex_name == 'bibliographysection':
+			self.__in_bibunit = True
+			self.__bibunit_index = self.__bibunit_index + 1
+			self.__parse_bib_references(self.basename, self.__build_bibunit_auxiliary_basename_prefix(), TeXMacroParameter(text='biblio'))
 
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol = False)
 	def _expand__end(self, name : str, parameters : list[TeXMacroParameter]):
 		assert len(parameters) > 0
 		tex_name = parameters[0].text
-		if tex_name == 'bibliographysection' or tex_name == 'bibunit':
+		if tex_name == 'bibunit' or (self.__include_extra_macros and tex_name == 'bibliographysection'):
 			self.__in_bibunit = False
 
 	# noinspection DuplicatedCode,PyUnusedLocal
@@ -930,14 +931,32 @@ class DependencyAnalyzer(Observer):
 	def _expand__defaultbibliographystyle(self, name : str, parameters : list[TeXMacroParameter]):
 		self.__default_bibliography_style[name] = parameters
 
+	def __analyse_bst_specification(self, bib_db : str, parameters: list[TeXMacroParameter]):
+		for param in parameters:
+			value = param.text
+			if value:
+				for svalue in re.split('\\s*,\\s*', value.strip()):
+					if svalue:
+						self.__explicit_bibliography_style = True
+						if svalue.endswith('.bst'):
+							bst_file = svalue
+						else:
+							bst_file = svalue + '.bst'
+						if not os.path.isabs(bst_file):
+							bst_file = os.path.normpath(os.path.join(self.root_directory, bst_file))
+						if os.path.isfile(bst_file):
+							self.__dependency_repository.update(FileType.bst, bst_file, scope=bib_db)
+
 	def __build_bibunit_auxiliary_basename_prefix(self) -> str:
 		"""
 		Compute the prefix text that will serve as the starting value for the filename of Bibunits auxiliary files
-		according to the API and macros provided by S. Galland.
+		according to the API and extra macros provided by S. Galland.
 		:return: The prefix.
 		:rtype: str
 		"""
-		return genutils.basename(self.main_filename, *FileType.tex_extensions()) + '.'
+		if self.__include_extra_macros:
+			return genutils.basename(self.main_filename, *FileType.tex_extensions()) + '.'
+		return 'bu'
 
 	@override
 	def find_macro(self, parser : Parser, name : str, special : bool, math : bool) -> str | None:
@@ -976,6 +995,11 @@ class DependencyAnalyzer(Observer):
 		for k, v in self.__MACROS.items():
 			parser.add_text_mode_macro(k, v)
 			parser.add_math_mode_macro(k, v)
+
+		if self.__include_extra_macros:
+			for k, v in extramacros.ALL_EXTRA_MACROS.items():
+				parser.add_text_mode_macro(k, v)
+				parser.add_math_mode_macro(k, v)
 
 		parser.parse(content)
 

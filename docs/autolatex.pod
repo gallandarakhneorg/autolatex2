@@ -254,6 +254,13 @@ This option has the same effect as B<--ps>.
 Prevents AutoLaTeX from loading the translator named S<name>. See below for available translators. The B<--include>
 option includes a translator, and B<--include-path> specifies where to find translator scripts.
 
+=item B<--extramacro>
+
+=item B<--noextramacro>
+
+Enables or disables the supports of extra TeX and LaTeX macros and environments. The list of these extra definitions
+in detailed in the dedicated section of this documentation.
+
 =item B<-f F<file>>
 
 =item B<--file F<file>>
@@ -1461,32 +1468,25 @@ Each directive is declared as: F<directive name = value>
 
 Several section names are reserved by AutoLaTeX; others are assumed to be translator configurations.
 
-=head3 [Viewer] section
-
-This section configures the viewer used by AutoLaTeX. Recognized directives:
-
-=over 4
-
-=item I<view>: Indicates whether AutoLaTeX should launch a viewer after LaTeX compilation. Accepted values: F<yes>
-or F<no>.
-
-=item I<viewer>: The path or command line of the viewer to launch. Accepted value: any command line.
-
-=back
-
 =head3 [Generation] section
 
 This section configures the generation process used by AutoLaTeX. Recognized directives:
 
 =over 4
 
-=item I<main file>: Specifies the basename of the main TeX file to compile. This option is only available in the
-project's configuration file.
+=item I<biber_cmd>: Specifies the Biber tool command line. Accepted value: any command line.
+
+=item I<biber_flags>: Specifies options to pass to the Biber tool. Accepted value: any command line.
+
+=item I<bibtex_cmd>: Specifies the BibTeX tool command line. Accepted value: any command line.
+
+=item I<bibtex_flags>: Specifies options to pass to the BibTeX tool. Accepted value: any command line.
+
+=item I<dvi2ps_cmd>: Specifies the dvips tool command line. Accepted value: any command line.
+
+=item I<dvi2ps_flags>: Specifies options to pass to the dvips tool. Accepted value: any command line.
 
 =item I<generate images>: Indicates whether AutoLaTeX automatically generates figures. Accepted values: F<yes> or F<no>.
-
-=item I<image directory>: Specifies directories where AutoLaTeX finds pictures to be processed by translators.
-Paths are separated by the path-separator character (':' on Unix, ';' on Windows).
 
 =item I<generation type>: Indicates the type of generation. Accepted values:
 
@@ -1500,21 +1500,22 @@ Paths are separated by the path-separator character (':' on Unix, ';' on Windows
 
 =back
 
-=item I<tex compiler>: Indicates the TeX compiler to use. Accepted values:
+=item I<image directory>: Specifies directories where AutoLaTeX finds pictures to be processed by translators.
+Paths are separated by the path-separator character (':' on Unix, ';' on Windows).
 
-=over 8
+=item I<include extra macros>: Specifies if the definition of extra TeX macros (not from TeX or LaTeX standards) must be
+included and supported by AutoLaTeX.
 
-=item F<latex> - use F<latex>
+=item I<latex_cmd>: Specifies the LaTeX tool command line. Accepted value: any command line.
 
-=item F<pdflatex> - use F<pdflatex>
+=item I<latex_flags>: Specifies options to pass to the LaTeX tool. Accepted value: any command line.
 
-=item F<xelatex> - use F<xelatex>
+=item I<main file>: Specifies the basename of the main TeX file to compile. This option is only available in the
+project's configuration file. See the section on extra macros for the details of the supported macros.²
 
-=item F<lualatex> - use F<lualatex>
+=item I<makeglossaries_cmd>: Specifies the MakeGlossaries tool command line. Accepted value: any command line.
 
-=back
-
-=item I<synctex>: Indicates whether the output document should be produced with SyncTeX support.
+=item I<makeglossaries_flags>: Specifies options to pass to the MakeGlossaries tool. Accepted value: any command line.
 
 =item I<makeindex style>: Specifies the style to be used by MakeIndex. This is a comma-separated list of values in
 order of preference. Values include:
@@ -1536,33 +1537,29 @@ passed to MakeIndex;
 
 If the list contains multiple values, AutoLaTeX applies the corresponding behaviors in sequence.
 
-=item I<translator include path>: Specifies additional directories from which translator scripts can be loaded. This
-is a list of paths separated by commas or the operating system's path separator (':' on Unix, ';' on Windows). If a
-path contains a comma, enclose it in quotes.
-
-=item I<latex_cmd>: Specifies the LaTeX tool command line. Accepted value: any command line.
-
-=item I<bibtex_cmd>: Specifies the BibTeX tool command line. Accepted value: any command line.
-
-=item I<biber_cmd>: Specifies the Biber tool command line. Accepted value: any command line.
-
-=item I<makeglossaries_cmd>: Specifies the MakeGlossaries tool command line. Accepted value: any command line.
-
 =item I<makeindex_cmd>: Specifies the MakeIndex tool command line. Accepted value: any command line.
-
-=item I<dvi2ps_cmd>: Specifies the dvips tool command line. Accepted value: any command line.
-
-=item I<latex_flags>: Specifies options to pass to the LaTeX tool. Accepted value: any command line.
-
-=item I<bibtex_flags>: Specifies options to pass to the BibTeX tool. Accepted value: any command line.
-
-=item I<biber_flags>: Specifies options to pass to the Biber tool. Accepted value: any command line.
-
-=item I<makeglossaries_flags>: Specifies options to pass to the MakeGlossaries tool. Accepted value: any command line.
 
 =item I<makeindex_flags>: Specifies options to pass to the MakeIndex tool. Accepted value: any command line.
 
-=item I<dvi2ps_flags>: Specifies options to pass to the dvips tool. Accepted value: any command line.
+=item I<synctex>: Indicates whether the output document should be produced with SyncTeX support.
+
+=item I<tex compiler>: Indicates the TeX compiler to use. Accepted values:
+
+=over 8
+
+=item F<latex> - use F<latex>
+
+=item F<pdflatex> - use F<pdflatex>
+
+=item F<xelatex> - use F<xelatex>
+
+=item F<lualatex> - use F<lualatex>
+
+=back
+
+=item I<translator include path>: Specifies additional directories from which translator scripts can be loaded. This
+is a list of paths separated by commas or the operating system's path separator (':' on Unix, ';' on Windows). If a
+path contains a comma, enclose it in quotes.
 
 =back
 
@@ -1591,16 +1588,99 @@ This section configures the SCM support of AutoLaTeX (CVS, SVN, or others). Reco
 
 =back
 
+=head3 [Viewer] section
+
+This section configures the viewer used by AutoLaTeX. Recognized directives:
+
+=over 4
+
+=item I<view>: Indicates whether AutoLaTeX should launch a viewer after LaTeX compilation. Accepted values: F<yes>
+or F<no>.
+
+=item I<viewer>: The path or command line of the viewer to launch. Accepted value: any command line.
+
+=back
+
 =head3 Translator section
 
 A translator section shares the name of the translator it configures. Recognized directives:
 
 =over 4
 
-=item I<include module>: Indicates whether the translator should be loaded by default. Accepted values: F<yes> or F<no>.
-
 =item I<files to convert>: A list of files to be converted by this translator. Files are separated by the operating
 system's path separator (':' on Unix, ';' on Windows).
+
+=item I<include module>: Indicates whether the translator should be loaded by default. Accepted values: F<yes> or F<no>.
+
+=back
+
+=head1 EXTRA TEX AND LATEX MACROS
+
+The recognition of the following TeX and LaTeX macros have been included in AutoLaTeX. These macros are not part of the
+standard TeX distributions. They are usually part of TeX templates provided by the authors of AutoLaTeX.
+
+=over 4
+
+=item * B<\animatedfigureslide[options]{title}{path}>: a Beamer slide that contains a single animated figure.
+The concept of animated figure is based on the AutoLaTeX translators "+layers" as defined above.
+Provided by the TeX-templates from L<https://github.com/gallandarakhneorg/tex-templates>.
+
+=item * B<\begin{bibliographysection}\end{bibliographysection}>: equivalent to B<\begin{bibunit}\end{bibunit}> with a bibliography slide added at the end of the section with B<\bibliographyslide>.
+Provided by the TeX-templates from L<https://github.com/gallandarakhneorg/tex-templates>.
+
+=item * B<\bibliographyslide>: a Beamer slide with a Bibunits bibliography.
+Provided by the TeX-templates from L<https://github.com/gallandarakhneorg/tex-templates>.
+
+=item * B<\figureslide[options]{title}{path}>: a Beamer slide that contains a single figure.
+Provided by the TeX-templates from L<https://github.com/gallandarakhneorg/tex-templates>.
+
+=item * B<\includeanimatedfigure[options]{path}>: See above. Provided by AutoLaTeX.
+
+=item * B<\includeanimatedfigurewtex[options]{path}>: See above. Provided by AutoLaTeX.
+
+=item * B<\includefigurewtex[options]{path}>: See above. Provided by AutoLaTeX.
+
+=item * B<\includegraphicswtex[options]{path}>: See above. Provided by AutoLaTeX.
+
+=item * B<\libraryslide[options]{picture}{title}{authors}{how published}{isbn}>: a Beamer slide that shows a description of a book.
+Provided by the TeX-templates from L<https://github.com/gallandarakhneorg/tex-templates>.
+
+=item * B<\mfigure[position]{include graphics options}{filename}{caption}{label}[source text]>: Include a floating figure with the given arguments.
+Provided by the tex-upmethodology from L<https://github.com/gallandarakhneorg/tex-upmethodology>.
+
+=item * B<\mfigure*[position]{include graphics options}{filename}{caption}{label}[source text]>: Include a floating figure with the given arguments.
+Provided by the tex-upmethodology from L<https://github.com/gallandarakhneorg/tex-upmethodology>.
+
+=item * B<\msubfigure{filename}{caption}>: Include a subfigure with the given arguments in a floating figure.
+Provided by the tex-upmethodology from L<https://github.com/gallandarakhneorg/tex-upmethodology>.
+
+=item * B<\msubfigure*{filename}{caption}>: Include a subfigure with the given arguments in a floating figure.
+Provided by the tex-upmethodology from L<https://github.com/gallandarakhneorg/tex-upmethodology>.
+
+=item * B<\mfigurewtex[position]{include graphics options}{filename}{caption}{label}>: Include a floating figure embedding TeX macros and with the given arguments.
+The concept of figure with embedded TeX is based on the AutoLaTeX translators "+tex" as defined above.
+Provided by the tex-upmethodology from L<https://github.com/gallandarakhneorg/tex-upmethodology>.
+
+=item * B<\mfigurewtex*[position]{include graphics options}{filename}{caption}{label}>: Include a floating figure embedding TeX macros and with the given arguments.
+The concept of figure with embedded TeX is based on the AutoLaTeX translators "+tex" as defined above.
+Provided by the tex-upmethodology from L<https://github.com/gallandarakhneorg/tex-upmethodology>.
+
+=item * B<\partnerlogo{path}>: specification of a logo for an associated partner in Beamer template.
+Provided by the TeX-templates from L<https://github.com/gallandarakhneorg/tex-templates>.
+
+=item * B<\resolvedfilename>: result of the resolution of a picture name.
+See B<\resolvepicturename> below.
+Provided by the TeX-templates from L<https://github.com/gallandarakhneorg/tex-templates>.
+
+=item * B<\resolvepicturename{name}>: search for a picture with the given basename inside one of the figure's paths and with one of the supported image filename extensions.
+The found filename for the picture is stored in the macro B<\resolvedfilename>.
+Provided by the TeX-templates from L<https://github.com/gallandarakhneorg/tex-templates>.
+
+=item * B<\sidecite{bibtex identifiers}>: in a Beamer template, add a note on the side of the slide that is equivalent to B<\cite{bibtex identifiers}>.
+Provided by the TeX-templates from L<https://github.com/gallandarakhneorg/tex-templates>.
+
+=item * B<\sidenote{text}>: in a Beamer template, add a text on the side of the slide.
+Provided by the TeX-templates from L<https://github.com/gallandarakhneorg/tex-templates>.
 
 =back
 
@@ -1637,7 +1717,7 @@ To install AutoLaTeX, run the F<setup.py> script to compile and install AutoLaTe
 
 F<cd path_to_autoloader_sources/>
 
-F<./setup.py build install>
+F<./setup.py build install --optimize --install-layout deb>
 
 =head1 AUTOLATEX LICENSE
 
