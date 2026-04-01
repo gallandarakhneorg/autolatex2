@@ -19,7 +19,7 @@
 # 330, Boston, MA 02111-1307, USA.
 
 """
-Abstract implementation of AutoLaTeX actions.
+Abstract implementation of actions.
 """
 
 from abc import ABC
@@ -31,7 +31,7 @@ import os
 from autolatex2.config.configobj import Config
 from autolatex2.make.maker import AutoLaTeXMaker
 import autolatex2.utils.utilfunctions as genutils
-import autolatex2.tex.utils as texutils
+from autolatex2.tex.utils import FileType
 from autolatex2.utils.runner import Runner
 from autolatex2.utils.i18n import T
 
@@ -48,7 +48,7 @@ class AbstractMakerAction(ABC):
 	@property
 	def configuration(self) -> Config:
 		"""
-		Replies the AutoLaTeX configuration used by this action.
+		Replies the configuration used by this action.
 		:return: the configuration object.
 		:rtype: Config
 		"""
@@ -57,7 +57,7 @@ class AbstractMakerAction(ABC):
 	@property
 	def parse_cli(self) -> argparse.ArgumentParser:
 		"""
-		Replies the tool for parsin the CLI arguments.
+		Replies the tool for parsing the CLI arguments.
 		:return: the CLI parser.
 		:rtype: argparse.ArgumentParser
 		"""
@@ -102,7 +102,7 @@ class AbstractMakerAction(ABC):
 	def run(self, cli_arguments : Namespace) -> bool:
 		"""
 		Callback for running the command.
-		:param cli_arguments: the succssfully parsed CLI arguments.
+		:param cli_arguments: the successfully parsed CLI arguments.
 		:type cli_arguments: Namespace
 		:return: True if the process could continue. False if an error occurred and the process should stop.
 		:rtype: bool
@@ -123,7 +123,7 @@ class AbstractMakerAction(ABC):
 	def _internal_run_images(self,  maker : AutoLaTeXMaker,  cli_arguments : Namespace) -> dict[str,str]:
 		"""
 		Run the internal behavior of the 'images' command.
-		:param maker: the AutoLaTeX maker.
+		:param maker: the maker.
 		:param cli_arguments: the arguments.
 		:type cli_arguments: Namespace
 		:return: the dictionary that maps the source image's filename to the generated image's filename.
@@ -136,7 +136,7 @@ class AbstractMakerAction(ABC):
 	def _internal_run_build(self, maker : AutoLaTeXMaker, cli_arguments : Namespace) -> bool:
 		"""
 		Run the internal behavior of the 'document' command.
-		:param maker: the AutoLaTeX maker.
+		:param maker: the maker.
 		:param cli_arguments: the arguments.
 		:return: True to continue process. False to stop the process.
 		"""
@@ -154,7 +154,7 @@ class AbstractMakerAction(ABC):
 	def _internal_run_viewer(self, maker : AutoLaTeXMaker, cli_arguments : Namespace) -> bool:
 		"""
 		Run the internal behavior of the 'view' command.
-		:param maker: the AutoLaTeX maker.
+		:param maker: the maker.
 		:param cli_arguments: the arguments.
 		:return: True to continue process. False to stop the process.
 		"""
@@ -168,7 +168,7 @@ class AbstractMakerAction(ABC):
 				logging.error(T("Unable to find the name of the generated file for the viewer"))
 				return False
 
-			out_file = genutils.basename2(input_file, *texutils.get_tex_file_extensions())
+			out_file = genutils.basename2(input_file, *FileType.tex_extensions())
 			if self.configuration.generation.pdf_mode:
 				out_file += '.pdf'
 			else:

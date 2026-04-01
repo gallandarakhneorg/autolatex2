@@ -58,10 +58,10 @@ class AuxiliaryCitationAnalyzer(Observer):
 	"""
 
 	__MACROS : dict[str,str] = {
-		'citation'	: '[]!{}',
-		'bibcite'	: '[]!{}',
-		'bibdata'	: '[]!{}',
-		'bibstyle'	: '[]!{}',
+		'citation'	: '![]!{}',
+		'bibcite'	: '![]!{}!{}',
+		'bibdata'	: '![]!{}',
+		'bibstyle'	: '![]!{}',
 	}
 
 	def __init__(self, filename : str):
@@ -176,14 +176,17 @@ class AuxiliaryCitationAnalyzer(Observer):
 			if callback_name in self.__expand_registry:
 				func = self.__expand_registry[callback_name]
 				func(self, list(parameters))
-			else:
-				func = self.__expand_registry['_ELSE']
-				func(self, list(parameters))
 		return ''
 
-	# noinspection PyPep8Naming
 	@expand_function
-	def _expand___ELSE(self, parameters : list[TeXMacroParameter]):
+	def _expand__citation(self, parameters : list[TeXMacroParameter]):
+		assert len(parameters) > 1 and parameters[1].text
+		for bibkey in re.split(r'\s*,\s*', parameters[1].text):
+			if bibkey:
+				self.__citations.add(bibkey)
+
+	@expand_function
+	def _expand__bibcite(self, parameters : list[TeXMacroParameter]):
 		assert len(parameters) > 1 and parameters[1].text
 		for bibkey in re.split(r'\s*,\s*', parameters[1].text):
 			if bibkey:

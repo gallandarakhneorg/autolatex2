@@ -19,7 +19,7 @@
 # 330, Boston, MA 02111-1307, USA.
 
 """
-Standard callbacks for exiting AutoLaTeX.
+Standard callbacks for exiting the program.
 """
 
 import sys
@@ -29,7 +29,7 @@ from typing import override
 
 class AutoLaTeXExiter(ABC):
 	"""
-	Callback that is invoked when AutoLaTeX should be terminated.
+	Callback that is invoked when the program should be terminated.
 	"""
 	@abstractmethod
 	def exit_on_failure(self):
@@ -46,7 +46,7 @@ class AutoLaTeXExiter(ABC):
 
 class AutoLaTeXSysExitExiter(AutoLaTeXExiter):
 	"""
-	Callback that is invoked when AutoLaTeX should be terminated. This callback call the system exit instructions.
+	Callback that is invoked when the program should be terminated. This callback call the system exit instructions.
 	"""
 	@override
 	def exit_on_failure(self):
@@ -62,7 +62,7 @@ class AutoLaTeXSysExitExiter(AutoLaTeXExiter):
 
 class AutoLaTeXExceptionExiter(AutoLaTeXExiter):
 	"""
-	Callback that is invoked when AutoLaTeX should be terminated. This callback generates an exception on failure.
+	Callback that is invoked when the program should be terminated. This callback generates an exception on failure.
 	"""
 	@override
 	def exit_on_failure(self):

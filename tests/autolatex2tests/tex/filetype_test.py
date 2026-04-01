@@ -43,6 +43,28 @@ class TestFileType(AbstractBaseTest):
 		"""
 		self.assertEqual(['.tex', '.latex', '.ltx'], FileType.tex.extensions())
 
+	def test_tex_is_file(self):
+		"""
+		FileType.tex.is_file
+		"""
+		self.assertTrue(FileType.tex.is_file('file.tex'))
+		self.assertTrue(FileType.tex.is_file('file.latex'))
+		self.assertTrue(FileType.tex.is_file('file.ltx'))
+		self.assertTrue(FileType.tex.is_file('file.TeX'))
+		self.assertTrue(FileType.tex.is_file('file.LaTeX'))
+		self.assertFalse(FileType.tex.is_file('file.aux'))
+
+	def test_aux_is_file(self):
+		"""
+		FileType.aux.is_file
+		"""
+		self.assertFalse(FileType.aux.is_file('file.tex'))
+		self.assertFalse(FileType.aux.is_file('file.latex'))
+		self.assertFalse(FileType.aux.is_file('file.ltx'))
+		self.assertFalse(FileType.aux.is_file('file.TeX'))
+		self.assertFalse(FileType.aux.is_file('file.LaTeX'))
+		self.assertTrue(FileType.aux.is_file('file.aux'))
+
 	def test_file_type_tex_extensions(self):
 		"""
 		FileType.tex_extensions

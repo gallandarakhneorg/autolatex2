@@ -1,7 +1,5 @@
 \documentclass{article}
 
-\usepackage{bibunits}
-
 \usepackage{graphicx}
 \graphicspath{{./imgs/auto/}}
 
@@ -20,8 +18,6 @@
 
 \begin{document}
 
-\begin{bibunit}
-
 \section{Section 1}
 bla blablab
 
@@ -30,23 +26,18 @@ bla blablab
 
 \`A la mort de M. le \gls{duc} de Bourgogne, lorsqu'il fut question d'aller jeter de l'eau b\'enite, le feu Roi d\'ecida que si les princes lorrains s'y pr\'esenteroient, qu'eux ni les \gls{ducs} n'en jetteroient (...) \cite{Ref2}
 
-\putbib
-\end{bibunit}
-
 \section{Section 2}
 
 bla blablab
 
 \includegraphics[width=\linewidth]{img2}
 
-\begin{bibunit}
-
 \section{Section 3}
 
 Bibliography \cite{Ref1}
 
-\putbib[secondbib]
-\end{bibunit}
+\bibliography{mybiblio}
+\bibliographystyle{plain}
 
 \printglossaries
 

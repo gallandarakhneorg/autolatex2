@@ -22,7 +22,6 @@ import unittest
 import logging
 import os
 import shutil
-import tempfile
 from typing import override
 
 from autolatex2.config.configobj import Config
@@ -30,7 +29,10 @@ from autolatex2.make.maker import AutoLaTeXMaker
 from autolatex2tests.abstract_base_test import AbstractBaseTest
 
 
-class TestBuildMaker(AbstractBaseTest):
+class TestBuildWithBibtexBiberMaker(AbstractBaseTest):
+	"""
+	Document using regular BibTeX database and Biber tool.
+	"""
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
@@ -82,7 +84,7 @@ class TestBuildMaker(AbstractBaseTest):
 	def setUp(self):
 		logging.getLogger().setLevel(logging.CRITICAL)
 		self.__working_directory = os.getcwd()
-		self.__resource_directory = os.path.normpath(os.path.join(os.path.dirname(__file__),  '..', 'dev-resources'))
+		self.__resource_directory = os.path.normpath(os.path.join(str(os.path.dirname(__file__)),  '..', 'dev-resources'))
 		self.__translators_directory = os.path.normpath(os.path.join(self.__resource_directory,  'translators'))
 		self.__install_test_environment()
 
@@ -97,12 +99,24 @@ class TestBuildMaker(AbstractBaseTest):
 		self.__tmp_folder_name = self.__tmp_folder.name
 		self.__img_folder = os.path.normpath(os.path.join(self.__tmp_folder_name, 'imgs', 'auto'))
 		self.__root_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'rootfile.tex'))
-		self.__bib_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'rootfile.bib'))
+		self.__bib_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'mybiblio.bib'))
+		self.__bbl_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'rootfile.bbl'))
+		self.__aux_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'rootfile.aux'))
+		self.__img_a_file = os.path.normpath(os.path.join(self.__img_folder, 'img1.svg'))
+		self.__pdf_img_a_file = os.path.normpath(os.path.join(self.__img_folder, 'img1.pdf'))
+		self.__img_b_file = os.path.normpath(os.path.join(self.__img_folder, 'img2.png.gz'))
+		self.__png_img_b_file = os.path.normpath(os.path.join(self.__img_folder, 'img2.png'))
 		self.__pdf_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'rootfile.pdf'))
+		self.__glo_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'rootfile.glo'))
+		self.__gls_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'rootfile.gls'))
 
 		self.__config = Config()
 		self.__config.document_directory = self.__tmp_folder_name
 		self.__config.document_filename = 'rootfile.tex'
+
+		# Activate the Biber tool
+		self.__config.generation.is_biber = True
+
 		self.__config.generation.pdf_mode = True
 		self.__config.translators.add_image_path(self.__img_folder)
 		self.__config.translators.is_translator_enable = True
@@ -113,22 +127,32 @@ class TestBuildMaker(AbstractBaseTest):
 		for trans in self.__excluded_translators:
 			self.__config.translators.set_included(trans, None, False)
 
-		os.makedirs(self.__img_folder)
-		shutil.copyfile(os.path.normpath(os.path.join(self.__translators_directory, 'testimg.svg')), os.path.join(self.__img_folder, 'img1.svg'))
-		shutil.copyfile(os.path.normpath(os.path.join(self.__translators_directory, 'testimg.jpg.gz')), os.path.join(self.__img_folder, 'img2.jpg.gz'))
-		shutil.copyfile(os.path.normpath(os.path.join(self.__translators_directory, 'testimg.svg')), os.path.join(self.__img_folder, 'img3.svg'))
-		shutil.copyfile(os.path.normpath(os.path.join(self.__resource_directory, 'test20.tex')), self.__root_file)
-		shutil.copyfile(os.path.normpath(os.path.join(self.__resource_directory, 'test20.bib')), self.__bib_file)
+		shutil.copyfile(os.path.normpath(os.path.join(self.__resource_directory, 'test27.tex')), self.__root_file)
+		shutil.copyfile(os.path.normpath(os.path.join(self.__resource_directory, 'test27.bib')), self.__bib_file)
+		os.makedirs(self.__img_folder, exist_ok=True)
+		shutil.copyfile(os.path.normpath(os.path.join(self.__resource_directory, 'translators', 'testimg.svg')), self.__img_a_file)
+		shutil.copyfile(os.path.normpath(os.path.join(self.__resource_directory, 'translators', 'testimg.png.gz')), self.__img_b_file)
 
 		self.__maker = AutoLaTeXMaker.create(self.__config)
 		os.chdir(self.__tmp_folder_name)
 
 
-	def test_build(self):
-		self.__maker.run_translators(force_generation= True, detect_conflicts = False)
+	def test_fresh(self):
+		"""
+		Build the build list from a fresh installation
+		"""
+		generated_images = self.__maker.run_translators(force_generation= True, detect_conflicts = False)
+		self.assertEqual(2, len(generated_images))
+		self.assertIn(self.__img_a_file, generated_images)
+		self.assertEqual(self.__pdf_img_a_file, generated_images[self.__img_a_file])
+		self.assertIn(self.__img_b_file, generated_images)
+		self.assertEqual(self.__png_img_b_file, generated_images[self.__img_b_file])
+
 		result = self.__maker.build()
 		self.assertTrue(result)
 		self.assertTrue(os.path.isfile(self.__pdf_file))
+		warns = self.__maker.standard_warnings
+		self.assertFalse(warns)
 
 
 if __name__ == '__main__':

@@ -65,13 +65,13 @@ class MakerAction(AbstractMakerAction):
 		:rtype: bool
 		"""
 		if cli_arguments.out:
-			out_directory = os.path.abspath(cli_arguments.out)
+			out_directory = str(os.path.abspath(cli_arguments.out))
 		else:
 			out_directory = os.getcwd()
 
 		cfg = Config()
 
-		tex_file = os.path.join(out_directory,  'main.tex')
+		tex_file = os.path.join(out_directory, 'main.tex')
 		if os.path.isfile(tex_file) and not cli_arguments.force:
 			logging.error(T("TeX file already exists: %s") % tex_file)
 			return False
@@ -84,7 +84,7 @@ class MakerAction(AbstractMakerAction):
 			\\end{document}
 			""")
 
-		local_image_directory = os.path.join('images',  'auto')
+		local_image_directory = str(os.path.join('images',  'auto'))
 		image_directory = os.path.join(out_directory,  local_image_directory)
 		cfg.translators.add_image_path(image_directory)
 

@@ -33,7 +33,7 @@ class MakerAction(AbstractMakerAction):
 
 	alias : str = 'makebiblio'
 
-	help : str = T('Performs all processing that permits to generate the bibliography (bibtex, biber...)')
+	help : str = T('Performs all processing that permits to generate the bibliography (BibTeX, Biber...)')
 
 	@override
 	def _add_command_cli_arguments(self, command_name : str, command_help : str | None,
@@ -51,11 +51,11 @@ class MakerAction(AbstractMakerAction):
 
 		self.parse_cli.add_argument('--noauxfileread',
 			action = 'store_true',
-			help = T('Don\'t read the content of the auxilliary files for determining if they contain bibliography citations'))
+			help = T('Don\'t read the content of the auxiliary files for determining if they contain bibliography citations'))
 
 		self.parse_cli.add_argument('--list',
 			action = 'store_true',
-			help = T('Show only the list of detected auxilliary files and do not run the biliography tool on them'))
+			help = T('Show only the list of detected auxiliary files and do not run the bibliography tool on them'))
 
 
 	@override

@@ -72,7 +72,7 @@ class TestAuxiliaryCitationAnalyzer(AbstractBaseTest):
 				\\bibcite{Ricci2003}{12}
 				\\bibcite{Viroli2005}{13}
 				\\bibcite{Ricci2008}{14}
-				\\bibcite{Rodriguez.iat14}{15}
+				\\bibcite{Rodriguez.iat14}{15}\\relax
 				\\bibcite{RodriguezHilaireGaudGallandKoukam2011_84}{16}
 				\\bibcite{Saunier2014}{17}
 				\\bibcite{Tamminga2014}{18}
@@ -120,7 +120,7 @@ class TestAuxiliaryCitationAnalyzer(AbstractBaseTest):
 		self.assertEqual({'abbrv'}, self.analyzer.styles)
 
 	def test_citations(self):
-		self.assertEqual(SortedSet([
+		self.assertEqual('\n'.join(SortedSet([
 				'AGRE.05',
 				'Badeig2010',
 				'Bhouri2012',
@@ -141,7 +141,8 @@ class TestAuxiliaryCitationAnalyzer(AbstractBaseTest):
 				'Tamminga2014',
 				'Viroli2005',
 				'Weyns2007',
-				'Zargayouna2009']), self.analyzer.citations)
+				'Zargayouna2009'])),
+				'\n'.join(self.analyzer.citations))
 
 	def test_md5(self):
 		self.assertEqual('d41d8cd98f00b204e9800998ecf8427e', self.analyzer.md5)

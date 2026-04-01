@@ -23,6 +23,7 @@ import logging
 import os
 import shutil
 from typing import override
+from unittest import skip
 
 from sortedcontainers import SortedSet
 
@@ -32,7 +33,7 @@ from autolatex2.make.maker import AutoLaTeXMaker
 from autolatex2tests.abstract_base_test import AbstractBaseTest
 
 
-class TestSimpleTeXDependenciesMaker(AbstractBaseTest):
+class TestBibunitsDependenciesMaker(AbstractBaseTest):
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
@@ -54,27 +55,28 @@ class TestSimpleTeXDependenciesMaker(AbstractBaseTest):
 		self.__tmp_folder = self._create_temp_directory()
 		self.__tmp_folder_name = self.__tmp_folder.name
 		self.__root_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'rootfile.tex'))
-		self.__texa_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'test12a.tex'))
-		self.__texb_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'test12b.tex'))
-		self.__bib_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'test5.bib'))
-		self.__bbl_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'rootfile.bbl'))
+		self.__bib_a_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'rootfile.bib'))
+		self.__bib_b_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'secondbib.bib'))
+		self.__bbl_a_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'bu1.bbl'))
+		self.__bbl_b_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'bu2.bbl'))
 		self.__aux_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'rootfile.aux'))
-		self.__img_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'test12img.pdf'))
+		self.__aux_a_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'bu1.aux'))
+		self.__aux_b_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'bu2.aux'))
+		self.__img_a_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'img1.pdf'))
+		self.__img_b_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'img2.pdf'))
 		self.__pdf_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'rootfile.pdf'))
 		self.__glo_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'rootfile.glo'))
 		self.__gls_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'rootfile.gls'))
-		self.__idx_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'rootfile.idx'))
-		self.__ind_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'rootfile.ind'))
 
 		self.__config = Config()
 		self.__config.document_directory = self.__tmp_folder_name
 		self.__config.document_filename = 'rootfile.tex'
 
-		shutil.copyfile(os.path.normpath(os.path.join(self.__resource_directory, 'test12.tex')), self.__root_file)
-		shutil.copyfile(os.path.normpath(os.path.join(self.__resource_directory, 'test12a.tex')), self.__texa_file)
-		shutil.copyfile(os.path.normpath(os.path.join(self.__resource_directory, 'test12b.tex')), self.__texb_file)
-		shutil.copyfile(os.path.normpath(os.path.join(self.__resource_directory, 'test5.bib')), self.__bib_file)
-		shutil.copyfile(os.path.normpath(os.path.join(self.__resource_directory, 'test12img.pdf')), self.__img_file)
+		shutil.copyfile(os.path.normpath(os.path.join(self.__resource_directory, 'test26.tex')), self.__root_file)
+		shutil.copyfile(os.path.normpath(os.path.join(self.__resource_directory, 'test26.bib')), self.__bib_a_file)
+		shutil.copyfile(os.path.normpath(os.path.join(self.__resource_directory, 'test26.bib')), self.__bib_b_file)
+		shutil.copyfile(os.path.normpath(os.path.join(self.__resource_directory, 'test12img.pdf')), self.__img_a_file)
+		shutil.copyfile(os.path.normpath(os.path.join(self.__resource_directory, 'test12img.pdf')), self.__img_b_file)
 
 		self.__maker = AutoLaTeXMaker.create(self.__config)
 		os.chdir(self.__tmp_folder_name)
@@ -119,51 +121,31 @@ class TestSimpleTeXDependenciesMaker(AbstractBaseTest):
 				"input_filename": self.__root_file,
 				"dependencies": [
 					self.__gls_file,
-					self.__ind_file,
 					self.__root_file,
-					self.__bbl_file
+					self.__bbl_a_file,
+					self.__bbl_b_file
 				]
 			},
 			self.__root_file: {
 				"output_filename": self.__root_file,
 				"input_filename": self.__root_file,
 				"dependencies": [
-					self.__texa_file,
-					self.__texb_file,
 				]
 			},
-			self.__texa_file: {
-				"output_filename": self.__texa_file,
-				"input_filename": self.__texa_file,
-				"dependencies": [
-				]
-			},
-			self.__texb_file: {
-				"output_filename": self.__texb_file,
-				"input_filename": self.__texb_file,
-				"dependencies": [
-				]
-			},
-			self.__bbl_file: {
-				"output_filename": self.__bbl_file,
-				"input_filename": self.__root_file,
+			self.__bbl_a_file: {
+				"output_filename": self.__bbl_a_file,
+				"input_filename": self.__aux_a_file,
 				"dependencies": [
 					self.__root_file,
-					self.__bib_file
+					self.__bib_a_file
 				]
 			},
-			self.__idx_file: {
-				"output_filename": self.__idx_file,
-				"input_filename": self.__root_file,
+			self.__bbl_b_file: {
+				"output_filename": self.__bbl_b_file,
+				"input_filename": self.__aux_b_file,
 				"dependencies": [
 					self.__root_file,
-				]
-			},
-			self.__ind_file: {
-				"output_filename": self.__ind_file,
-				"input_filename": self.__idx_file,
-				"dependencies": [
-					self.__idx_file
+					self.__bib_b_file
 				]
 			},
 			self.__glo_file: {
@@ -182,10 +164,9 @@ class TestSimpleTeXDependenciesMaker(AbstractBaseTest):
 			}
 		}, files)
 
-
 	def test_compute_dependencies_w_aux(self):
 		"""
-		Compute dependencies from TeX sources and auxilliary files
+		Compute dependencies from TeX sources and auxiliary files
 		"""
 		(pdf_file,  files) = self.__maker.compute_dependencies(self.__root_file, read_aux_file= True)
 		self.assertEqual(self.__pdf_file, pdf_file)
@@ -195,51 +176,31 @@ class TestSimpleTeXDependenciesMaker(AbstractBaseTest):
 				"input_filename": self.__root_file,
 				"dependencies": [
 					self.__gls_file,
-					self.__ind_file,
 					self.__root_file,
-					self.__bbl_file
+					self.__bbl_a_file,
+					self.__bbl_b_file
 				]
 			},
 			self.__root_file: {
 				"output_filename": self.__root_file,
 				"input_filename": self.__root_file,
 				"dependencies": [
-					self.__texa_file,
-					self.__texb_file,
 				]
 			},
-			self.__texa_file: {
-				"output_filename": self.__texa_file,
-				"input_filename": self.__texa_file,
-				"dependencies": [
-				]
-			},
-			self.__texb_file: {
-				"output_filename": self.__texb_file,
-				"input_filename": self.__texb_file,
-				"dependencies": [
-				]
-			},
-			self.__bbl_file: {
-				"output_filename": self.__bbl_file,
-				"input_filename": self.__root_file,
+			self.__bbl_a_file: {
+				"output_filename": self.__bbl_a_file,
+				"input_filename": self.__aux_a_file,
 				"dependencies": [
 					self.__root_file,
-					self.__bib_file
+					self.__bib_a_file
 				]
 			},
-			self.__idx_file: {
-				"output_filename": self.__idx_file,
-				"input_filename": self.__root_file,
+			self.__bbl_b_file: {
+				"output_filename": self.__bbl_b_file,
+				"input_filename": self.__aux_b_file,
 				"dependencies": [
 					self.__root_file,
-				]
-			},
-			self.__ind_file: {
-				"output_filename": self.__ind_file,
-				"input_filename": self.__idx_file,
-				"dependencies": [
-					self.__idx_file
+					self.__bib_b_file
 				]
 			},
 			self.__glo_file: {

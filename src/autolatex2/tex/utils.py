@@ -87,6 +87,17 @@ class FileType(IntEnum):
 		else:
 			return [ '.' + self.name ]
 
+	def is_file(self, filename : str) -> bool:
+		"""
+		Replies the given filename has the filename extensions of the current file type.
+		:rtype: bool
+		"""
+		if filename:
+			ext = os.path.splitext(filename)[-1]
+			if ext:
+				return ext.lower() in self.extensions()
+		return False
+
 	@staticmethod
 	def output_types() -> list['FileType']:
 		"""

@@ -23,8 +23,8 @@ from argparse import Namespace
 from typing import override
 
 import autolatex2.utils.utilfunctions as genutils
-import autolatex2.tex.utils as texutils
 from autolatex2.cli.abstract_actions import AbstractMakerAction
+from autolatex2.tex.utils import FileType
 from autolatex2.utils.i18n import T
 from autolatex2.utils import extlogging
 
@@ -65,9 +65,9 @@ class MakerAction(AbstractMakerAction):
 			if ddir and not cli_arguments.nochdir:
 				os.chdir(ddir)
 			maker = self._internal_create_maker()
-			idx_ext = texutils.get_index_file_extensions()[0]
+			idx_ext = FileType.idx.extension()
 			for root_file in maker.root_files:
-				idx_file = genutils.basename2(root_file,  *texutils.get_tex_file_extensions()) + idx_ext
+				idx_file = genutils.basename2(root_file,  *FileType.tex_extensions()) + idx_ext
 				result = maker.run_makeindex(idx_file)
 				if result is not None:
 					if result.return_code != 0:

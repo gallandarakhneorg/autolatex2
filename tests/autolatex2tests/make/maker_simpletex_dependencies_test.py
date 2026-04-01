@@ -32,7 +32,7 @@ from autolatex2.make.maker import AutoLaTeXMaker
 from autolatex2tests.abstract_base_test import AbstractBaseTest
 
 
-class TestDependenciesMaker(AbstractBaseTest):
+class TestSimpleTeXDependenciesMaker(AbstractBaseTest):
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
@@ -146,7 +146,7 @@ class TestDependenciesMaker(AbstractBaseTest):
 			},
 			self.__bbl_file: {
 				"output_filename": self.__bbl_file,
-				"input_filename": self.__root_file,
+				"input_filename": self.__aux_file,
 				"dependencies": [
 					self.__root_file,
 					self.__bib_file
@@ -222,7 +222,7 @@ class TestDependenciesMaker(AbstractBaseTest):
 			},
 			self.__bbl_file: {
 				"output_filename": self.__bbl_file,
-				"input_filename": self.__root_file,
+				"input_filename": self.__aux_file,
 				"dependencies": [
 					self.__root_file,
 					self.__bib_file

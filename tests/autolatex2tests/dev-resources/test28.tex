@@ -1,0 +1,52 @@
+\documentclass{article}
+
+\usepackage{graphicx}
+\graphicspath{{./imgs/auto/}}
+
+\usepackage{multibib}
+
+\newcites{sourcea}{References from Source A}
+\newcites{sourceb}{References from Source B}
+
+\usepackage{glossaries}
+\makeglossaries
+\newglossaryentry{duc}
+{
+    name=duc,
+    description={Duc de Bourgogne}
+}
+\newglossaryentry{ducs}
+{
+    name=duc,
+    description={Ducs et pairs}
+}
+
+\begin{document}
+
+\section{Section 1}
+bla blablab
+
+\includegraphics[width=\linewidth]{img1}
+
+
+\`A la mort de M. le \gls{duc} de Bourgogne, lorsqu'il fut question d'aller jeter de l'eau b\'enite, le feu Roi d\'ecida que si les princes lorrains s'y pr\'esenteroient, qu'eux ni les \gls{ducs} n'en jetteroient (...) \citesourceb{Ref2}
+
+\section{Section 2}
+
+bla blablab
+
+\includegraphics[width=\linewidth]{img2}
+
+\section{Section 3}
+
+Bibliography \citesourcea{Ref1}
+
+\bibliographystylesourcea{plain}
+\bibliographysourcea{mybiblio}
+
+\bibliographystylesourceb{plain}
+\bibliographysourceb{secondbib}
+
+\printglossaries
+
+\end{document}

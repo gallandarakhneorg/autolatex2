@@ -19,7 +19,7 @@
 # 330, Boston, MA 02111-1307, USA.
 
 """
-Definition of the enumeration types for the AutoLaTeX Maker.
+Definition of the enumeration types for the program Maker.
 """
 
 from enum import IntEnum, unique
@@ -27,7 +27,7 @@ from enum import IntEnum, unique
 @unique
 class TeXTools(IntEnum):
 	"""
-	Type of TeX tools supported by AutoLaTeX.
+	Type of TeX tools supported by the program.
 	"""
 	bibtex = 0
 	biber = 1
@@ -45,7 +45,7 @@ class TeXTools(IntEnum):
 @unique
 class TeXCompiler(IntEnum):
 	"""
-	Type of LaTeX compilers supported by AutoLaTeX.
+	Type of LaTeX compilers supported by the program.
 	"""
 	pdflatex = TeXTools.pdflatex
 	latex = TeXTools.latex
@@ -57,7 +57,7 @@ class TeXCompiler(IntEnum):
 @unique
 class BibCompiler(IntEnum):
 	"""
-	Type of bibliography compilers supported by AutoLaTeX.
+	Type of bibliography compilers supported by the program.
 	"""
 	bibtex = TeXTools.bibtex
 	biber = TeXTools.biber
@@ -67,7 +67,7 @@ class BibCompiler(IntEnum):
 @unique
 class IndexCompiler(IntEnum):
 	"""
-	Type of index compilers supported by AutoLaTeX.
+	Type of index compilers supported by the program.
 	"""
 	makeindex = TeXTools.makeindex
 	texindy = TeXTools.texindy
@@ -77,6 +77,6 @@ class IndexCompiler(IntEnum):
 @unique
 class GlossaryCompiler(IntEnum):
 	"""
-	Type of glossary compilers supported by AutoLaTeX.
+	Type of glossary compilers supported by the program.
 	"""
 	makeglossaries = TeXTools.makeglossaries

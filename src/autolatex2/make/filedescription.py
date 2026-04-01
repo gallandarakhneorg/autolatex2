@@ -19,7 +19,7 @@
 # 330, Boston, MA 02111-1307, USA.
 
 """
-Description of a file for the AutoLaTeX Maker.
+Description of a file for the program Maker.
 """
 
 import json
@@ -36,7 +36,7 @@ class FileDescription:
 	Description of a file in the making process.
 	"""
 
-	def __init__(self, output_filename : str, file_type : FileType, input_filename : str, main_filename : str):
+	def __init__(self, output_filename : str, file_type : FileType, input_filename : str, main_filename : str | None):
 		"""
 		Construct a file description.
 		:param output_filename: Name of the file to generate.
@@ -45,18 +45,20 @@ class FileDescription:
 		:type file_type: FileType
 		:param input_filename: Name of the file to read for generating this file.
 		:type input_filename: str
-		:param main_filename: Name of the main file.
-		:type main_filename: str
+		:param main_filename: Name of the main file. If None, the current file is the main file itself.
+		:type main_filename: str | None
 		"""
-		self.__type = file_type
-		self.__output_filename = output_filename
-		self.__input_filename = input_filename
-		self.__main_file = main_filename
-		self.__dependencies = SortedSet()
-		self.__has_change_date = False
-		self.__change_date = None
-		self.__use_biber = False
-		self.__use_xindy = False
+		self.__type : FileType = file_type
+		self.__output_filename : str = output_filename
+		self.__input_filename : str = input_filename
+		self.__main_file : str = main_filename if main_filename is not None else self.__input_filename
+		self.__dependencies : SortedSet = SortedSet()
+		self.__has_change_date : bool = False
+		self.__change_date : float | None = None
+		self.__use_multibib : bool = False
+		self.__use_bibunits : bool = False
+		self.__use_biber : bool = False
+		self.__use_xindy : bool = False
 
 	@override
 	def __str__(self):
@@ -68,8 +70,10 @@ class FileDescription:
 		js['output_filename'] = self.output_filename
 		js['input_filename'] = self.input_filename
 		js['type'] = self.file_type
-		js['mainfile'] = self.main_filename
+		js['main_filename'] = self.main_filename
 		js['change'] = self.change
+		js['use_multibib'] = self.use_multibib
+		js['use_bibunits'] = self.use_bibunits
 		js['use_biber'] = self.use_biber
 		js['use_xindy'] = self.use_xindy
 		js['dependencies'] = list()
@@ -127,6 +131,40 @@ class FileDescription:
 			self.__has_change_date = True
 			self.__change_date = genutils.get_file_last_change(self.__output_filename)
 		return self.__change_date
+
+	@property
+	def use_multibib(self) -> bool:
+		"""
+		Replies if Multibib should be used to generate this file.
+		:rtype: bool
+		"""
+		return self.__use_multibib
+
+	@use_multibib.setter
+	def use_multibib(self,  use : bool):
+		"""
+		Change the flag that indicates if Multibib should be used to generate this file.
+		:param use: The flag.
+		:type use: bool
+		"""
+		self.__use_multibib = use
+
+	@property
+	def use_bibunits(self) -> bool:
+		"""
+		Replies if Bibunits should be used to generate this file.
+		:rtype: bool
+		"""
+		return self.__use_bibunits
+
+	@use_bibunits.setter
+	def use_bibunits(self,  use : bool):
+		"""
+		Change the flag that indicates if Bibunits should be used to generate this file.
+		:param use: The flag.
+		:type use: bool
+		"""
+		self.__use_bibunits = use
 
 	@property
 	def use_biber(self) -> bool:

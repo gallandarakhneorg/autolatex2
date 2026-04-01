@@ -40,7 +40,7 @@ class TestMakeFileDescription(AbstractBaseTest):
 		self.assertEqual('./path0/filename0.aux', str(self.__desc))
 
 	def test___repr__(self):
-		self.assertEqual('{\n    "output_filename": "./path0/filename0.aux",\n    "input_filename": "./path0/filename0.tex",\n    "type": 0,\n    "mainfile": "./path0/main0.tex",\n    "change": null,\n    "use_biber": false,\n    "use_xindy": false,\n    "dependencies": []\n}', repr(self.__desc))
+		self.assertEqual('{\n    "output_filename": "./path0/filename0.aux",\n    "input_filename": "./path0/filename0.tex",\n    "type": 16,\n    "main_filename": "./path0/main0.tex",\n    "change": null,\n    "use_multibib": false,\n    "use_bibunits": false,\n    "use_biber": false,\n    "use_xindy": false,\n    "dependencies": []\n}', repr(self.__desc))
 
 	def test_file_type(self):
 		self.assertEqual(FileType.tex, self.__desc.file_type)
@@ -73,6 +73,20 @@ class TestMakeFileDescription(AbstractBaseTest):
 	def test_set_use_xindy(self):
 		self.__desc.use_xindy = True		
 		self.assertTrue(self.__desc.use_xindy)
+
+	def test_use_multibib(self):
+		self.assertFalse(self.__desc.use_multibib)
+
+	def test_set_use_multibib(self):
+		self.__desc.use_multibib = True
+		self.assertTrue(self.__desc.use_multibib)
+
+	def test_use_bibunits(self):
+		self.assertFalse(self.__desc.use_bibunits)
+
+	def test_set_use_bibunits(self):
+		self.__desc.use_bibunits = True
+		self.assertTrue(self.__desc.use_bibunits)
 
 
 if __name__ == '__main__':

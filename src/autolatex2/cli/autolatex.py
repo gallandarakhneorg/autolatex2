@@ -43,7 +43,7 @@ class AutoLaTeXMain(AbstractAutoLaTeXMain):
 		:type read_user_config: bool
 		:param args: List of command line arguments. If it is None, the system args are used.
 		:type args: list
-		:param exiter: The instance of the object that is called when AutoLaTeX should stop.
+		:param exiter: The instance of the object that is called when the program should stop.
 		:type exiter: exiters.AutoLaTeXExiter | None
 		"""
 		ensure_autolatex_logging_levels()
@@ -108,6 +108,7 @@ class AutoLaTeXMain(AbstractAutoLaTeXMain):
 		continuous_group = async_group.add_mutually_exclusive_group()
 
 		class ContinuousAction(argparse.Action):
+			# noinspection PyBroadException
 			@override
 			def __call__(self, lparser, namespace, value, option_string=None):
 				outer.configuration.infiniteLoop = True
@@ -155,7 +156,9 @@ class AutoLaTeXMain(AbstractAutoLaTeXMain):
 	def _pre_run_program(self, strict_arguments : bool) -> tuple[Namespace,list[str],list[str]]:
 		"""
 		Run the general behavior of the main program before the specific behavior related to commands.
-		:param strict_arguments: Indicates if only the arguments from the main script and the associated commands are allowed. If True, the CLI arguments are parsed stricly and if an argument is not known, there is a failire. If False, the function doers not fail if it is encountering an unknown argument.
+		:param strict_arguments: Indicates if only the arguments from the main script and the associated commands are
+		allowed. If True, the CLI arguments are parsed strictly and if an argument is not known, there is a failure.
+		If False, the function doers not fail if it is encountering an unknown argument.
 		:type strict_arguments: bool
 		:return: the tuple with as first element the parsed CLI arguments (argparse namespace), the actions , and the second element the list of unknown arguments.
 		:rtype: tuple[Namespace,list[str],list[str]]

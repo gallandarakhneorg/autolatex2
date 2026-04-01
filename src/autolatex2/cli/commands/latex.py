@@ -24,7 +24,7 @@ import os
 from typing import override
 
 from autolatex2.cli.abstract_actions import AbstractMakerAction
-from autolatex2.tex.utils import TeXWarnings
+from autolatex2.tex.utils import TeXWarnings, FileType
 from autolatex2.utils import extlogging
 import autolatex2.tex.utils as texutils
 import autolatex2.utils.utilfunctions as genutils
@@ -59,7 +59,7 @@ class MakerAction(AbstractMakerAction):
 
 		self.parse_cli.add_argument('--showneedloop',
 			action='store_true',
-			help = T('Show a message that is indicating if another run or the (La)TeX text processing was detected as needed to produce the target documemnt'))
+			help = T('Show a message that is indicating if another run or the (La)TeX text processing was detected as needed to produce the target document'))
 
 	# noinspection PyBroadException
 	@override
@@ -88,7 +88,7 @@ class MakerAction(AbstractMakerAction):
 					extlogging.multiline_error(str(ex))
 					return False
 				if cli_arguments.showneedloop:
-					log_file = genutils.basename2(root_file, *texutils.get_tex_file_extensions()) + '.log'
+					log_file = genutils.basename2(root_file, *FileType.tex_extensions()) + '.log'
 					valid = True
 					if os.path.isfile(log_file):
 						try:
@@ -96,7 +96,7 @@ class MakerAction(AbstractMakerAction):
 							with open(log_file, "r") as input_log:
 								log_content = input_log.readline()
 								while log_content:
-									need_rebuild = texutils.extract_tex_warning_from_line(log_content, warnings)
+									texutils.extract_tex_warning_from_line(log_content, warnings)
 									log_content = input_log.readline()
 							if warnings:
 								all_msgs = ''
@@ -106,7 +106,7 @@ class MakerAction(AbstractMakerAction):
 									elif warning == TeXWarnings.undefined_citation:
 										msg = T("a citation is undefined")
 									elif warning == TeXWarnings.multiple_definition:
-										msg = T("muliple definition of the same reference")
+										msg = T("multiple definition of the same reference")
 									elif warning == TeXWarnings.multiple_definition:
 										msg = T("a general warning leading to rebuild")
 									else:

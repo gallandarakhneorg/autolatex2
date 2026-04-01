@@ -19,7 +19,7 @@
 # 330, Boston, MA 02111-1307, USA.
 
 """
-Abstract implementation for AutoLaTeX main program.
+Abstract implementation for main program.
 """
 
 import textwrap
@@ -46,7 +46,7 @@ from autolatex2.utils.i18n import T
 
 class AbstractAutoLaTeXMain(ABC):
 	"""
-	Abstract implementation for a main AutoLaTeX program.
+	Abstract implementation for a main program.
 	"""
 
 	def __init__(self,  read_system_config : bool = True,  read_user_config : bool = True,
@@ -59,7 +59,7 @@ class AbstractAutoLaTeXMain(ABC):
 		:type read_user_config: bool
 		:param args: List of command line arguments. If it is None, the system args are used.
 		:type args: list
-		:param exiter: The instance of the object that is called when AutoLaTeX should stop.
+		:param exiter: The instance of the object that is called when the program should stop.
 		:type exiter: exiters.AutoLaTeXExiter | None
 		"""
 		self.__initial_argv = args
@@ -98,7 +98,7 @@ class AbstractAutoLaTeXMain(ABC):
 	@property
 	def configuration(self) -> Config:
 		"""
-		Replies the global configuration of AutoLaTeX.
+		Replies the global configuration of the program.
 		:rtype: Config
 		"""
 		return self.__configuration
@@ -140,13 +140,13 @@ class AbstractAutoLaTeXMain(ABC):
 
 	def show_configuration(self):
 		"""
-		Show up the configuration of AutoLaTeX.
+		Show up the configuration of the program.
 		"""
 		eprintpkg.epprint(self.configuration)
 
 	def _detect_autolatex_configuration_file(self,  directory : str | None) -> str | None:
 		"""
-		Search for an AutoLaTeX configuration file in the given directory or one of its parent directories.
+		Search for a configuration file in the given directory or one of its parent directories.
 		:param directory: The start of the search.
 		:type directory: str
 		:return: the path to the configuration file, or None.
@@ -601,13 +601,13 @@ class AbstractAutoLaTeXMain(ABC):
 			action=FilelinewarningAction,
 			const = True, 
 			nargs=0, 
-			help = T('Enable the extended format for warnings. This format add the filename and the line number where the warning is occuring, before the warning message by itself'))
+			help = T('Enable the extended format for warnings. This format add the filename and the line number where the warning occurs, before the warning message by itself'))
 
 		warning_group.add_argument('--nofile-line-warning',
 			action=FilelinewarningAction,
 			const = False, 
 			nargs=0, 
-			help = T('Disable the extended format for warnings. This format add the filename and the line number where the warning is occuring, before the warning message by itself'))
+			help = T('Disable the extended format for warnings. This format add the filename and the line number where the warning occurs, before the warning message by itself'))
 
 	def _add_standard_cli_options_logging(self):
 		"""
@@ -809,7 +809,9 @@ class AbstractAutoLaTeXMain(ABC):
 	def _pre_run_program(self, strict_arguments : bool) -> tuple[Namespace,list[str],list[str]]:
 		"""
 		Run the general behavior of the main program before the specific behavior related to commands.
-		:param strict_arguments: Indicates if only the arguments from the main script and the associated commands are allowed. If True, the CLI arguments are parsed stricly and if an argument is not known, there is a failire. If False, the function doers not fail if it is encountering an unknown argument.
+		:param strict_arguments: Indicates if only the arguments from the main script and the associated commands are allowed.
+		If True, the CLI arguments are parsed strictly and if an argument is not known, there is a failure. If False,
+		the function doers not fail if it is encountering an unknown argument.
 		:type strict_arguments: bool
 		:return: the tuple with as first element the parsed CLI arguments (argparse namespace), the actions , and the second element the list of unknown arguments.
 		:rtype: tuple[Namespace,list[str],list[str]]
@@ -1042,6 +1044,7 @@ class AbstractAutoLaTeXMain(ABC):
 
 		return execution_order
 
+	# noinspection PyMethodMayBeStatic
 	def __unaliases(self, commands_to_run : list[str], all_commands : dict[str,AutolatexCommand]) -> list[str]:
 		"""
 		Replace any alias in the given list of commands to run by their regular names.
@@ -1113,7 +1116,7 @@ class AbstractAutoLaTeXMain(ABC):
 		Detect the name of the main TeX file in the project directory.
 		:param directory: the directory to search inside.
 		:type directory: str
-		:return: the flename of the root TeX file, or None if not found.
+		:return: the filename of the root TeX file, or None if not found.
 		:rtype: str | None
 		"""
 		files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f)) and f.endswith('.tex')]

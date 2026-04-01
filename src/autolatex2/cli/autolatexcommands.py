@@ -19,7 +19,7 @@
 # 330, Boston, MA 02111-1307, USA.
 
 """
-Generic implementation of an AutoLaTeX command.
+Generic implementation of a command.
 """
 
 from typing import Type
@@ -30,7 +30,7 @@ from autolatex2.utils.extlogging import ensure_autolatex_logging_levels
 
 class AutolatexCommand:
     """
-	Command to be run that is launched by the user of AutoLaTeX.
+	Command to be run that is launched by the user of the program.
 	"""
     def __init__(self, name: str, action_type: Type[AbstractMakerAction], help_text: str, aliases: list[str] | None, prerequisites : list[str] | None):
         """

@@ -50,7 +50,7 @@ class _TreeNode:
 	Node in the dependency tree.
 	"""
 	filename: str
-	timestamp : float
+	timestamp : float | None
 	dependencies : list['_TreeNode'] = field(default_factory=list)
 	depth: int = 0
 	is_cycle: bool = False
@@ -209,7 +209,7 @@ class MakerAction(AbstractMakerAction):
 
 		self.parse_cli.add_argument('--noauxfile',
 			action='store_true',
-			help=T('Don\'t read the auxilliary files for building the dependency tree'))
+			help=T('Don\'t read the auxiliary files for building the dependency tree'))
 
 		self.parse_cli.add_argument('--times',
 			action='store_true',

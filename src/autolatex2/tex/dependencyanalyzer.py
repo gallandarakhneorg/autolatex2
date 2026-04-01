@@ -365,7 +365,7 @@ class DependencyAnalyzer(Observer):
 		'newglossaryentry'			: '![]!{}',
 		# BibTeX
 		'addbibresource'			: '![]!{}',
-		'begin'						: '[]!{}',
+		'begin'						: '![]!{}![]',
 		'end'						: '!{}',
 		'putbib'					: '![]',
 		'bibliographyslide'			: '',
@@ -631,7 +631,7 @@ class DependencyAnalyzer(Observer):
 		"""
 		# Special case: the bibunit
 		if self.__in_bibunit:
-			bbl_file = genutils.basename2(bbl_file, '.bbl') + '.' + str(self.__bibunit_index)
+			bbl_file = genutils.basename2(bbl_file, '.bbl') + str(self.__bibunit_index)
 		if not os.path.isabs(bbl_file):
 			bbl_file = genutils.ensure_filename_extension(bbl_file, '.bbl')
 			bbl_file = os.path.normpath(os.path.join(self.root_directory, bbl_file))
@@ -754,6 +754,10 @@ class DependencyAnalyzer(Observer):
 	def _expand__bibliographystyle(self, name : str, parameters : list[TeXMacroParameter]):
 		assert len(parameters) > 0
 		bibdb = self.__extract_bibdb('\\bibliographystyle', name)
+		self.__analyse_bst_specification(bibdb, parameters)
+
+
+	def __analyse_bst_specification(self, bib_db : str, parameters: list[TeXMacroParameter]):
 		for param in parameters:
 			value = param.text
 			if value:
@@ -767,7 +771,8 @@ class DependencyAnalyzer(Observer):
 						if not os.path.isabs(bst_file):
 							bst_file = os.path.normpath(os.path.join(self.root_directory, bst_file))
 						if os.path.isfile(bst_file):
-							self.__dependency_repository.update(FileType.bst, bst_file, scope=bibdb)
+							self.__dependency_repository.update(FileType.bst, bst_file, scope=bib_db)
+
 
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol = False)
@@ -780,7 +785,8 @@ class DependencyAnalyzer(Observer):
 	@expand_function(start_symbol = False)
 	def _expand__putbib(self, name : str, parameters : list[TeXMacroParameter]):
 		bibdb = self.basename
-		bbl_file = self.basename
+		# By default, Bibunits uses the 'bu' prefix for its auxiliary files
+		bbl_file = 'bu'
 		if len(parameters) > 0 and parameters[0].text:
 			self.__parse_bib_references(bibdb, bbl_file, *parameters)
 		elif '\\defaultbibliography' in self.__default_bibliography:
@@ -791,7 +797,7 @@ class DependencyAnalyzer(Observer):
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol = False)
 	def _expand__bibliographyslide(self, name : str, parameters : list[TeXMacroParameter]):
-		self.__parse_bib_references(self.basename, self.basename, TeXMacroParameter(text='biblio'))
+		self.__parse_bib_references(self.basename, self.basename + '.', TeXMacroParameter(text='biblio'))
 
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol = False)
@@ -799,17 +805,22 @@ class DependencyAnalyzer(Observer):
 		assert len(parameters) > 1
 		tex_name = parameters[1].text
 		if tex_name == 'bibliographysection':
-			self.__parse_bib_references(self.basename, self.basename, TeXMacroParameter(text='biblio'))
+			self.__in_bibunit = True
+			self.__bibunit_index = self.__bibunit_index + 1
+			self.__parse_bib_references(self.basename, self.basename + '.', TeXMacroParameter(text='biblio'))
 		elif tex_name == 'bibunit':
 			self.__in_bibunit = True
 			self.__bibunit_index = self.__bibunit_index + 1
+			assert len(parameters) > 2
+			if parameters[2].text:
+				self.__analyse_bst_specification(self.basename, [ parameters[2] ])
 
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol = False)
 	def _expand__end(self, name : str, parameters : list[TeXMacroParameter]):
 		assert len(parameters) > 0
 		tex_name = parameters[0].text
-		if tex_name == 'bibunit':
+		if tex_name == 'bibliographysection' or tex_name == 'bibunit':
 			self.__in_bibunit = False
 
 	# noinspection DuplicatedCode,PyUnusedLocal

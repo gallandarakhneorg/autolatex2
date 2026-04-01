@@ -56,14 +56,14 @@ class MakerAction(AbstractMakerAction):
 
 		self.parse_cli.add_argument('--noauxfileread',
 			action='store_true',
-			help=T('Don\'t read the content of the auxilliary files for determining if they contain bibliography citations'))
+			help=T('Don\'t read the content of the auxiliary files for determining if they contain bibliography citations'))
 
 
 	@override
 	def run(self, cli_arguments : Namespace) -> bool:
 		"""
 		Callback for running the command.
-		:param cli_arguments: the succssfully parsed CLI arguments.
+		:param cli_arguments: the successfully parsed CLI arguments.
 		:type cli_arguments: Namespace
 		:return: True if the process could continue. False if an error occurred and the process should stop.
 		:rtype: bool
@@ -78,7 +78,7 @@ class MakerAction(AbstractMakerAction):
 	def _internal_run_viewer(self, maker : AutoLaTeXMaker, cli_arguments : Namespace) -> bool:
 		"""
 		Run the internal behavior of the 'view' command.
-		:param maker: the AutoLaTeX maker.
+		:param maker: the maker.
 		:param cli_arguments: the arguments.
 		:return: True to continue process. False to stop the process.
 		"""

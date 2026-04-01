@@ -48,11 +48,12 @@ class MakerAction(AbstractMakerAction):
 			action = 'store_true', 
 			help=T('Force to overwrite the STY file if it exists'))
 
+	# noinspection DuplicatedCode
 	@override
 	def run(self, cli_arguments : Namespace) -> bool:
 		"""
 		Callback for running the command.
-		:param cli_arguments: the succssfully parsed CLI arguments.
+		:param cli_arguments: the successfully parsed CLI arguments.
 		:type cli_arguments: Namespace
 		:return: True if the process could continue. False if an error occurred and the process should stop.
 		:rtype: bool

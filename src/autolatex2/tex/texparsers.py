@@ -162,6 +162,7 @@ class TeXParser(Parser):
 				'pounds'            : '',
 				'providecommand'    : '{}[][]{}',
 				'ref'		    	: '{}',
+				'relax'             : '',
 				'renewcommand'      : '{}[][]{}',
 				'rm'                : '-',
 				'rmfamily'          : '-',
