@@ -55,11 +55,11 @@ class TestAbstractMainRun(AbstractBaseTest):
 		self.assertIsNotNone(commands[name].creator_type)
 
 	def test__pre_run_program(self):
-		self.assertIsNone(self.__obj.configuration.document_directory)
+		self.assertFalse(self.__obj.configuration.document_directory)
 
 		cli_parser, commands, arguments = self.__obj._pre_run_program(False)
 
-		self.assertIsNotNone(self.__obj.configuration.document_directory)
+		self.assertTrue(self.__obj.configuration.document_directory)
 		self.assertEqual(LogLevel.DEBUG, logging.getLogger().level)
 
 		self.assertEqual([], commands)

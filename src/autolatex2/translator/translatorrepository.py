@@ -25,7 +25,6 @@ Translation engine.
 import os
 import re
 import logging
-from argparse import ArgumentError
 from typing import override, Iterator, Self
 
 from sortedcontainers import SortedSet
@@ -118,17 +117,26 @@ class InstalledTranslatorDescription:
 		self.__user_translators = SourceTranslatorMapping()
 		self.__document_translators = SourceTranslatorMapping()
 
+	def __contains__(self, item : TranslatorLevel) -> bool:
+		if item == TranslatorLevel.SYSTEM:
+			return len(self.__system_translators) > 0
+		elif item == TranslatorLevel.USER:
+			return len(self.__user_translators) > 0
+		elif item == TranslatorLevel.DOCUMENT:
+			return len(self.__document_translators) > 0
+		raise False
+
 	def __len__(self):
 		return len(self.__system_translators) + len(self.__user_translators) + len(self.__document_translators)
 
-	def __getitem__(self, item) -> SourceTranslatorMapping:
+	def __getitem__(self, item : TranslatorLevel) -> SourceTranslatorMapping:
 		if item == TranslatorLevel.SYSTEM:
 			return self.__system_translators
 		elif item == TranslatorLevel.USER:
 			return self.__user_translators
 		elif item == TranslatorLevel.DOCUMENT:
 			return self.__document_translators
-		raise ArgumentError(item, T('Invalid translator level: %s') % str(item))
+		raise KeyError(T('Invalid translator level: %s') % str(item))
 
 	def get_level_for(self, translator_name : str) -> TranslatorLevel | None:
 		"""
@@ -217,7 +225,7 @@ class ConflictingTranslators:
 			return self.__user_conflicts
 		elif item == TranslatorLevel.DOCUMENT:
 			return self.__document_conflicts
-		raise ArgumentError(item, T('Invalid translator level: %s') % str(item))
+		raise KeyError(T('Invalid translator level: %s') % str(item))
 
 	def detect_conflicts(self, translators : dict[Translator,TranslatorLevel]):
 		"""
@@ -354,8 +362,8 @@ class TranslatorRepository:
 		"""
 		lvls = list(TranslatorLevel)
 		for level in reversed(lvls):
-			if translator_name in self._installed_translators[level.value]:
-				return self._installed_translators[level.value][translator_name]
+			if translator_name in self._installed_translators[level]:
+				return self._installed_translators[level][translator_name]
 		return None
 
 	def get_included_translator_names_with_levels(self) -> dict[str,TranslatorLevel]:

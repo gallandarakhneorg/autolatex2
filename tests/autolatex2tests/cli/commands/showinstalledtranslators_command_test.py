@@ -21,6 +21,7 @@
 import logging
 import unittest
 from typing import override
+from unittest import skip
 
 from autolatex2.cli.abstract_main import AbstractAutoLaTeXMain
 from autolatex2.cli.autolatexcommands import AutolatexCommand

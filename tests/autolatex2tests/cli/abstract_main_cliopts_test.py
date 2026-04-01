@@ -60,18 +60,18 @@ class TestAbstractMain(AbstractBaseTest):
 		self.assertEqual(self.__beamer_file, self.__obj.configuration.get_system_beamer_sty_file())
 
 	def test_directory(self):
-		self.assertIsNone(self.__obj.configuration.document_directory)
-		self.assertIsNone(self.__obj.configuration.document_filename)
+		self.assertFalse(self.__obj.configuration.document_directory)
+		self.assertFalse(self.__obj.configuration.document_filename)
 		
 		self.__obj._add_standard_cli_options_path()
 		self.__obj.cli_parser.parse_known_args(['--directory', self.__resource_directory])
 		
 		self.assertEqual(self.__resource_directory, self.__obj.configuration.document_directory)
-		self.assertIsNone(self.__obj.configuration.document_filename)
+		self.assertFalse(self.__obj.configuration.document_filename)
 
 	def test_file(self):
-		self.assertIsNone(self.__obj.configuration.document_directory)
-		self.assertIsNone(self.__obj.configuration.document_filename)
+		self.assertFalse(self.__obj.configuration.document_directory)
+		self.assertFalse(self.__obj.configuration.document_filename)
 		
 		self.__obj._add_standard_cli_options_path()
 		self.__obj.cli_parser.parse_known_args(['--file', self.__resource_file])
@@ -80,14 +80,14 @@ class TestAbstractMain(AbstractBaseTest):
 		self.assertEqual('test1.tex', self.__obj.configuration.document_filename)
 
 	def test_search_project_from(self):
-		self.assertIsNone(self.__obj.configuration.document_directory)
-		self.assertIsNone(self.__obj.configuration.document_filename)
+		self.assertFalse(self.__obj.configuration.document_directory)
+		self.assertFalse(self.__obj.configuration.document_filename)
 		
 		self.__obj._add_standard_cli_options_path()
 		self.__obj.cli_parser.parse_known_args(['--search-project-from', self.__resource_file])
 		
-		self.assertIsNone(self.__obj.configuration.document_directory)
-		self.assertIsNone(self.__obj.configuration.document_filename)
+		self.assertFalse(self.__obj.configuration.document_directory)
+		self.assertFalse(self.__obj.configuration.document_filename)
 
 	def test_pdf(self):
 		self.assertTrue(self.__obj.configuration.generation.pdf_mode)
