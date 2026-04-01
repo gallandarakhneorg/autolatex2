@@ -76,7 +76,7 @@ class OldStyleConfigReader:
 		"""
 		for p in OldStyleConfigReader.to_path_list(self._ensure_ascendent_compatibility(content.get('files to clean'))):
 			config.clean.add_clean_file(p)
-		for p in OldStyleConfigReader.to_path_list(self._ensure_ascendent_compatibility(content.get('files to desintegrate'))):
+		for p in OldStyleConfigReader.to_path_list(self._ensure_ascendent_compatibility(content.get('files to disintegrate'))):
 			config.clean.add_cleanall_file(p)
 
 	def _read_generation_prefix(self, content : Any, config : Config):
@@ -101,14 +101,14 @@ class OldStyleConfigReader:
 		:param config: the configuration object to fill up.
 		:type config: Config
 		"""
-		config.include_extra_macros = OldStyleConfigReader.to_bool(self._ensure_ascendent_compatibility(content.get('include extra macros')), config.generation.include_extra_macros)
+		config.generation.include_extra_macros = OldStyleConfigReader.to_bool(self._ensure_ascendent_compatibility(content.get('include extra macros')),
+																   config.generation.include_extra_macros)
 
 		for p in OldStyleConfigReader.to_path_list(self._ensure_ascendent_compatibility(content.get('image directory'))):
 			config.translators.add_image_path(self.to_path(p))
 
 		config.translators.is_translator_enable = OldStyleConfigReader.to_bool(self._ensure_ascendent_compatibility(content.get('generate images')), config.translators.is_translator_enable)
-		
-		config.include_extra_macros = OldStyleConfigReader.to_bool(self._ensure_ascendent_compatibility(content.get('include extra macros')), config.generation.include_extra_macros)
+
 		generation_type = OldStyleConfigReader.to_kw(self._ensure_ascendent_compatibility(content.get('generation type')), 'pdf' if config.generation.pdf_mode else 'ps')
 		if generation_type == 'dvi' or generation_type == 'ps':
 			config.generation.pdf_mode = False
@@ -427,10 +427,12 @@ class OldStyleConfigReader:
 		"""
 		if config is None:
 			config = Config()
+		assert config is not None
 		if filename and os.path.isfile(filename) and os.access(filename, os.R_OK):
 			try:
-				self.read(filename, TranslatorLevel.DOCUMENT, config)
+				return self.read(filename, TranslatorLevel.DOCUMENT, config)
 			except:
 				pass
 		return config
+
 		

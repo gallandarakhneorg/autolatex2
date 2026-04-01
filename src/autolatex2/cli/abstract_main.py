@@ -260,7 +260,7 @@ class AbstractAutoLaTeXMain(ABC):
 					config_file = outer._detect_autolatex_configuration_file(outer.configuration.document_directory)
 				if config_file:
 					config_reader = OldStyleConfigReader()
-					config_reader.read_document_config_safely(config_file, outer.configuration)
+					outer.configuration = config_reader.read_document_config_safely(config_file, outer.configuration)
 					outer.__read_document_configuration = False
 		path_group.add_argument('--search-project-from',
 			action=SearchProjectFromAction, 
@@ -874,7 +874,7 @@ class AbstractAutoLaTeXMain(ABC):
 			config_file = self._detect_autolatex_configuration_file(self.__configuration.document_directory)
 			if config_file:
 				config_reader = OldStyleConfigReader()
-				config_reader.read_document_config_safely(config_file, self.__configuration)
+				self.__configuration = config_reader.read_document_config_safely(config_file, self.__configuration)
 
 		# Remove positional arguments if they are not recognized (other args)
 		positional_arguments = [arg for arg in positional_arguments if arg not in other_args]
