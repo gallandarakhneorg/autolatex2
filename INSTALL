@@ -23,6 +23,7 @@ Additionally, the installation script calls the external tool "pod2man" for gene
 After installation, AutoLaTeX needs the following Python modules to be run:
 
 	* abc
+	* argcomplete
 	* argparse
 	* collections
 	* configparser

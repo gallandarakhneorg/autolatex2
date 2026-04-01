@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# PYTHON_ARGCOMPLETE_OK
 #
 # Copyright (C) 1998-2026 Stephane Galland <galland@arakhne.org>
 #
@@ -30,6 +31,7 @@ import logging
 import os
 import platform
 import sys
+import argcomplete
 from argparse import Namespace
 from typing import Any, override
 
@@ -862,6 +864,9 @@ class AbstractAutoLaTeXMain(ABC):
 			default_action = self.configuration.default_cli_action
 			if default_action:
 				positional_arguments.insert(0, default_action)
+
+		# Enable auto-completion of the command-line arguments on Linux systems
+		argcomplete.autocomplete(self._cli_parser)
 
 		if strict_arguments:
 			parsed_args = self._cli_parser.parse_args(args=script_cli)

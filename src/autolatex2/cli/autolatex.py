@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# PYTHON_ARGCOMPLETE_OK
 #
 # Copyright (C) 1998-2026 Stephane Galland <galland@arakhne.org>
 #
