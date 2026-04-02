@@ -102,11 +102,15 @@ class PostBuildCommand(build_py):
 		with open(in_sty, 'rt') as f_in:
 			content = f_in.read()
 		now = datetime.now()
-		year = str(now.year)
-		month = str(now.month)
-		day = str(now.day)
-		content = re.sub('autolatex@package@ver\\{[^}]+}', 'autolatex@package@ver{%s/%s/%s}' % (year, month, day), content, re.DOTALL)
-		content = re.sub('autolatexversion\\{[^}]+}', 'autolatexversion{%s}' % str(PROGRAM_VERSION), content, re.DOTALL)
+		year = int(now.year)
+		month = int(now.month)
+		day = int(now.day)
+		content = re.sub('autolatex@package@ver\\{[^}]+}',
+						 'autolatex@package@ver{%s/%s/%s}' % (f'{year:04d}', f'{month:02d}', f'{day:02d}'),
+						 content, re.DOTALL)
+		content = re.sub('autolatexversion\\{[^}]+}',
+						 'autolatexversion{%s}' % str(PROGRAM_VERSION),
+						 content, re.DOTALL)
 		print("\twriting %s" % out_sty)
 		with open(out_sty, 'wt') as f_out:
 			f_out.write(content)
@@ -120,10 +124,12 @@ class PostBuildCommand(build_py):
 		with open(in_sty, 'rt') as f_in:
 			content = f_in.read()
 		now = datetime.now()
-		year = str(now.year)
-		month = str(now.month)
-		day = str(now.day)
-		content = re.sub('autolatexbeamer@package@ver\\{[^}]+}', 'autolatexbeamer@package@ver{%s/%s/%s}' % (year, month, day), content, re.DOTALL)
+		year = int(now.year)
+		month = int(now.month)
+		day = int(now.day)
+		content = re.sub('autolatexbeamer@package@ver\\{[^}]+}',
+						 'autolatexbeamer@package@ver{%s/%s/%s}' % (f'{year:04d}', f'{month:02d}', f'{day:02d}'),
+						 content, re.DOTALL)
 		print("\twriting %s" % out_sty)
 		with open(out_sty, 'wt') as f_out:
 			f_out.write(content)

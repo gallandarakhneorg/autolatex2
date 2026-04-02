@@ -97,10 +97,4 @@ usr/lib/python3/dist-packages/autolatex2/utils/extprint.py
 usr/lib/python3/dist-packages/autolatex2/utils/i18n.py
 usr/lib/python3/dist-packages/autolatex2/utils/runner.py
 usr/lib/python3/dist-packages/autolatex2/utils/utilfunctions.py
-usr/lib/python3/dist-packages/autolatex-50.0.egg-info
-usr/lib/python3/dist-packages/autolatex-50.0.egg-info/PKG-INFO
-usr/lib/python3/dist-packages/autolatex-50.0.egg-info/requires.txt
-usr/lib/python3/dist-packages/autolatex-50.0.egg-info/dependency_links.txt
-usr/lib/python3/dist-packages/autolatex-50.0.egg-info/entry_points.txt
-usr/lib/python3/dist-packages/autolatex-50.0.egg-info/top_level.txt
-
+usr/lib/python3/dist-packages/autolatex-*.egg-info/*

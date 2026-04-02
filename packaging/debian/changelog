@@ -1,3 +1,9 @@
+autolatex (50.1-0arakhne0) noble; urgency=low
+
+  * Fixing the invalid date format in the header of the STY files.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Thu, 02 Apr 2026 21:19:10 +0800
+
 autolatex (50.0-0arakhne3) noble; urgency=low
 
   * Add the missed package autolatex-beamer
