@@ -6,10 +6,10 @@ case "$1" in
         ;;
     rtupdate)
         # recompile for the new default interpreter
-        py3compile -p autolatex-astah-sysml /usr/lib/python3/dist-packages/autolatex2/translators/astah
+        py3compile -p autolatex-astah-sysml /usr/lib/python3/dist-packages/autolatex2/translators/astah-sysml
         ;;
     post-rtupdate)
         # clean up .pyc files for the old interpreter
-        py3clean -p autolatex-astah-sysml /usr/lib/python3/dist-packages/autolatex2/translators/astah
+        py3clean -p autolatex-astah-sysml /usr/lib/python3/dist-packages/autolatex2/translators/astah-sysml
         ;;
 esac

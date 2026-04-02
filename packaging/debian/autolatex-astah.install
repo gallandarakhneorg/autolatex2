@@ -1,5 +1,5 @@
 usr/share/python3/runtime.d/autolatex-astah.rtupdate
-usr/lib/python3/dist-packages/autolatex2/translators/astah/astah2png.transdef2
-usr/lib/python3/dist-packages/autolatex2/translators/astah/__init__.py
-usr/lib/python3/dist-packages/autolatex2/translators/astah/astah2pdf.transdef2
+usr/lib/python3/dist-packages/autolatex2/translators/astah-uml/__init__.py
+usr/lib/python3/dist-packages/autolatex2/translators/astah-uml/astah2png.transdef2
+usr/lib/python3/dist-packages/autolatex2/translators/astah-uml/astah2pdf.transdef2
 

@@ -1,3 +1,15 @@
+autolatex (50.0-0arakhne2) noble; urgency=low
+
+  * Fixing the Debian packaging.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Thu, 02 Apr 2026 18:56:39 +0800
+
+autolatex (50.0-0arakhne1) noble; urgency=low
+
+  * Fixing the Debian packaging.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Thu, 02 Apr 2026 15:56:32 +0800
+
 autolatex (50.0-0arakhne0) noble; urgency=low
 
   * xenial -> noble

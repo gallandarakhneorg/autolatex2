@@ -4,7 +4,7 @@ set -e
 case "$1" in
     remove|upgrade|deconfigure)
         # Remove byte-compiled Python files
-        py3clean -p autolatex-astah-sysml /usr/lib/python3/dist-packages/autolatex2/translators/astah
+        py3clean -p autolatex-astah-sysml /usr/lib/python3/dist-packages/autolatex2/translators/astah-sysml
         ;;
 
     failed-upgrade)

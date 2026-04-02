@@ -2,13 +2,26 @@
 .svn/
 .cvs/
 .git/
+
+# Python Eggs
 **/__pycache__/**
-build/
-dist/
 **/*.egg-info/**
 .eggs
 
+# Python Setup
+build/
+dist/
+
+# Debian
+packaging/upstream/**
+autolatex*.deb
+autolatex*.dsc
+autolatex*.changes
+autolatex*.buildinfo
+autolatex*.tar.gz
+
 # IDE files
+autolatex.sh
 .idea
 .jedi
 
