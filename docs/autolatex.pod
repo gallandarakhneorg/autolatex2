@@ -1380,16 +1380,22 @@ TeX part:
 
 =back
 
-=head1 LATEX STYLE PACKAGE
+=head1 LATEX PACKAGES
 
-AutoLaTeX provides a LaTeX style package called F<autolatex.sty>, which includes the following functions:
+AutoLaTeX provides two LaTeX packages called F<autolatex.sty> and F<autolatex-beamer.sty>. You could create a
+copy of these packages in the folder of your document by using the command-line's commands B<createsty> and
+B<createbeamer>
+
+=head2 autolatex.sty
+
+The LaTeX package F<autolatex.sty> provides the following TeX macros:
 
 =over 4
 
 =item B<\includegraphicswtex[options]{filename}>
 
-Includes a figure with combined TeX macros. The filename must have one of the following extensions: F<.pdftex_t>,
-F<.pdftex_t>, F<.pstex_t>, F<.pdf_tex>, F<.ps_tex>.
+Includes a figure with combined TeX macros. The file on the file system must have a name with one of the extensions
+defined with B<\DeclareGraphicsExtensionsWtex>.
 The B<options> must be either F<width=XX> or F<height=XX>, where F<XX> is a length.
 
 =item B<\includefigurewtex[options]{filename}>
@@ -1399,8 +1405,8 @@ Same as B<\includegraphicswtex>.
 =item B<\includeanimatedfigure[options]{filename}>
 
 Includes the layers of a figure in a Beamer presentation. The layers are assumed to be in separate PDF files.
-The figure is a TeX file that includes the PDF files in a Beamer-compatible environment. The filename must
-have one of the following extensions: F<.pdftex_t>, F<.pdftex_t>, F<.pstex_t>, F<.pdf_tex>, F<.ps_tex>.
+The figure is a TeX file that includes the PDF files in a Beamer-compatible environment. The file on the file system
+must have a name with one of the extensions defined with B<\DeclareGraphicsExtensionsWtex>.
 The B<options> must be either F<width=XX> or F<height=XX>, where F<XX> is a length.
 
 By default, a layer replaces the previous layer when displayed. You can change the overlay specification by
@@ -1412,7 +1418,7 @@ on which the layer appears in Beamer. For example, F<E<lt>2E<gt>> means "only on
 
 Includes the layers of a figure combined with TeX macros in a Beamer presentation. The layers are assumed to be in
 separate PDF files. The figure is a TeX file that includes the PDF files in a Beamer-compatible environment. The
-filename must have one of the following extensions: F<.pdftex_t>, F<.pdftex_t>, F<.pstex_t>, F<.pdf_tex>, F<.ps_tex>.
+file on the file system must have a name with one of the extensions defined with B<\DeclareGraphicsExtensionsWtex>.
 The B<options> must be either F<width=XX> or F<height=XX>, where F<XX> is a length.
 
 By default, a layer replaces the previous layer when displayed. You can change the overlay specification by adding the
@@ -1422,11 +1428,56 @@ the layer appears in Beamer. For example, F<E<lt>2E<gt>> means "only on slide 2"
 
 =item B<\DeclareGraphicsExtensionsWtex{extensions}>
 
-Defines the filename extensions used by B<\includegraphicswtex> to locate figure files.
+Defines the filename extensions used by B<\includegraphicswtex> to locate figure files. The extensions may be separated
+by coma ',' characters. By default, the declared filename extensions are: F<.pdftex_t>, F<.pstex_t>, F<.pdf_tex>,
+and F<.ps_tex>.
 
 =item B<\graphicspath{{path1},{path2}...}>
 
-This macro is from the TeX package 'graphicx.sty'. It defines the search paths for figures.
+This macro is from the TeX package 'graphicx.sty'. It defines the search paths for figures. You could specify multiple
+paths by separating them with coma ',' characters. It is recommended to enclose each path with block characters '{' and
+'}'. The figures' files are searched in the different search paths, in the order specified in the argument of
+B<\graphicspath>.
+
+=back
+
+=head2 autolatex-beamer.sty
+
+The LaTeX package F<autolatex-beamer.sty> provides the following TeX macros:
+
+=over 4
+
+=item B<\animatedfigureslideE<lt>framesE<gt>[options]{title}{filename}>
+
+Create a frame/slide with the given title and that contains only a single figure that is an I<animated figure> according to the
+macros provided by the F<autolatex.sty> package.
+
+The B<frames> parameter is optional and specify the frame numbers that must be displayed from the animated figure. Each
+frame corresponds to a layer from the animated figure. By default, a layer replaces the previous layer when displayed.
+You can specify the frames to be shown by adding the string B<E<lt>framesE<gt>> This F<frames> part defines the slide
+numbers on which the layer appears in Beamer. For example, F<E<lt>2E<gt>> means "only on slide 2"; F<E<lt>6-E<gt>> means
+"from slide 6 to the end."
+
+The B<options> must be either F<width=XX>, F<height=XX>, F<label=ID> or F<subtitle=TXT>, where F<XX> is a length, F<ID>
+is the identifier of the slide to be served as its label, and F<TXT> is a regular text.
+
+The B<title> is used as the main title of the created slide.
+
+The B<filename> is the fielname or the path to animated figure. The file on the file system must have a name with one
+ of the extensions defined with B<\DeclareGraphicsExtensionsWtex>.
+
+
+=item B<\autolatexsettoslidecontentwidth{variable}>
+
+This macro sets the value of the specified length variable (usually defined with a B<\newlength>) to the
+I<width of the text part> of a slide. This macro may be redefined by TeX Beamer templates for changing the computing
+of this width according to th template's graphical structure.
+
+=item B<\autolatexsettoslidecontentheight{variable}>
+
+This macro sets the value of the specified length variable (usually defined with a B<\newlength>) to the
+I<height of the text part> of a slide. This macro may be redefined by TeX Beamer templates for changing the computing
+of this height according to th template's graphical structure.
 
 =back
 
@@ -1621,9 +1672,7 @@ standard TeX distributions. They are usually part of TeX templates provided by t
 
 =over 4
 
-=item * B<\animatedfigureslide[options]{title}{path}>: a Beamer slide that contains a single animated figure.
-The concept of animated figure is based on the AutoLaTeX translators "+layers" as defined above.
-Provided by the TeX-templates from L<https://github.com/gallandarakhneorg/tex-templates>.
+=item * B<\animatedfigureslide[options]{title}{path}>: See above. Provided by AutoLaTeX.
 
 =item * B<\begin{bibliographysection}\end{bibliographysection}>: equivalent to B<\begin{bibunit}\end{bibunit}> with a bibliography slide added at the end of the section with B<\bibliographyslide>.
 Provided by the TeX-templates from L<https://github.com/gallandarakhneorg/tex-templates>.
