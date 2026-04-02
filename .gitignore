@@ -9,6 +9,7 @@
 .eggs
 
 # Python Setup
+bin/
 build/
 dist/
 

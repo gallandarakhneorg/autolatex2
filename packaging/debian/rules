@@ -44,6 +44,7 @@ override_dh_auto_install:
 	@echo "Copying autolatex.sty in TeX folder"; \
 	install -d "$(CURDIR)/debian/tmp/usr/share/texmf/tex/latex/autolatex"; \
 	install "$(CURDIR)/debian/tmp/usr/lib/python3/dist-packages/autolatex2/tex/autolatex.sty" "$(CURDIR)/debian/tmp/usr/share/texmf/tex/latex/autolatex/autolatex.sty"
+	install "$(CURDIR)/debian/tmp/usr/lib/python3/dist-packages/autolatex2/tex/autolatex-beamer.sty" "$(CURDIR)/debian/tmp/usr/share/texmf/tex/latex/autolatex/autolatex-beamer.sty"
 	#
 	dh_auto_install
 

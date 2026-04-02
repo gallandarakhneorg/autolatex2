@@ -1,3 +1,9 @@
+autolatex (50.0-0arakhne3) noble; urgency=low
+
+  * Add the missed package autolatex-beamer
+
+ -- Stephane GALLAND <galland@arakhne.org>  Thu, 02 Apr 2026 19:41:33 +0800
+
 autolatex (50.0-0arakhne2) noble; urgency=low
 
   * Fixing the Debian packaging.

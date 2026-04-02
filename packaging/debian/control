@@ -11,7 +11,7 @@ Homepage: https://github.com/gallandarakhneorg/tex-templates
 
 Package: autolatex-full
 Architecture: all
-Depends: autolatex-recommended (= ${source:Version}), autolatex-astah (= ${source:Version}), autolatex-astah-sysml (= ${source:Version}), autolatex-asymptote (= ${source:Version}), autolatex-texify (= ${source:Version}), autolatex-dia (= ${source:Version}), autolatex-fig2dev (= ${source:Version}), autolatex-gle (= ${source:Version}), autolatex-octave (= ${source:Version}), autolatex-umbrello (= ${source:Version})
+Depends: autolatex-recommended (= ${source:Version}), autolatex-beamer (= ${source:Version}), autolatex-astah (= ${source:Version}), autolatex-astah-sysml (= ${source:Version}), autolatex-asymptote (= ${source:Version}), autolatex-texify (= ${source:Version}), autolatex-dia (= ${source:Version}), autolatex-fig2dev (= ${source:Version}), autolatex-gle (= ${source:Version}), autolatex-octave (= ${source:Version}), autolatex-umbrello (= ${source:Version})
 Description: AutoLaTeX: metapackage pulling in all components of AutoLaTeX
  AutoLaTeX is a tool for managing small to large sized LaTeX documents.
  The user can easily perform all required steps to do such tasks as: preview 
@@ -66,6 +66,22 @@ Recommends: autolatex-base (= ${source:Version})
 Description: LaTeX package for AutoLaTeX
  This package provides a LaTeX style that provides several useful LaTeX commands
  such as inclusion of figures with embedded TeX macros.
+ .
+ AutoLaTeX is a tool for managing small to large sized LaTeX documents.
+ The user can easily perform all required steps to do such tasks as: preview 
+ the document, or produce a PDF file. AutoLaTeX will keep track of files 
+ that have changed and how to run the various programs that are needed 
+ to produce the output. One of the best feature of AutoLaTeX is to provide 
+ translator rules (aka. translators) to automatically generate the figures 
+ which will be included into the PDF.
+
+Package: autolatex-beamer
+Architecture: all
+Pre-Depends: python3 (>= 3.12), debconf, po-debconf
+Depends: texlive, texlive-extra-utils, texlive-latex-base
+Recommends: autolatex-sty (= ${source:Version}), texlive-latex-recommended
+Description: LaTeX Beamer package for AutoLaTeX
+ This package provides an extension for LaTeX Beamer style.
  .
  AutoLaTeX is a tool for managing small to large sized LaTeX documents.
  The user can easily perform all required steps to do such tasks as: preview 
