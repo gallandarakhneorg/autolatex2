@@ -17,10 +17,11 @@ usr/lib/python3/dist-packages/autolatex2/translator/interpreters/javascriptinter
 usr/lib/python3/dist-packages/autolatex2/translator/__init__.py
 usr/lib/python3/dist-packages/autolatex2/translator/translatorrepository.py
 usr/lib/python3/dist-packages/autolatex2/translator/translatorobj.py
+usr/lib/python3/dist-packages/autolatex2/translators/__init__.py
 usr/lib/python3/dist-packages/autolatex2/translators/postscript/__init__.py
 usr/lib/python3/dist-packages/autolatex2/translators/postscript/eps2pdf_epstopdf.transdef2
-usr/lib/python3/dist-packages/autolatex2/translators/tikz/tikz2pdf.transdef2
 usr/lib/python3/dist-packages/autolatex2/translators/tikz/__init__.py
+usr/lib/python3/dist-packages/autolatex2/translators/tikz/tikz2pdf.transdef2
 usr/lib/python3/dist-packages/autolatex2/cli/abstract_actions.py
 usr/lib/python3/dist-packages/autolatex2/cli/commands/all.py
 usr/lib/python3/dist-packages/autolatex2/cli/commands/images.py
@@ -51,7 +52,6 @@ usr/lib/python3/dist-packages/autolatex2/cli/__init__.py
 usr/lib/python3/dist-packages/autolatex2/cli/exiters.py
 usr/lib/python3/dist-packages/autolatex2/cli/autolatexcommands.py
 usr/lib/python3/dist-packages/autolatex2/cli/autolatex.py
-usr/lib/python3/dist-packages/autolatex2/translators/__init__.py
 usr/lib/python3/dist-packages/autolatex2/default.ist
 usr/lib/python3/dist-packages/autolatex2/__init__.py
 usr/lib/python3/dist-packages/autolatex2/default.cfg
@@ -99,5 +99,4 @@ usr/lib/python3/dist-packages/autolatex-50.0.egg-info/requires.txt
 usr/lib/python3/dist-packages/autolatex-50.0.egg-info/dependency_links.txt
 usr/lib/python3/dist-packages/autolatex-50.0.egg-info/entry_points.txt
 usr/lib/python3/dist-packages/autolatex-50.0.egg-info/top_level.txt
-usr/lib/python3/dist-packages/autolatex2/translators/__init__.py
 
