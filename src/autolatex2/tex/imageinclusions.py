@@ -273,6 +273,16 @@ class ImageInclusions(Observer):
 		return raw_text
 
 	@expand_function(extra_macro=True)
+	def _expand__animatedfigureslide(self, parser : Parser, parameters : list[TeXMacroParameter]) -> str | None:
+		return self._expand__figureslide(parser, parameters)
+
+	@expand_function(extra_macro=True)
+	def _expand__figureslide(self, parser : Parser, parameters : list[TeXMacroParameter]) -> str | None:
+		assert len(parameters) > 2
+		self.__find_picture(parameters[2].text)
+		return None
+
+	@expand_function(extra_macro=True)
 	def _expand__includeanimatedfigure(self, parser : Parser, parameters : list[TeXMacroParameter]) -> str | None:
 		return self._expand__includegraphics(parser, parameters)
 
@@ -297,6 +307,13 @@ class ImageInclusions(Observer):
 
 	# noinspection PyUnusedLocal
 	@expand_function
+	def _expand__libraryslide(self, parser : Parser, parameters : list[TeXMacroParameter]) -> str | None:
+		assert len(parameters) > 1
+		self.__find_picture(parameters[1].text)
+		return None
+
+	# noinspection PyUnusedLocal
+	@expand_function
 	def _expand__graphicspath(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
 		assert len(parameters) > 1
 		t = parameters[1].text
@@ -313,15 +330,14 @@ class ImageInclusions(Observer):
 
 	@expand_function(extra_macro=True)
 	def _expand__mfigurestar(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
-		self._expand__mfigure(parser, parameters)
-		return None
-
-	@expand_function(extra_macro=True)
-	def _expand__mfiguretex(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
 		return self._expand__mfigure(parser, parameters)
 
 	@expand_function(extra_macro=True)
-	def _expand__mfiguretexstar(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
+	def _expand__mfigurewtex(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
+		return self._expand__mfigure(parser, parameters)
+
+	@expand_function(extra_macro=True)
+	def _expand__mfigurewtexstar(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
 		return self._expand__mfigure(parser, parameters)
 
 	# noinspection PyUnusedLocal
@@ -338,8 +354,22 @@ class ImageInclusions(Observer):
 	# noinspection PyUnusedLocal
 	@expand_function(extra_macro=True)
 	def _expand__msubfigure(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
-		assert len(parameters) > 2
-		self.__find_picture(parameters[2].text)
+		assert len(parameters) > 0
+		self.__find_picture(parameters[0].text)
+		return None
+
+	# noinspection PyUnusedLocal
+	@expand_function(extra_macro=True)
+	def _expand__partnerlogo(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
+		assert len(parameters) > 0
+		self.__find_picture(parameters[0].text)
+		return None
+
+	# noinspection PyUnusedLocal
+	@expand_function(extra_macro=True)
+	def _expand__resolvepicturename(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
+		assert len(parameters) > 0
+		self.__find_picture(parameters[0].text)
 		return None
 
 	# noinspection PyUnusedLocal
