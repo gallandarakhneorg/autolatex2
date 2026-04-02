@@ -1380,6 +1380,86 @@ TeX part:
 
 =back
 
+=head1 ANIMATED FIGURES IN AUTOLATEX
+
+Animated figures represent a powerful mechanism for constructing dynamic visual content within LaTeX Beamer
+presentations. Unlike conventional static graphics, an animated figure consists of multiple visual layers that
+can appear progressively across the slides of a single frame. This approach enables the presenter to control
+the incremental disclosure of complex diagrams, illustrations, or schematics, thereby guiding the audience
+through a narrative sequence without requiring separate image files for each step.
+
+AutoLaTeX automates the generation of such figures by leveraging layered Scalable Vector Graphics (SVG) files
+and translating them into a Beamer-compatible format. The underlying principle relies on the mapping between
+layers in an SVG document and overlay specifications in Beamer. Each layer within the SVG file corresponds to
+a distinct visual element that may be shown or hidden on specific slides. To control this behavior, the author
+embeds a frame specification directly into the layer's name. This specification follows the format F<E<lt>specE<gt>>,
+where F<spec> defines a set of slide numbers. The syntax accommodates single numbers (e.g., F<E<lt>2E<gt>>),
+inclusive ranges (e.g., F<E<lt>3-6E<gt>>), open-ended ranges (e.g., F<E<lt>5-E<gt>> for all slides from five onward,
+or F<E<lt>-8E<gt>> for slides up to and including eight), and combinations thereof (separated by coma characters).
+When the SVG is processed by the appropriate AutoLaTeX translator (such as F<svg2pdf+layers_inkscape>) these
+specifications are extracted and used to generate a Beamer overlay sequence. The resulting output comprises a set
+of PDF files, each corresponding to one layer, along with a TeX file that orchestrates their inclusion using
+Beamer's overlay mechanisms. Consequently, when the presentation is compiled, the figure animates: each layer appears
+exactly on the slides designated by its embedded specification, and layers without a specification typically appear
+from the beginning.
+
+Integration with Beamer is achieved through the LaTeX macros provided by the F<autolatex-beamer.sty> package (see
+below).
+
+Creating an animated figure suitable for AutoLaTeX and Beamer begins with designing the vector graphic in a tool that
+supports layers, such as Inkscape. The author constructs the diagram as a set of layers, where each layer represents
+one logical step of the animation. For instance, a technical drawing might have a base layer containing the background
+and axes, followed by successive layers adding curves, labels, or annotations. The crucial step lies in naming each
+layer to encode its appearance schedule. The author opens the layer properties dialog and sets the layer name to
+include the desired frame specification, such as “Base layer” for a layer that should always appear, or
+“Data curve <2-4>” for a layer that should appear only on slides two through four. After naming, the author saves the
+file with an extension that triggers the appropriate translator; typically, the F<+layers.svg> extension is used to
+indicate that the file contains layered content intended for animation. AutoLaTeX's translator will then parse the
+layer names, generate the overlay structure, and produce the final assets ready for inclusion in the Beamer document.
+
+This workflow combines the expressive power of vector graphics editing with the precise overlay control of Beamer,
+all automated by AutoLaTeX. It eliminates the manual effort of exporting multiple static images and coding their
+appearance order, thereby streamlining the creation of sophisticated, animated presentations.
+
+=head1 FIGURES WITH EMBEDDED TEX CODE
+
+In scientific and technical documents, figures often require textual elements that demand the typographic quality and
+mathematical capabilities of LaTeX. Standard graphics formats such as Encapsulated PostScript (EPS) or Scalable Vector
+Graphics (SVG) typically render text using fonts and formatting determined by the drawing application, which may not
+align with the document's overall aesthetic or may lack support for complex mathematical notation. To overcome this
+limitation, many tools, including AutoLaTeX, provide a mechanism for embedding TeX and LaTeX macros directly into the
+textual components of vector figures. When such a figure is processed, the textual elements are extracted, typeset by
+the LaTeX engine, and reintegrated into the final graphic, ensuring perfect harmony with the surrounding document.
+
+With AutoLaTeX, the underlying principle rests on a class of translators that produce dual output: a PDF file
+containing the graphical elements (lines, shapes, images) and a companion TeX file that defines the textual overlays.
+The TeX file contains the macros necessary to position and typeset the text at precisely the coordinates intended by
+the figure's author. During document compilation, the LaTeX engine reads this TeX file and renders the text using the
+same font settings, mathematics mode, and cross‑referencing capabilities as the main document. This approach preserves
+the vector quality of the graphics while achieving seamless integration of LaTeX‑typeset text.
+
+Several translators within AutoLaTeX support this dual‑output mode. For diagrams created with Xfig, the translator
+B<fig2pdf+tex> processes files with extensions such as B<+tex.fig>. The Xfig author must designate text objects that
+should be treated as LaTeX code by marking them in the editor (see documentation of Xfig). The translator extracts
+these objects, generates a separate TeX file, and produces a PDF of the graphic stripped of the original text.
+In Inkscape, the author creates text elements and applies the "LaTeX" rendering mode (via the “Text” menu or by setting
+ the “LaTeX” output option in the export dialog). The translator then separates the graphical paths from the textual
+ content, producing a PDF of the graphic and a F<.pdftex_t> file containing the LaTeX code for the text.
+
+Once the source figure has been prepared and saved with the appropriate extension, AutoLaTeX's translator system takes
+over. Upon detecting a change in the source file, the translator executes the necessary external commands (Inkscape,
+fig2dev, gnuplot, etc.) to generate the PDF and the TeX companion file. During the LaTeX compilation of the main
+document, these files are included using specialized macros. The F<autolatex.sty> package provides
+B<\includegraphicswtex{filename}>, which behaves like the standard B<\includegraphics> but automatically incorporates
+the associated TeX macros from the companion file. The graphics path resolution for these macros is governed by
+B<\DeclareGraphicsExtensionsWtex>, which by default includes F<.pdftex_t>, F<.pstex_t>, F<.pdf_tex>, and F<.ps_tex>.
+
+The advantages of this approach extend beyond mere aesthetic consistency. Mathematical formulas, chemical notations,
+and custom LaTeX commands appear exactly as they do in the body text, with proper font selection, sizing, and spacing.
+References to equations, sections, or bibliographic items within figure labels become possible because the text is
+typeset at compilation time and can incorporate cross‑references. Moreover, the resulting PDF graphics remain fully
+scalable and resolution‑independent, preserving the crispness of both lines and text under zoom.
+
 =head1 LATEX PACKAGES
 
 AutoLaTeX provides two LaTeX packages called F<autolatex.sty> and F<autolatex-beamer.sty>. You could create a

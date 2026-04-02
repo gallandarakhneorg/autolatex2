@@ -921,15 +921,140 @@ AUTO GENERATION OF FIGURES
         Input format: .vsd .vdx .vsdx
         Output format: .pdf
 
-LATEX STYLE PACKAGE
-    AutoLaTeX provides a LaTeX style package called autolatex.sty, which
-    includes the following functions:
+ANIMATED FIGURES IN AUTOLATEX
+    Animated figures represent a powerful mechanism for constructing dynamic
+    visual content within LaTeX Beamer presentations. Unlike conventional
+    static graphics, an animated figure consists of multiple visual layers
+    that can appear progressively across the slides of a single frame. This
+    approach enables the presenter to control the incremental disclosure of
+    complex diagrams, illustrations, or schematics, thereby guiding the
+    audience through a narrative sequence without requiring separate image
+    files for each step.
+
+    AutoLaTeX automates the generation of such figures by leveraging layered
+    Scalable Vector Graphics (SVG) files and translating them into a
+    Beamer-compatible format. The underlying principle relies on the mapping
+    between layers in an SVG document and overlay specifications in Beamer.
+    Each layer within the SVG file corresponds to a distinct visual element
+    that may be shown or hidden on specific slides. To control this
+    behavior, the author embeds a frame specification directly into the
+    layer's name. This specification follows the format <spec>, where spec
+    defines a set of slide numbers. The syntax accommodates single numbers
+    (e.g., <2>), inclusive ranges (e.g., <3-6>), open-ended ranges (e.g.,
+    <5-> for all slides from five onward, or <-8> for slides up to and
+    including eight), and combinations thereof (separated by coma
+    characters). When the SVG is processed by the appropriate AutoLaTeX
+    translator (such as svg2pdf+layers_inkscape) these specifications are
+    extracted and used to generate a Beamer overlay sequence. The resulting
+    output comprises a set of PDF files, each corresponding to one layer,
+    along with a TeX file that orchestrates their inclusion using Beamer's
+    overlay mechanisms. Consequently, when the presentation is compiled, the
+    figure animates: each layer appears exactly on the slides designated by
+    its embedded specification, and layers without a specification typically
+    appear from the beginning.
+
+    Integration with Beamer is achieved through the LaTeX macros provided by
+    the autolatex-beamer.sty package (see below).
+
+    Creating an animated figure suitable for AutoLaTeX and Beamer begins
+    with designing the vector graphic in a tool that supports layers, such
+    as Inkscape. The author constructs the diagram as a set of layers, where
+    each layer represents one logical step of the animation. For instance, a
+    technical drawing might have a base layer containing the background and
+    axes, followed by successive layers adding curves, labels, or
+    annotations. The crucial step lies in naming each layer to encode its
+    appearance schedule. The author opens the layer properties dialog and
+    sets the layer name to include the desired frame specification, such as
+    “Base layer” for a layer that should always appear, or “Data curve
+    <2-4>” for a layer that should appear only on slides two through four.
+    After naming, the author saves the file with an extension that triggers
+    the appropriate translator; typically, the +layers.svg extension is used
+    to indicate that the file contains layered content intended for
+    animation. AutoLaTeX's translator will then parse the layer names,
+    generate the overlay structure, and produce the final assets ready for
+    inclusion in the Beamer document.
+
+    This workflow combines the expressive power of vector graphics editing
+    with the precise overlay control of Beamer, all automated by AutoLaTeX.
+    It eliminates the manual effort of exporting multiple static images and
+    coding their appearance order, thereby streamlining the creation of
+    sophisticated, animated presentations.
+
+FIGURES WITH EMBEDDED TEX CODE
+    In scientific and technical documents, figures often require textual
+    elements that demand the typographic quality and mathematical
+    capabilities of LaTeX. Standard graphics formats such as Encapsulated
+    PostScript (EPS) or Scalable Vector Graphics (SVG) typically render text
+    using fonts and formatting determined by the drawing application, which
+    may not align with the document's overall aesthetic or may lack support
+    for complex mathematical notation. To overcome this limitation, many
+    tools, including AutoLaTeX, provide a mechanism for embedding TeX and
+    LaTeX macros directly into the textual components of vector figures.
+    When such a figure is processed, the textual elements are extracted,
+    typeset by the LaTeX engine, and reintegrated into the final graphic,
+    ensuring perfect harmony with the surrounding document.
+
+    With AutoLaTeX, the underlying principle rests on a class of translators
+    that produce dual output: a PDF file containing the graphical elements
+    (lines, shapes, images) and a companion TeX file that defines the
+    textual overlays. The TeX file contains the macros necessary to position
+    and typeset the text at precisely the coordinates intended by the
+    figure's author. During document compilation, the LaTeX engine reads
+    this TeX file and renders the text using the same font settings,
+    mathematics mode, and cross‑referencing capabilities as the main
+    document. This approach preserves the vector quality of the graphics
+    while achieving seamless integration of LaTeX‑typeset text.
+
+    Several translators within AutoLaTeX support this dual‑output mode. For
+    diagrams created with Xfig, the translator fig2pdf+tex processes files
+    with extensions such as +tex.fig. The Xfig author must designate text
+    objects that should be treated as LaTeX code by marking them in the
+    editor (see documentation of Xfig). The translator extracts these
+    objects, generates a separate TeX file, and produces a PDF of the
+    graphic stripped of the original text. In Inkscape, the author creates
+    text elements and applies the "LaTeX" rendering mode (via the “Text”
+    menu or by setting the “LaTeX” output option in the export dialog). The
+    translator then separates the graphical paths from the textual content,
+    producing a PDF of the graphic and a .pdftex_t file containing the LaTeX
+    code for the text.
+
+    Once the source figure has been prepared and saved with the appropriate
+    extension, AutoLaTeX's translator system takes over. Upon detecting a
+    change in the source file, the translator executes the necessary
+    external commands (Inkscape, fig2dev, gnuplot, etc.) to generate the PDF
+    and the TeX companion file. During the LaTeX compilation of the main
+    document, these files are included using specialized macros. The
+    autolatex.sty package provides \includegraphicswtex{filename}, which
+    behaves like the standard \includegraphics but automatically
+    incorporates the associated TeX macros from the companion file. The
+    graphics path resolution for these macros is governed by
+    \DeclareGraphicsExtensionsWtex, which by default includes .pdftex_t,
+    .pstex_t, .pdf_tex, and .ps_tex.
+
+    The advantages of this approach extend beyond mere aesthetic
+    consistency. Mathematical formulas, chemical notations, and custom LaTeX
+    commands appear exactly as they do in the body text, with proper font
+    selection, sizing, and spacing. References to equations, sections, or
+    bibliographic items within figure labels become possible because the
+    text is typeset at compilation time and can incorporate
+    cross‑references. Moreover, the resulting PDF graphics remain fully
+    scalable and resolution‑independent, preserving the crispness of both
+    lines and text under zoom.
+
+LATEX PACKAGES
+    AutoLaTeX provides two LaTeX packages called autolatex.sty and
+    autolatex-beamer.sty. You could create a copy of these packages in the
+    folder of your document by using the command-line's commands createsty
+    and createbeamer
+
+  autolatex.sty
+    The LaTeX package autolatex.sty provides the following TeX macros:
 
     \includegraphicswtex[options]{filename}
-        Includes a figure with combined TeX macros. The filename must have
-        one of the following extensions: .pdftex_t, .pdftex_t, .pstex_t,
-        .pdf_tex, .ps_tex. The options must be either width=XX or height=XX,
-        where XX is a length.
+        Includes a figure with combined TeX macros. The file on the file
+        system must have a name with one of the extensions defined with
+        \DeclareGraphicsExtensionsWtex. The options must be either width=XX
+        or height=XX, where XX is a length.
 
     \includefigurewtex[options]{filename}
         Same as \includegraphicswtex.
@@ -938,9 +1063,9 @@ LATEX STYLE PACKAGE
         Includes the layers of a figure in a Beamer presentation. The layers
         are assumed to be in separate PDF files. The figure is a TeX file
         that includes the PDF files in a Beamer-compatible environment. The
-        filename must have one of the following extensions: .pdftex_t,
-        .pdftex_t, .pstex_t, .pdf_tex, .ps_tex. The options must be either
-        width=XX or height=XX, where XX is a length.
+        file on the file system must have a name with one of the extensions
+        defined with \DeclareGraphicsExtensionsWtex. The options must be
+        either width=XX or height=XX, where XX is a length.
 
         By default, a layer replaces the previous layer when displayed. You
         can change the overlay specification by adding the string <spec> to
@@ -952,10 +1077,10 @@ LATEX STYLE PACKAGE
         Includes the layers of a figure combined with TeX macros in a Beamer
         presentation. The layers are assumed to be in separate PDF files.
         The figure is a TeX file that includes the PDF files in a
-        Beamer-compatible environment. The filename must have one of the
-        following extensions: .pdftex_t, .pdftex_t, .pstex_t, .pdf_tex,
-        .ps_tex. The options must be either width=XX or height=XX, where XX
-        is a length.
+        Beamer-compatible environment. The file on the file system must have
+        a name with one of the extensions defined with
+        \DeclareGraphicsExtensionsWtex. The options must be either width=XX
+        or height=XX, where XX is a length.
 
         By default, a layer replaces the previous layer when displayed. You
         can change the overlay specification by adding the string <spec> to
@@ -965,11 +1090,58 @@ LATEX STYLE PACKAGE
 
     \DeclareGraphicsExtensionsWtex{extensions}
         Defines the filename extensions used by \includegraphicswtex to
-        locate figure files.
+        locate figure files. The extensions may be separated by coma ','
+        characters. By default, the declared filename extensions are:
+        .pdftex_t, .pstex_t, .pdf_tex, and .ps_tex.
 
     \graphicspath{{path1},{path2}...}
         This macro is from the TeX package 'graphicx.sty'. It defines the
-        search paths for figures.
+        search paths for figures. You could specify multiple paths by
+        separating them with coma ',' characters. It is recommended to
+        enclose each path with block characters '{' and '}'. The figures'
+        files are searched in the different search paths, in the order
+        specified in the argument of \graphicspath.
+
+  autolatex-beamer.sty
+    The LaTeX package autolatex-beamer.sty provides the following TeX
+    macros:
+
+    \animatedfigureslide<frames>[options]{title}{filename}
+        Create a frame/slide with the given title and that contains only a
+        single figure that is an *animated figure* according to the macros
+        provided by the autolatex.sty package.
+
+        The frames parameter is optional and specify the frame numbers that
+        must be displayed from the animated figure. Each frame corresponds
+        to a layer from the animated figure. By default, a layer replaces
+        the previous layer when displayed. You can specify the frames to be
+        shown by adding the string <frames> This frames part defines the
+        slide numbers on which the layer appears in Beamer. For example, <2>
+        means "only on slide 2"; <6-> means "from slide 6 to the end."
+
+        The options must be either width=XX, height=XX, label=ID or
+        subtitle=TXT, where XX is a length, ID is the identifier of the
+        slide to be served as its label, and TXT is a regular text.
+
+        The title is used as the main title of the created slide.
+
+        The filename is the fielname or the path to animated figure. The
+        file on the file system must have a name with one of the extensions
+        defined with \DeclareGraphicsExtensionsWtex.
+
+    \autolatexsettoslidecontentwidth{variable}
+        This macro sets the value of the specified length variable (usually
+        defined with a \newlength) to the *width of the text part* of a
+        slide. This macro may be redefined by TeX Beamer templates for
+        changing the computing of this width according to th template's
+        graphical structure.
+
+    \autolatexsettoslidecontentheight{variable}
+        This macro sets the value of the specified length variable (usually
+        defined with a \newlength) to the *height of the text part* of a
+        slide. This macro may be redefined by TeX Beamer templates for
+        changing the computing of this height according to th template's
+        graphical structure.
 
 CONFIGURATION FILE
   Location of the Configuration Files
@@ -1127,11 +1299,8 @@ EXTRA TEX AND LATEX MACROS
     distributions. They are usually part of TeX templates provided by the
     authors of AutoLaTeX.
 
-    *   \animatedfigureslide[options]{title}{path}: a Beamer slide that
-        contains a single animated figure. The concept of animated figure is
-        based on the AutoLaTeX translators "+layers" as defined above.
-        Provided by the TeX-templates from
-        <https://github.com/gallandarakhneorg/tex-templates>.
+    *   \animatedfigureslide[options]{title}{path}: See above. Provided by
+        AutoLaTeX.
 
     *   \begin{bibliographysection}\end{bibliographysection}: equivalent to
         \begin{bibunit}\end{bibunit} with a bibliography slide added at the
