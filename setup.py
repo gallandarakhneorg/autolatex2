@@ -20,6 +20,7 @@
 
 import shutil
 from datetime import datetime
+import logging
 import gzip
 import platform
 import os
@@ -31,7 +32,7 @@ from typing import override
 from setuptools import setup, find_packages
 from setuptools.command.build_py import build_py
 from setuptools.command.install import install
-
+from setuptools.command.sdist import sdist as sourcedist
 
 # Read the program information
 CURRENT_DIR = os.path.normpath(os.path.dirname(__file__))
@@ -51,6 +52,14 @@ def is_unix():
 
 
 class PostBuildCommand(build_py):
+	"""
+	Custom build process that update the date in the STY files, ensure the version number in the root VERSION
+	file corresponds to those from src/, generate the manual pages.
+	"""
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.unixman = False
+		self.install_layout = 'deb'
 
 	@override
 	def initialize_options(self):
@@ -66,17 +75,18 @@ class PostBuildCommand(build_py):
 	@override
 	def run(self):
 		print("Updating the LaTeX sty file")
-		self.update_sty_file()
+		PostBuildCommand.update_sty_file()
 		print("Updating the LaTeX Beamer sty file")
-		self.update_beamer_sty_file()
+		PostBuildCommand.update_beamer_sty_file()
 		print("Updating the VERSION file")
 		self.update_version_file()
 		super().run()
 		if self.unixman:
 			print("Building manual page")
-			self.pod2man()
+			PostBuildCommand.pod2man()
 
-	def pod2man(self, in_pod : str = None, out_man : str = None, out_gz : str = None):
+	@staticmethod
+	def pod2man(in_pod : str = None, out_man : str = None, out_gz : str = None):
 		if not in_pod:
 			in_pod = os.path.join(CURRENT_DIR, 'docs', 'autolatex.pod')
 		if not out_man:
@@ -93,7 +103,9 @@ class PostBuildCommand(build_py):
 		else:
 			sys.exit(rc)
 
-	def update_sty_file(self, in_sty: str = None, out_sty: str = None):
+	# noinspection DuplicatedCode
+	@staticmethod
+	def update_sty_file(in_sty: str = None, out_sty: str = None):
 		if not in_sty:
 			in_sty = os.path.join(CURRENT_DIR, 'src', 'autolatex2', 'tex', 'autolatex.sty')
 		if not out_sty:
@@ -115,7 +127,9 @@ class PostBuildCommand(build_py):
 		with open(out_sty, 'wt') as f_out:
 			f_out.write(content)
 
-	def update_beamer_sty_file(self, in_sty: str = None, out_sty: str = None):
+	# noinspection DuplicatedCode
+	@staticmethod
+	def update_beamer_sty_file(in_sty: str = None, out_sty: str = None):
 		if not in_sty:
 			in_sty = os.path.join(CURRENT_DIR, 'src', 'autolatex2', 'tex', 'autolatex-beamer.sty')
 		if not out_sty:
@@ -144,6 +158,17 @@ class PostBuildCommand(build_py):
 
 
 class PostInstallCommand(install):
+	"""
+	Custom installation process that install the manual pages.
+	"""
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.unixman = True
+		self.is_local_layout = True
+		# The following attributes correspond to CLI options
+		self.install_layout = 'deb'
+		self.verbose = 1
 
 	@override
 	def initialize_options(self):
@@ -170,17 +195,17 @@ class PostInstallCommand(install):
 
 	def install_man(self):
 		if self.root:
-			pfx = self.prefix[1:] if self.prefix.startswith(os.path.sep) else self.prefix
-			path = os.path.join(self.root, pfx)
+			pfx = self.prefix[1:] if self.prefix and str(self.prefix).startswith(os.path.sep) else self.prefix
+			path = os.path.join(self.root, str(pfx))
 		else:
 			path = self.prefix
 		if self.is_local_layout:
-			path = os.path.join(path, 'local')
+			path = os.path.join(str(path), 'local')
 
-		pod_path = os.path.join(path, 'share', 'doc', 'autolatex-base')
+		pod_path = os.path.join(str(path), 'share', 'doc', 'autolatex-base')
 		pod_path = os.path.normpath(pod_path)
 
-		man_path = os.path.join(path, 'share', 'man', 'man1')
+		man_path = os.path.join(str(path), 'share', 'man', 'man1')
 		man_path = os.path.normpath(man_path)
 
 		src_pod_file = os.path.join(CURRENT_DIR, 'docs', 'autolatex.pod')
@@ -195,11 +220,68 @@ class PostInstallCommand(install):
 			os.makedirs(os.path.dirname(mangz_file), exist_ok=True)
 			self.copy_file(src_mangz_file, mangz_file, level=self.verbose)
 
+
+class CustomSourceDistributionCommand(sourcedist):
+	"""
+	Custom source distribution building that renames the root directory inside the archive in order to be
+	compliant with the CTAN standards.
+	"""
+
+	DELETION_CANDIDATES = [
+		os.path.join('src', 'autolatex.egg-info', 'dependency_links.txt')
+	]
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+
+	def make_distribution(self):
+		"""
+		Override the distribution creation to use a custom base directory name.
+		"""
+		with self._remove_os_link():
+			# Set the desired name for the root directory inside the archive
+			base_dir = PROGRAM_NAME
+			full_base_dir = self.distribution.get_fullname()
+			full_base_name = os.path.join(self.dist_dir, full_base_dir)
+
+			logging.warning("CTAN standards: use base directory name '%s'" % base_dir)
+
+			self.make_release_tree(base_dir, self.filelist.files)
+
+			archive_files = []
+			# Ensure tar format is processed last (to avoid accidental overwrites)
+			if 'tar' in self.formats:
+				self.formats.append(self.formats.pop(self.formats.index('tar')))
+
+			# CTAN standard: Remove empty files from the source archive
+			for deletion_candidate in CustomSourceDistributionCommand.DELETION_CANDIDATES:
+				if os.path.isfile(deletion_candidate) and os.path.getsize(deletion_candidate) <= 1: # 1 byte is assumed to be empty
+					logging.warning("CTAN standards: deleting empty %s" % deletion_candidate)
+					full_path = deletion_candidate
+					if not os.path.isabs(full_path):
+						full_path = os.path.join(os.getcwd(), base_dir, full_path)
+					#logging.warning("CTAN standards: %s" % full_path)
+					os.unlink(full_path)
+
+			for fmt in self.formats:
+				file = self.make_archive(
+					full_base_name, fmt, base_dir=base_dir, owner=self.owner, group=self.group
+				)
+				archive_files.append(file)
+				self.distribution.dist_files.append(('sdist', '', file))
+
+			self.archive_files = archive_files
+
+			if not self.keep_temp:
+				shutil.rmtree(base_dir, ignore_errors=True)
+
+
 # Setup
 setup(
 	cmdclass ={
 		'build_py': PostBuildCommand,
 		'install': PostInstallCommand,
+		'sdist': CustomSourceDistributionCommand,
 	},
 	name=PROGRAM_NAME,
 	version=PROGRAM_VERSION,
