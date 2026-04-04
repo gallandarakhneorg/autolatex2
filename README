@@ -137,6 +137,11 @@ COMMANDS
         whether the bibliography should be placed in a BibTeX file
         (external) or inlined in the TeX file (default: inlined).
 
+    showbuildprocess
+        Displays the list of actions that will be applied by AutoLaTeX
+        during the building process. This function does not start the
+        building process.
+
     showconfig
         Displays the configuration definitions read from the configuration
         files.

@@ -18,32 +18,25 @@
 # write to the Free Software Foundation, Inc., 59 Temple Place - Suite
 # 330, Boston, MA 02111-1307, USA.
 
-__all__ = [
-	'biblio',
-	'build',
-	'clean',
-	'cleanall',
-	'createbeamer',
-	'createconfig',
-	'createist',
-	'createsty',
-	'commit',
-	'document',
-	'glossaries',
-	'images',
-	'index',
-	'init',
-	'latex',
-	'makeflat',
-	'showbuildprocess',
-	'showconfig',
-	'showconfigfiles',
-	'showdependencies',
-	'showimages',
-	'showinstalledtranslators',
-	'showloadedtranslators',
-	'showpath',
-	'unusedimages',
-	'update',
-	'view',
-]
+import logging
+import unittest
+from typing import override
+
+from autolatex2.cli.abstract_main import AbstractAutoLaTeXMain
+from autolatex2.cli.autolatexcommands import AutolatexCommand
+from autolatex2.cli.exiters import AutoLaTeXExceptionExiter
+from autolatex2tests.cli.commands.abstract_command_test import AbstractCommandTest
+
+
+class TestShowBuildProcessAction(AbstractCommandTest):
+
+	def __init__(self, x):
+		super().__init__(x, 'showbuildprocess')
+
+	def test_regular(self):
+		self.do_test()
+
+
+if __name__ == '__main__':
+	unittest.main()
+

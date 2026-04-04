@@ -312,7 +312,7 @@ class MakerAction(AbstractMakerAction):
 			cycle_marker = " 🔄" if node.is_cycle else ""
 			error_marker = f" ❌ {node.info}" if node.info is not None else ""
 			timestamp = f" ({node.timestamp})" if show_timestamps else ""
-			print(f"{indent}{marker}{node.filename}{timestamp}{cycle_marker}{error_marker}")
+			eprint(f"{indent}{marker}{node.filename}{timestamp}{cycle_marker}{error_marker}")
 
 			# Process children
 			if node.dependencies:
