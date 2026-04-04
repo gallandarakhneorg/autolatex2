@@ -153,7 +153,7 @@ class TeXParser(Parser):
 				'ldots'				: '',
 				'lnot'              : '',
 				'mdseries'          : '-',
-				'newcommand'        : '{}[][]{}',
+				'newcommand'        : '!{}[][]{}',
 				'newif'             : '\\',
 				'normalfont'        : '-',
 				'normalsize'        : '-',
@@ -164,10 +164,10 @@ class TeXParser(Parser):
 				'P'                 : '',
 				'pm'                : '',
 				'pounds'            : '',
-				'providecommand'    : '{}[][]{}',
+				'providecommand'    : '!{}[][]{}',
 				'ref'		    	: '{}',
 				'relax'             : '',
-				'renewcommand'      : '{}[][]{}',
+				'renewcommand'      : '!{}[][]{}',
 				'rm'                : '-',
 				'rmfamily'          : '-',
 				'S'                 : '',
@@ -817,7 +817,7 @@ class TeXParser(Parser):
 		self.separators = seps
 		return seps
 
-	def __parse_cmd(self, text : str, lineno : int, prefix : str = '') -> tuple[str,str]:
+	def __parse_cmd(self, text : str, lineno : int, prefix : str = '', expand_cmd : bool = True) -> tuple[str,str]:
 		"""
 		Parse a TeX command.
 		:param text: The text, which follows the backslash, to scan.
@@ -826,6 +826,8 @@ class TeXParser(Parser):
 		:type lineno: int
 		:param prefix: A prefix merged to the command name. Use carefully.
 		:type prefix: str
+		:param expand_cmd: A flag that indicates if this function have to expand the recognized macro. Default is True.
+		:type expand_cmd: bool
 		:return: the tuple (the result of expansion of the macro, the rest of the tex text after the macro).
 		:rtype: tuple[str,str]
 		"""
@@ -834,23 +836,32 @@ class TeXParser(Parser):
 		r = re.match(r'^\[(.*)', text, re.DOTALL)
 		if r: # Starts multi-line math mode
 			text = r.group(1)
-			expand_to = self.observer.open_math(self, False)
-			self.math_mode = MathMode.block
+			if expand_cmd:
+				expand_to = self.observer.open_math(self, False)
+				self.math_mode = MathMode.block
+			else:
+				expand_to = prefix + '['
 		else:
 			r = re.match(r'^](.*)', text, re.DOTALL)
 			if r: # Stop multi-line math mode
 				text = r.group(1)
-				expand_to = self.observer.close_math(self, False)
-				self.math_mode = None
+				if expand_cmd:
+					expand_to = self.observer.close_math(self, False)
+					self.math_mode = None
+				else:
+					expand_to = prefix + ']'
 			else:
-				r = re.match(r'^([a-zA-Z]+\*?|.)(.*)', text, re.DOTALL)
+				r = re.match(r'^([a-zA-Z@]+\*?|.)(.*)', text, re.DOTALL)
 				if r: # default LaTeX command
 					cmd_name = r.group(1)
 					text = r.group(2)
-					trans = self.__search_cmd_trans(cmd_name, lineno, (prefix != "\\"))
-					if not trans:
-						trans = ''
-					expand_to, text = self.__run_cmd(prefix + cmd_name, trans, text, lineno)
+					if expand_cmd:
+						trans = self.__search_cmd_trans(cmd_name, lineno, (prefix != "\\"))
+						if not trans:
+							trans = ''
+						expand_to, text = self.__run_cmd(prefix + cmd_name, trans, text, lineno)
+					else:
+						expand_to = prefix + cmd_name
 				else:
 					logging.log(LogLevel.FINE_WARNING, T("invalid syntax for the TeX command: %s (lineno: %d)"), prefix + text, lineno)
 		if expand_to is None:
@@ -970,6 +981,7 @@ class TeXParser(Parser):
 			expand_to = self.observer.expand(self, name, name)
 		return expand_to, text
 
+	# noinspection DuplicatedCode
 	def __eat_cmd_parameters(self, p_params : str, text : str, macro : str, lineno : int) -> tuple[str,list[TeXMacroParameter],str]:
 		"""
 		Eat the parameters for a macro.
@@ -989,10 +1001,13 @@ class TeXParser(Parser):
 		param_index = 0
 		logging.debug(T("Macro prototype of '%s': %s (%s:%d)") % (macro, p_params, self.filename, lineno))
 		for p in re.findall(r'(!?\{}|!?\[[^]]*]|-|\\)', p_params, re.DOTALL):
-			# Eats no significant white spaces
+			# Scan for arguments
 			r = re.match(r'^(!?)\{}', p, re.DOTALL)
 			if r: # Eats a mandatory parameter
-				optional = r.group(1) or ''
+				evaluable = r.group(1) or ''
+				# According to TeX specifications, the space characters are not significant when searching for an argument
+				# Eats no significant white spaces from text before the mandatory argument
+				text = re.sub(r'^[ \t\f\r\n]+', '', text, re.S)
 				prem = text[0:1]
 				text = text[1:]
 				if prem == '{':
@@ -1002,11 +1017,11 @@ class TeXParser(Parser):
 							index=param_index,
 							macro_name=False,
 							optional=False,
-							evaluable=optional != '!',
+							evaluable=evaluable != '!',
 							text=context))
 					raw_params += "{" + context + "}"
 				elif prem == '\\':
-					if optional != '!':
+					if evaluable != '!':
 						# The following macro is expandable
 						c, text = self.__parse_cmd(text, lineno, '\\')
 						extracted_parameters.append(
@@ -1019,7 +1034,7 @@ class TeXParser(Parser):
 						raw_params += c
 					else:
 						# The following macro is not expandable
-						r = re.match(r'^([a-zA-Z]+\*?|.)(.*)$', text, re.DOTALL)
+						r = re.match(r'^([a-zA-Z@]+\*?|.)(.*)$', text, re.DOTALL)
 						c = r.group(1)
 						text = r.group(2)
 						extracted_parameters.append(
@@ -1036,36 +1051,44 @@ class TeXParser(Parser):
 							index=param_index,
 							macro_name=False,
 							optional=False,
-							evaluable=optional != '!',
+							evaluable=evaluable != '!',
 							text=prem))
 					raw_params += prem
 			else:
 				r = re.match(r'^(!?)\[([^]]*)]', p, re.DOTALL)
 				if r: # Eats an optional parameter
-					optional = r.group(1) or ''
+					evaluable = r.group(1) or ''
 					default_val = r.group(2) or ''
-					prem = text[0:1]
-					if prem == '[':
-						context, text = self.__eat_context(text[1:], ']')
+					# According to TeX specifications, the space characters are not significant when searching for an argument
+					# Eats no significant white spaces from text only if the optional argument is specified; Otherwise they are preserved
+					r_opt = re.match(r'^[ \t\f\r\n]*\[', text, re.S)
+					if r_opt:
+						# Found the optional argument from text
+						# Eats no significant white spaces from text
+						text = re.sub(r'^[ \t\f\r\n]*\[', '', text, re.S)
+						context, text = self.__eat_context(text, ']')
 						extracted_parameters.append(
 							TeXMacroParameter(
 								index=param_index,
 								macro_name=False,
 								optional=True,
-								evaluable=optional != '!',
+								evaluable=evaluable != '!',
 								text=context))
 						raw_params += "[" + context + "]"
 					else:
+						# No optional argument found from text
 						# Assume default value
 						extracted_parameters.append(
 							TeXMacroParameter(
 								index=param_index,
 								macro_name=False,
 								optional=True,
-								evaluable=optional != '!',
+								evaluable=evaluable != '!',
 								text=default_val))
 				elif p == '\\': # Eats a TeX command name
-					r = re.match(r'^\\([a-zA-Z]+\*?|.)(.*)$', text, re.DOTALL)
+					# Eats no significant white spaces from text because they cannot be part of the command name
+					text = re.sub(r'^[ \t\f\r\n]+', '', text, re.S)
+					r = re.match(r'^\\([a-zA-Z@]+\*?|.)(.*)$', text, re.DOTALL)
 					if r:
 						n = r.group(1)
 						text = r.group(2)
@@ -1091,6 +1114,7 @@ class TeXParser(Parser):
 								text=''))
 						raw_params += "\\"
 				elif p == '-': # Eats until the end of the current context
+					# Does not eat no significant white spaces from text because they may be useful as argument value
 					context, text = self.__eat_context(text, '\\}')
 					extracted_parameters.append(
 						TeXMacroParameter(

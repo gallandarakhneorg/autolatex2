@@ -187,7 +187,7 @@ class TestFlattener(AbstractBaseTest):
 			\begin{document}
 			\end{document}
 			''',
-			'mypackage.sty' : r'''\def\toto{}''' }
+			'mypackage.sty' : '''\\def\\toto{}''' }
 		self.outputs = { 'doc.tex' : r'''
 			\documentclass{article}
 			\usepackage{filecontents}
@@ -243,7 +243,7 @@ class TestFlattener(AbstractBaseTest):
 			\begin{document}
 			\end{document}
 			''',
-			'mypackage.sty' : r'''\def\toto{}''' }
+			'mypackage.sty' : '''\\def\\toto{}''' }
 		self.outputs = { 'doc.tex' : r'''
 			\documentclass{article}
 			\usepackage{filecontents}
