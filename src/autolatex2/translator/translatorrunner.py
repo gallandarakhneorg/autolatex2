@@ -233,7 +233,7 @@ class TranslatorRunner:
 			out_ext = ''
 
 		if not out_file:
-			out_file = genutils.basename2(in_file, *in_exts) + out_ext
+			out_file = genutils.basename_with_path(in_file, *in_exts) + out_ext
 
 		if pdf_mode is None:
 			current_pdf_mode = translator.configuration.generation.pdf_mode
@@ -253,7 +253,7 @@ class TranslatorRunner:
 		environment['out_exts'] = out_exts
 		environment['out_ext'] = out_ext
 		environment['ext'] = out_ext
-		environment['outbasename'] = genutils.basename(out_file, *out_exts)
+		environment['outbasename'] = genutils.simple_basename(out_file, *out_exts)
 		environment['outwoext'] = os.path.join(outdir, str(environment['outbasename']))
 		environment['outmode'] = 'pdf' if current_pdf_mode else 'eps'
 
@@ -313,7 +313,7 @@ class TranslatorRunner:
 		else:
 			out_ext = ''
 		if not out_file:
-			out_file = genutils.basename2(in_file, *in_exts) + out_ext
+			out_file = genutils.basename_with_path(in_file, *in_exts) + out_ext
 
 		if pdf_mode is None:
 			current_pdf_mode = translator.configuration.generation.pdf_mode
@@ -333,7 +333,7 @@ class TranslatorRunner:
 		environment['outexts'] = out_exts
 		environment['outext'] = out_ext
 		environment['ext'] = out_ext
-		environment['outbasename'] = genutils.basename(out_file, *out_exts)
+		environment['outbasename'] = genutils.simple_basename(out_file, *out_exts)
 		environment['outwoext'] = os.path.join(outdir, str(environment['outbasename']))
 		environment['outmode'] = 'pdf' if current_pdf_mode else 'eps'
 
@@ -412,7 +412,7 @@ class TranslatorRunner:
 			out_ext = ''
 
 		if not out_file:
-			out_file = genutils.basename2(in_file, *in_exts) + out_ext
+			out_file = genutils.basename_with_path(in_file, *in_exts) + out_ext
 
 		# Try to avoid the translation if the source file is no more recent than the target file.
 		if only_more_recent:
@@ -425,7 +425,7 @@ class TranslatorRunner:
 					for filename in os.listdir(dir_name):
 						abs_path = os.path.join(dir_name, filename)
 						if not os.path.isdir(abs_path) and not genutils.is_hidden_file(abs_path):
-							bn = genutils.basename(filename, *out_exts)
+							bn = genutils.simple_basename(filename, *out_exts)
 							m = re.match('^('+re.escape(bn+'_')+'.*)'+re.escape(out_ext)+'$', filename, re.S)
 							if m:
 								t = genutils.get_file_last_change(abs_path)
@@ -463,7 +463,7 @@ class TranslatorRunner:
 		environment['outexts'] = out_exts
 		environment['outext'] = out_ext
 		environment['ext'] = out_ext
-		environment['outbasename'] = genutils.basename(out_file, *out_exts)
+		environment['outbasename'] = genutils.simple_basename(out_file, *out_exts)
 		environment['outwoext'] = os.path.join(os.path.dirname(out_file), str(environment['outbasename']))
 		environment['outmode'] = 'pdf' if current_pdf_mode else 'eps'
 

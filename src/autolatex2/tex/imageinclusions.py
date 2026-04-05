@@ -465,7 +465,7 @@ class ImageInclusions(Observer):
 			figexts = (	'.pdf', '.eps', '.ps', '.png', '.jpeg', '.jpg', '.gif', '.bmp')
 			exts = figexts + texexts
 			ofilename = filename
-			obasename = genutils.basename(tex_name, *exts)
+			obasename = genutils.simple_basename(tex_name, *exts)
 			filenames = {}
 
 			# Search in the registered paths
@@ -484,7 +484,7 @@ class ImageInclusions(Observer):
 
 			# Search in the folder, i.e. the document directory.
 			if not filenames:
-				template = os.path.join(os.path.dirname(ofilename), genutils.basename(ofilename, *exts))
+				template = os.path.join(os.path.dirname(ofilename), genutils.simple_basename(ofilename, *exts))
 				for ext in figexts:
 					fn = template + ext
 					if os.path.isfile(fn):

@@ -30,6 +30,7 @@ from sortedcontainers import SortedSet
 
 from autolatex2.cli.abstract_actions import AbstractMakerAction
 from autolatex2.make.filedescription import FileDescription
+from autolatex2.tex.utils import FileType
 from autolatex2.utils.extprint import eprint
 import autolatex2.utils.utilfunctions as genutils
 from autolatex2.utils.i18n import T
@@ -54,7 +55,9 @@ class _TreeNode:
 	dependencies : list['_TreeNode'] = field(default_factory=list)
 	depth: int = 0
 	is_cycle: bool = False
-	info: str | None = None
+	problem: str | None = None
+	is_problem: str | None = None
+	is_obsolete : bool = False
 
 
 class _DependencyTreeBuilder:
@@ -73,6 +76,7 @@ class _DependencyTreeBuilder:
 		self._tree_nodes : dict[str,_TreeNode] = {}
 		self._cycles: list[list[str]] = []
 
+	# noinspection DuplicatedCode
 	def build_tree(self, root_filename: str) -> _TreeNode | None:
 		"""
         Build a dependency tree starting from root_filename.
@@ -91,6 +95,7 @@ class _DependencyTreeBuilder:
 		root_node = self._build_node(root_filename, depth=0, path=[root_filename])
 		return root_node
 
+	# noinspection DuplicatedCode
 	def _build_node(self, filename: str, depth: int, path: list[str]) -> _TreeNode:
 		"""
         Recursively build a tree node with cycle detection.
@@ -117,7 +122,6 @@ class _DependencyTreeBuilder:
 				dependencies=[],
 				depth=depth,
 				is_cycle=True,
-				#info=T("Cycle detected: %s") % {' -> '.join(cycle)}
 			)
 			self._tree_nodes[filename] = node
 			return node
@@ -146,6 +150,8 @@ class _DependencyTreeBuilder:
 		# Process dependencies
 		seen_deps: set[str] = set()  # Track to avoid duplicates at same level
 
+		node.is_obsolete = node.timestamp is None
+
 		for dep in file_desc.dependencies:
 			if dep not in self._dependencies:
 				# Dependency not found - create a placeholder node
@@ -155,7 +161,7 @@ class _DependencyTreeBuilder:
 					dependencies=[],
 					depth=depth + 1,
 					is_cycle=False,
-					info=T('not defined in file descriptions')
+					problem=T('not defined in file descriptions')
 				)
 				node.dependencies.append(missing_node)
 				continue
@@ -169,10 +175,26 @@ class _DependencyTreeBuilder:
 			dep_node = self._build_node(dep, depth + 1, path + [filename])
 			node.dependencies.append(dep_node)
 
+			# Propagate the timestamp if parent and child are source types
+			if (file_desc.file_type.is_source_type() and self._dependencies[dep].file_type.is_source_type() \
+				and self._is_obsolete_timestamp(node.timestamp, dep_node.timestamp)):
+				node.timestamp = dep_node.timestamp
+				dep_node.is_obsolete = False
+			# Determine if the current is obsolete
+			elif not node.is_obsolete and (dep_node.is_obsolete or self._is_obsolete_timestamp(node.timestamp, dep_node.timestamp)):
+				node.is_obsolete = True
+
 		# Mark as visited
 		self._status[filename] = _DependencyStatus.VISITED
 
 		return node
+
+	# noinspection PyMethodMayBeStatic
+	def _is_obsolete_timestamp(self, parent_timestamp : float | None, child_timestamp : float | None) -> bool:
+		if parent_timestamp is None or child_timestamp is None:
+			return True
+		assert parent_timestamp is not None and child_timestamp is not None
+		return parent_timestamp < child_timestamp
 
 	def get_cycles(self) -> list[list[str]]:
 		"""
@@ -195,6 +217,7 @@ class MakerAction(AbstractMakerAction):
 
 	help : str = T('Show the dependency relationships of files from the main LaTeX document.')
 
+	# noinspection DuplicatedCode
 	@override
 	def _add_command_cli_arguments(self, command_name : str, command_help : str | None,
 								   command_aliases : list[str] | None):
@@ -219,6 +242,7 @@ class MakerAction(AbstractMakerAction):
 			action='store_true',
 			help=T('Show the dependency as a list'))
 
+	# noinspection DuplicatedCode
 	@override
 	def run(self, cli_arguments : Namespace) -> bool:
 		"""
@@ -243,7 +267,7 @@ class MakerAction(AbstractMakerAction):
 			return False
 		return True
 
-	# noinspection PyMethodMayBeStatic
+	# noinspection PyMethodMayBeStatic,DuplicatedCode
 	def _build_dependency_set(self, dependencies : tuple[str, dict[str, FileDescription]]) -> tuple[SortedSet,dict[str,str]]:
 		"""
 		Build the set of all the files that are required for building the document.
@@ -292,7 +316,8 @@ class MakerAction(AbstractMakerAction):
 		"""
 		for dep in dependencies:
 			error_marker = f" ❌ {problems[dep]}" if dep in problems and problems[dep] else ""
-			eprint(f"{dep}{error_marker}")
+			obsolete = " ⌛" if dep.is_obsolete else ""
+			eprint(f"{dep}{obsolete}{error_marker}")
 
 	# noinspection PyMethodMayBeStatic
 	def _show_dependency_tree(self, node : _TreeNode|None, show_timestamps : bool, indent: str = "",
@@ -310,9 +335,10 @@ class MakerAction(AbstractMakerAction):
 			# Print current node
 			marker = "└── " if is_last else "├── "
 			cycle_marker = " 🔄" if node.is_cycle else ""
-			error_marker = f" ❌ {node.info}" if node.info is not None else ""
+			error_marker = f" ❌ {node.problem}" if node.problem is not None else ""
 			timestamp = f" ({node.timestamp})" if show_timestamps else ""
-			eprint(f"{indent}{marker}{node.filename}{timestamp}{cycle_marker}{error_marker}")
+			obsolete = " ⌛" if node.is_obsolete else ""
+			eprint(f"{indent}{marker}{node.filename}{obsolete}{timestamp}{cycle_marker}{error_marker}")
 
 			# Process children
 			if node.dependencies:

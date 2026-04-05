@@ -88,7 +88,7 @@ class MakerAction(AbstractMakerAction):
 					extlogging.multiline_error(str(ex))
 					return False
 				if cli_arguments.showneedloop:
-					log_file = genutils.basename2(root_file, *FileType.tex_extensions()) + '.log'
+					log_file = FileType.log.ensure_extension(root_file)
 					valid = True
 					if os.path.isfile(log_file):
 						try:

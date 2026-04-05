@@ -60,11 +60,11 @@ translator_python_dependencies:
 translator_function: |
     curdir = os.getcwd()
     plotdir = os.path.dirname(_in)
-    plotFile = genutils.basename2(_in, _inexts) + '__xxxx_autolatex.plot'
-    texFile = genutils.basename2(_out, _outexts) + '.tex'
-    psFile = genutils.basename2(_out, _outexts) + '.ps'
-    epsFile = genutils.basename2(_out, _outexts) + '.eps'
-    ptexFile = genutils.basename2(_out, _outexts)
+    plotFile = genutils.basename_with_path(_in, *_inexts) + '__xxxx_autolatex.plot'
+    texFile = genutils.basename_with_path(_out, *_outexts) + '.tex'
+    psFile = genutils.basename_with_path(_out, *_outexts) + '.ps'
+    epsFile = genutils.basename_with_path(_out, *_outexts) + '.eps'
+    ptexFile = genutils.basename_with_path(_out, *_outexts)
     if _pdfmode:
     	ptexFile += '.pdftex_t'
     else:

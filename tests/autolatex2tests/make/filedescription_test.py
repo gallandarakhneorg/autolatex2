@@ -40,7 +40,7 @@ class TestMakeFileDescription(AbstractBaseTest):
 		self.assertEqual('./path0/filename0.aux', str(self.__desc))
 
 	def test___repr__(self):
-		self.assertEqual('{\n    "output_filename": "./path0/filename0.aux",\n    "input_filename": "./path0/filename0.tex",\n    "type": 16,\n    "main_filename": "./path0/main0.tex",\n    "change": null,\n    "use_multibib": false,\n    "use_bibunits": false,\n    "use_biber": false,\n    "use_xindy": false,\n    "dependencies": []\n}', repr(self.__desc))
+		self.assertEqual('{\n    "output_filename": "./path0/filename0.aux",\n    "input_filename": "./path0/filename0.tex",\n    "type": 19,\n    "main_filename": "./path0/main0.tex",\n    "change": null,\n    "use_multibib": false,\n    "use_bibunits": false,\n    "use_biber": false,\n    "use_xindy": false,\n    "dependencies": []\n}', repr(self.__desc))
 
 	def test_file_type(self):
 		self.assertEqual(FileType.tex, self.__desc.file_type)
@@ -58,6 +58,22 @@ class TestMakeFileDescription(AbstractBaseTest):
 		self.assertEqual('./path0/main0.tex', self.__desc.main_filename)
 
 	def test_change(self):
+		self.assertIsNone(self.__desc.change)
+
+	def test_change_5(self):
+		self.assertIsNone(self.__desc.change)
+		self.__desc.change = 5
+		self.assertEqual(5, self.__desc.change)
+
+	def test_change_35(self):
+		self.assertIsNone(self.__desc.change)
+		self.__desc.change = 35
+		self.assertEqual(35, self.__desc.change)
+
+	def test_change_None(self):
+		self.assertIsNone(self.__desc.change)
+		self.__desc.change = 35
+		self.__desc.change = None
 		self.assertIsNone(self.__desc.change)
 
 	def test_use_biber(self):

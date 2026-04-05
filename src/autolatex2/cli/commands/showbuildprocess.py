@@ -49,7 +49,9 @@ class MakerAction(AbstractMakerAction):
 		try:
 			maker = self._internal_create_maker()
 			for root_file in maker.root_files:
+				logging.debug(T("Computing the file dependencies"))
 				root_dep_file, dependencies = maker.compute_dependencies(root_file)
+				logging.debug(T("Building the execution list"))
 				build_list = maker.build_internal_execution_list(root_file=root_file,
 																 root_pdf_file=root_dep_file,
 																 dependencies=dependencies,

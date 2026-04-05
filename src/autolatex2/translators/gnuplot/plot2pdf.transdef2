@@ -33,7 +33,7 @@ translator_python_dependencies:
 translator_function: |
     curdir = os.getcwd()
     workingDir = os.path.dirname(_in)
-    extPlotFile = os.path.join(workingDir, genutils.basename2(_in, _inexts) + '_tmp_autolatex.plot')
+    extPlotFile = os.path.join(workingDir, genutils.basename_with_path(_in, *_inexts) + '_tmp_autolatex.plot')
     try:
     	genutils.unlink(extPlotFile)
     	with open(extPlotFile, 'wt') as out_file:

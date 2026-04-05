@@ -21,7 +21,6 @@
 import unittest
 import tempfile
 import logging
-import os
 from typing import override
 
 from autolatex2.tex.utils import *
@@ -39,33 +38,34 @@ class TestUtils(AbstractBaseTest):
 	def test_extract_tex_warning_from_line_00(self):
 		wset = set()
 		self.assertTrue(extract_tex_warning_from_line('\n\nWarning: There were undefined references. re-run the LaTeX compiler', wset))
-		self.assertEqual(set([]), wset)
+		self.assertEqual(set(), wset)
 	
 	def test_extract_tex_warning_from_line_01(self):
 		wset = set()
 		self.assertFalse(extract_tex_warning_from_line('\n\nWarning: There were undefined references', wset))
-		self.assertEqual(set([TeXWarnings.undefined_reference]), wset)
+		self.assertEqual({TeXWarnings.undefined_reference}, wset)
 
 	def test_extract_tex_warning_from_line_02(self):
 		wset = set()
 		self.assertFalse(extract_tex_warning_from_line('\n\nWarning: Citation XYZ undefined', wset))
-		self.assertEqual(set([TeXWarnings.undefined_citation]), wset)
+		self.assertEqual({TeXWarnings.undefined_citation}, wset)
 
 	def test_extract_tex_warning_from_line_03(self):
 		wset = set()
 		self.assertFalse(extract_tex_warning_from_line('\n\nWarning: There were multiply-defined labels', wset))
-		self.assertEqual(set([TeXWarnings.multiple_definition]), wset)
+		self.assertEqual({TeXWarnings.multiple_definition}, wset)
 
 	def test_extract_tex_warning_from_line_04(self):
 		wset = set()
 		self.assertFalse(extract_tex_warning_from_line('\n\nWarning: This is a warning', wset))
-		self.assertEqual(set([TeXWarnings.other_warning]), wset)
+		self.assertEqual({TeXWarnings.other_warning}, wset)
 
 	def test_parse_tex_log_file_noFatal(self):
 		filename = genutils.find_file_in_path("test1.txt")
 		if filename:
 			filename = genutils.find_file_in_path("test1.txt", use_environment_variable=True)
 		self.assertIsNotNone(filename)
+		assert filename is not None
 		fatal_error, blocks = parse_tex_log_file(filename)
 		self.assertEqual('', fatal_error)
 		self.assertEqual(164, len(blocks))
@@ -75,13 +75,15 @@ class TestUtils(AbstractBaseTest):
 		if filename:
 			filename = genutils.find_file_in_path("test2.txt", use_environment_variable=True)
 		self.assertIsNotNone(filename)
+		assert filename is not None
 		fatal_error, blocks = parse_tex_log_file(filename)
 		self.assertTrue(fatal_error.startswith("Undefined control sequence."))
 		self.assertEqual(42, len(blocks))
 
 	def test_find_aux_files_1_file_wo_subfolder_wo_selector(self):
+		folder = tempfile.TemporaryDirectory(delete=False)
+		assert folder is not None
 		try:
-			folder = tempfile.TemporaryDirectory(delete=False)
 			tex_file_0 = os.path.join(folder.name, "root_file.tex")
 			with open(tex_file_0, 'w') as f:
 				f.write("xyz")
@@ -97,8 +99,9 @@ class TestUtils(AbstractBaseTest):
 			folder.cleanup()
 
 	def test_find_aux_files_2_files_wo_subfolder_wo_selector(self):
+		folder = tempfile.TemporaryDirectory(delete=False)
+		assert folder is not None
 		try:
-			folder = tempfile.TemporaryDirectory(delete=False)
 			tex_file_0 = os.path.join(folder.name, "root_file.tex")
 			with open(tex_file_0, 'w') as f:
 				f.write("xyz")
@@ -118,8 +121,9 @@ class TestUtils(AbstractBaseTest):
 			folder.cleanup()
 
 	def test_find_aux_files_3_files_wo_subfolder_wo_selector(self):
+		folder = tempfile.TemporaryDirectory(delete=False)
+		assert folder is not None
 		try:
-			folder = tempfile.TemporaryDirectory(delete=False)
 			tex_file_0 = os.path.join(folder.name, "root_file.tex")
 			with open(tex_file_0, 'w') as f:
 				f.write("xyz")
@@ -143,8 +147,9 @@ class TestUtils(AbstractBaseTest):
 			folder.cleanup()
 
 	def test_find_aux_files_1_file_w_subfolder_wo_selector(self):
+		folder = tempfile.TemporaryDirectory(delete=False)
+		assert folder is not None
 		try:
-			folder = tempfile.TemporaryDirectory(delete=False)
 			tex_file_0 = os.path.join(folder.name, "root_file.tex")
 			with open(tex_file_0, 'w') as f:
 				f.write("xyz")
@@ -175,8 +180,9 @@ class TestUtils(AbstractBaseTest):
 			folder.cleanup()
 
 	def test_find_aux_files_2_files_w_subfolder_wo_selector(self):
+		folder = tempfile.TemporaryDirectory(delete=False)
+		assert folder is not None
 		try:
-			folder = tempfile.TemporaryDirectory(delete=False)
 			tex_file_0 = os.path.join(folder.name, "root_file.tex")
 			with open(tex_file_0, 'w') as f:
 				f.write("xyz")
@@ -211,8 +217,9 @@ class TestUtils(AbstractBaseTest):
 			folder.cleanup()
 
 	def test_find_aux_files_3_files_w_subfolder_wo_selector(self):
+		folder = tempfile.TemporaryDirectory(delete=False)
+		assert folder is not None
 		try:
-			folder = tempfile.TemporaryDirectory(delete=False)
 			tex_file_0 = os.path.join(folder.name, "root_file.tex")
 			with open(tex_file_0, 'w') as f:
 				f.write("xyz")
@@ -251,8 +258,9 @@ class TestUtils(AbstractBaseTest):
 			folder.cleanup()
 
 	def test_find_aux_files_1_file_wo_subfolder_w_selector(self):
+		folder = tempfile.TemporaryDirectory(delete=False)
+		assert folder is not None
 		try:
-			folder = tempfile.TemporaryDirectory(delete=False)
 			tex_file_0 = os.path.join(folder.name, "root_file.tex")
 			with open(tex_file_0, 'w') as f:
 				f.write("xyz")
@@ -267,8 +275,9 @@ class TestUtils(AbstractBaseTest):
 			folder.cleanup()
 
 	def test_find_aux_files_2_files_wo_subfolder_w_selector(self):
+		folder = tempfile.TemporaryDirectory(delete=False)
+		assert folder is not None
 		try:
-			folder = tempfile.TemporaryDirectory(delete=False)
 			tex_file_0 = os.path.join(folder.name, "root_file.tex")
 			with open(tex_file_0, 'w') as f:
 				f.write("xyz")
@@ -286,8 +295,9 @@ class TestUtils(AbstractBaseTest):
 			folder.cleanup()
 
 	def test_find_aux_files_3_files_wo_subfolder_w_selector(self):
+		folder = tempfile.TemporaryDirectory(delete=False)
+		assert folder is not None
 		try:
-			folder = tempfile.TemporaryDirectory(delete=False)
 			tex_file_0 = os.path.join(folder.name, "root_file.tex")
 			with open(tex_file_0, 'w') as f:
 				f.write("xyz")
@@ -311,8 +321,9 @@ class TestUtils(AbstractBaseTest):
 			folder.cleanup()
 
 	def test_find_aux_files_1_file_w_subfolder_w_selector(self):
+		folder = tempfile.TemporaryDirectory(delete=False)
+		assert folder is not None
 		try:
-			folder = tempfile.TemporaryDirectory(delete=False)
 			tex_file_0 = os.path.join(folder.name, "root_file.tex")
 			with open(tex_file_0, 'w') as f:
 				f.write("xyz")
@@ -343,8 +354,9 @@ class TestUtils(AbstractBaseTest):
 			folder.cleanup()
 
 	def test_find_aux_files_2_files_w_subfolder_w_selector(self):
+		folder = tempfile.TemporaryDirectory(delete=False)
+		assert folder is not None
 		try:
-			folder = tempfile.TemporaryDirectory(delete=False)
 			tex_file_0 = os.path.join(folder.name, "root_file.tex")
 			with open(tex_file_0, 'w') as f:
 				f.write("xyz")
@@ -379,8 +391,9 @@ class TestUtils(AbstractBaseTest):
 			folder.cleanup()
 
 	def test_find_aux_files_3_files_w_subfolder_w_selector(self):
+		folder = tempfile.TemporaryDirectory(delete=False)
+		assert folder is not None
 		try:
-			folder = tempfile.TemporaryDirectory(delete=False)
 			tex_file_0 = os.path.join(folder.name, "root_file.tex")
 			with open(tex_file_0, 'w') as f:
 				f.write("xyz")

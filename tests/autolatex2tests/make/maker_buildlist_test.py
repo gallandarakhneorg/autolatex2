@@ -128,8 +128,8 @@ class TestBuildListMaker(AbstractBaseTest):
 
 	def ensure_stamps(self):
 		self.__maker.build_internal_execution_list(self.__root_file, self.__pdf_file, self.__dependencies, force_changes=False)
-		self.__maker.write_build_stamps(self.__tmp_folder_name)
-		self.__maker.read_build_stamps(self.__tmp_folder_name)
+		self.__maker.stamp_manager.write_build_stamps(self.__tmp_folder_name)
+		self.__maker.stamp_manager.read_build_stamps(self.__tmp_folder_name)
 
 	def __assertBuildingListItem(self, i : int, expected : dict, actual : FileDescription):
 		self.assertEqual(expected['output_filename'], actual.output_filename, "Invalid output filename for actual #%d" % i)

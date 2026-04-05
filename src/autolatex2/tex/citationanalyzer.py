@@ -270,10 +270,10 @@ class BiblatexCitationAnalyzer(Observer):
 		:param filename: The name of the file to parse.
 		:type filename: str
 		"""
-		self.__filename = filename
-		self.__basename = os.path.basename(os.path.splitext(filename)[0])
-		self.__citations = None
-		self.__md5 = None
+		self.__filename : str = filename
+		self.__basename : str = os.path.basename(os.path.splitext(filename)[0])
+		self.__citations : SortedSet | None = None
+		self.__md5 : str | None = None
 
 	@property
 	def basename(self) -> str:
@@ -312,14 +312,15 @@ class BiblatexCitationAnalyzer(Observer):
 		self.__filename = n
 
 	@property
-	def citations(self) -> set:
+	def citations(self) -> SortedSet:
 		"""
 		Replies the bibliography citations that were specified in the BCF file.
 		:return: the set of citations.
 		:rtype: set
 		"""
 		if self.__citations is None:
-			return set()
+			self.__citations = SortedSet()
+		assert self.__citations is not None
 		return self.__citations
 
 	@property
@@ -332,21 +333,25 @@ class BiblatexCitationAnalyzer(Observer):
 			if self.__citations is None:
 				self.run()
 			self.__md5 = md5(bytes('\\'.join(self.citations), 'UTF-8')).hexdigest()
+		assert self.__md5 is not None
 		return self.__md5
 
+	# noinspection DuplicatedCode
 	def run(self):
 		"""
 		Extract the data from the BCF file.
 		"""
-		with open(self.filename) as f:
-			content = f.read()
+		if os.path.isfile(self.filename):
+			with open(self.filename) as f:
+				content = f.read()
+			citations = SortedSet()
+			for citation in re.findall(re.escape('<bcf:citekey>') + '(.+?)' + re.escape('</bcf:citekey>'), content,
+									   re.DOTALL):
+				citations.add(citation)
+			self.__citations = citations
+		else:
+			self.__citations = SortedSet()
 
-		citations = set()
-
-		for citation in re.findall(re.escape('<bcf:citekey>') + '(.+?)' + re.escape('</bcf:citekey>'), content, re.DOTALL):
-			citations.add(citation)
-
-		self.__citations = sorted(citations)
 
 	@override
 	def text(self, parser: Parser, text: str):

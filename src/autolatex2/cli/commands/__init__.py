@@ -43,6 +43,7 @@ __all__ = [
 	'showinstalledtranslators',
 	'showloadedtranslators',
 	'showpath',
+	'stamps',
 	'unusedimages',
 	'update',
 	'view',

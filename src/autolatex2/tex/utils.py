@@ -51,22 +51,37 @@ class FileType(IntEnum):
 	"""
 	Type of file in the making process.
 	"""
-	aux = 1
-	bbc = 2
-	bbl = 3
-	bbx = 4
-	bib = 5
-	bst = 6
-	cbx = 7
-	cls = 8
-	glo = 9
-	gls = 10
-	idx = 11
-	ind = 12
-	pdf = 13
-	ps = 14
-	sty = 15
-	tex = 16
+	aux  = 1
+	bcf  = 2
+	bbc  = 3
+	bbl  = 4
+	bbx  = 5
+	bib  = 6
+	bst  = 7
+	cbx  = 8
+	cls  = 9
+	dvi  = 10
+	glo  = 11
+	gls  = 12
+	idx  = 13
+	ind  = 14
+	log  = 15
+	pdf  = 16
+	ps   = 17
+	sty  = 18
+	tex  = 19
+	xdv  = 20
+	xdvi = 21
+
+	def is_source_type(self) -> bool:
+		"""
+		Replies if the given type is assumed to be a source type.
+		A source type is usually not the result of a tool usage, but it might contain other source types by inclusion.
+		:return: Tue if the type corresponds to a source type; Otherwise, it is a type of file that is the result of
+		a computation.
+		:rtype: bool
+		"""
+		return self == FileType.tex or self == FileType.bib or self == FileType.sty
 
 	def extension(self) -> str:
 		"""
@@ -105,7 +120,19 @@ class FileType(IntEnum):
 		:return: the list of file types.
 		:rtype: list[FileType]
 		"""
-		return [FileType.pdf, FileType.sty, FileType.ps]
+		return [FileType.pdf, FileType.ps, FileType.dvi, FileType.xdvi, FileType.xdv]
+
+	@staticmethod
+	def output_extensions() -> list[str]:
+		"""
+		Replies all the file types extensions that are related to the output result of TeX tools.
+		:return: the list of file extensions.
+		:rtype: list[str]
+		"""
+		exts = list()
+		for ext in FileType.output_types():
+			exts.extend(ext.extensions())
+		return exts
 
 	@staticmethod
 	def tex_types() -> list['FileType']:
@@ -166,7 +193,7 @@ class FileType(IntEnum):
 		:return: the list of file types.
 		:rtype: list[FileType]
 		"""
-		return [FileType.bib, FileType.bbl, FileType.bst, FileType.bbc, FileType.bbx, FileType.cbx]
+		return [FileType.bib, FileType.bbl, FileType.bst, FileType.bbc, FileType.bcf, FileType.bbx, FileType.cbx]
 
 	@staticmethod
 	def bibliography_extensions() -> list[str]:
@@ -222,6 +249,17 @@ class FileType(IntEnum):
 			exts.extend(ext.extensions())
 		return exts
 
+	def ensure_extension(self, filename : str) -> str:
+		"""
+		Ensure the given filename has the extension of this file type. Any previous file extension is removed
+		from the given filename. If multiple file extensions are specified in the given filename, only the
+		last one is removed.
+		:param filename: the filename to check.
+		:type filename: str
+		:return: the filename with the correct file extension
+		:rtype: str
+		"""
+		return genutils.ensure_filename_extension(filename, self.extension())
 
 
 @dataclass
@@ -333,7 +371,7 @@ def find_aux_files(tex_file : str, selector : Callable[[str], bool] | None = Non
 			if selector is None or selector(candidate_name):
 				aux_files.append(candidate_name)
 		else:
-			additional_tex_file = genutils.basename2(candidate_name, *FileType.aux.extensions()) + '.tex'
+			additional_tex_file = FileType.tex.ensure_extension(candidate_name)
 			if os.path.isfile(additional_tex_file) and (selector is None or selector(candidate_name)):
 				aux_files.append(candidate_name)
 	return aux_files
@@ -348,7 +386,7 @@ def create_extended_tex_filename(filename : str) -> str:
 	"""
 	ext = genutils.get_filename_extension_from(filename, *FileType.tex_extensions())
 	if ext is not None:
-		new_basename = genutils.basename2(filename, ext)
+		new_basename = genutils.basename_with_path(filename, ext)
 	else:
 		new_basename = filename
 	new_basename += EXTENDED_TEX_CODE_FILENAME_POSTFIX
@@ -366,7 +404,7 @@ def get_original_tex_filename(filename : str) -> str:
 	"""
 	ext = genutils.get_filename_extension_from(filename, *FileType.tex_extensions())
 	if ext is not None:
-		new_basename = genutils.basename2(filename, ext)
+		new_basename = genutils.basename_with_path(filename, ext)
 	else:
 		new_basename = filename
 	if new_basename.endswith(EXTENDED_TEX_CODE_FILENAME_POSTFIX):

@@ -41,138 +41,54 @@ class TestUtils(AbstractBaseTest):
 		self.assertEqual('a', genutils.first_of(None, None, 'a', None, 'b', 'c'))
 
 	def test_basename_inline_a(self):
-		self.assertEqual('name', genutils.basename('name.ext', '.ext'))
-		self.assertEqual('name', genutils.basename('name.ext', '.ext', '.a'))
-		self.assertEqual('name', genutils.basename('name.ext', '.a', '.ext'))
-		self.assertEqual('name.ext', genutils.basename('name.ext', '.a'))
-		self.assertEqual('name.ext', genutils.basename('name.ext'))
+		self.assertEqual('name', genutils.simple_basename('name.ext', '.ext'))
+		self.assertEqual('name', genutils.simple_basename('name.ext', '.ext', '.a'))
+		self.assertEqual('name', genutils.simple_basename('name.ext', '.a', '.ext'))
+		self.assertEqual('name.ext', genutils.simple_basename('name.ext', '.a'))
+		self.assertEqual('name.ext', genutils.simple_basename('name.ext'))
 
 	def test_basename_inline_b(self):
 		d = os.path.join('a',  'b', 'c')
 		act = os.path.join(d,  'name.ext')
 		exp = 'name'
 		exp2 = 'name.ext'
-		self.assertEqual(exp, genutils.basename(act, '.ext'))
-		self.assertEqual(exp, genutils.basename(act, '.ext', '.a'))
-		self.assertEqual(exp, genutils.basename(act, '.a', '.ext'))
-		self.assertEqual(exp2, genutils.basename(act, '.a'))
-		self.assertEqual(exp2, genutils.basename(act))
-
-	def test_basename_tuple_a(self):
-		self.assertEqual('name', genutils.basename('name.ext', ('.ext')))
-		self.assertEqual('name', genutils.basename('name.ext', ('.ext', '.a')))
-		self.assertEqual('name', genutils.basename('name.ext', ('.a', '.ext')))
-		self.assertEqual('name.ext', genutils.basename('name.ext', ('.a')))
-
-	def test_basename_tuple_b(self):
-		d = os.path.join('a',  'b', 'c')
-		act = os.path.join(d,  'name.ext')
-		exp = 'name'
-		exp2 = 'name.ext'
-		self.assertEqual(exp, genutils.basename(act, ('.ext')))
-		self.assertEqual(exp, genutils.basename(act, ('.ext', '.a')))
-		self.assertEqual(exp, genutils.basename(act, ('.a', '.ext')))
-		self.assertEqual(exp2, genutils.basename(act, ('.a')))
-
-	def test_basename_list_a(self):
-		self.assertEqual('name', genutils.basename('name.ext', [ '.ext' ]))
-		self.assertEqual('name', genutils.basename('name.ext', ['.ext', '.a' ]))
-		self.assertEqual('name', genutils.basename('name.ext', ['.a', '.ext' ]))
-
-	def test_basename_list_b(self):
-		d = os.path.join('a',  'b', 'c')
-		act = os.path.join(d,  'name.ext')
-		exp = 'name'
-		self.assertEqual(exp, genutils.basename(act, [ '.ext' ]))
-		self.assertEqual(exp, genutils.basename(act, ['.ext', '.a' ]))
-		self.assertEqual(exp, genutils.basename(act, ['.a', '.ext' ]))
-
-	def test_basename_set_a(self):
-		self.assertEqual('name', genutils.basename('name.ext', { '.ext' }))
-		self.assertEqual('name', genutils.basename('name.ext', {'.ext', '.a' }))
-		self.assertEqual('name', genutils.basename('name.ext', {'.a', '.ext' }))
-
-	def test_basename_set_b(self):
-		d = os.path.join('a',  'b', 'c')
-		act = os.path.join(d,  'name.ext')
-		exp = 'name'
-		self.assertEqual(exp, genutils.basename(act, { '.ext' }))
-		self.assertEqual(exp, genutils.basename(act, {'.ext', '.a' }))
-		self.assertEqual(exp, genutils.basename(act, {'.a', '.ext' }))
+		self.assertEqual(exp, genutils.simple_basename(act, '.ext'))
+		self.assertEqual(exp, genutils.simple_basename(act, '.ext', '.a'))
+		self.assertEqual(exp, genutils.simple_basename(act, '.a', '.ext'))
+		self.assertEqual(exp2, genutils.simple_basename(act, '.a'))
+		self.assertEqual(exp2, genutils.simple_basename(act))
 
 	def test_basename_texfilename(self):
 		d = os.path.join('a', 'b', 'c')
 		act = os.path.join(d, 'name+endname+tex.plot')
 		exp = 'name+endname'
-		self.assertEqual(exp, genutils.basename(act, '.plott', '.plot_tex', '.plottex', '.plot+tex',
+		self.assertEqual(exp, genutils.simple_basename(act, '.plott', '.plot_tex', '.plottex', '.plot+tex',
 												'.tex.plot', '+tex.plot', '.gnut', '.gnu_tex', '.gnutex',
 												'.gnu+tex', '.tex.gnu', '+tex.gnu'))
 
-	def test_basename2_inline_a(self):
-		self.assertEqual('name', genutils.basename2('name.ext', '.ext'))
-		self.assertEqual('name', genutils.basename2('name.ext', '.ext', '.a'))
-		self.assertEqual('name', genutils.basename2('name.ext', '.a', '.ext'))
-		self.assertEqual('name.ext', genutils.basename2('name.ext', '.a'))
-		self.assertEqual('name.ext', genutils.basename2('name.ext'))
+	def test_basename_with_path_inline_a(self):
+		self.assertEqual('name', genutils.basename_with_path('name.ext', '.ext'))
+		self.assertEqual('name', genutils.basename_with_path('name.ext', '.ext', '.a'))
+		self.assertEqual('name', genutils.basename_with_path('name.ext', '.a', '.ext'))
+		self.assertEqual('name.ext', genutils.basename_with_path('name.ext', '.a'))
+		self.assertEqual('name.ext', genutils.basename_with_path('name.ext'))
 
-	def test_basename2_inline_b(self):
+	def test_basename_with_path_inline_b(self):
 		d = os.path.join('a',  'b', 'c')
 		act = os.path.join(d,  'name.ext')
 		exp = os.path.join(d,  'name')
 		exp2 = os.path.join(d,  'name.ext')
-		self.assertEqual(exp, genutils.basename2(act, '.ext'))
-		self.assertEqual(exp, genutils.basename2(act, '.ext', '.a'))
-		self.assertEqual(exp, genutils.basename2(act, '.a', '.ext'))
-		self.assertEqual(exp2, genutils.basename2(act, '.a'))
-		self.assertEqual(exp2, genutils.basename2(act))
+		self.assertEqual(exp, genutils.basename_with_path(act, '.ext'))
+		self.assertEqual(exp, genutils.basename_with_path(act, '.ext', '.a'))
+		self.assertEqual(exp, genutils.basename_with_path(act, '.a', '.ext'))
+		self.assertEqual(exp2, genutils.basename_with_path(act, '.a'))
+		self.assertEqual(exp2, genutils.basename_with_path(act))
 
-	def test_basename2_tuple_a(self):
-		self.assertEqual('name', genutils.basename2('name.ext', ('.ext')))
-		self.assertEqual('name', genutils.basename2('name.ext', ('.ext', '.a')))
-		self.assertEqual('name', genutils.basename2('name.ext', ('.a', '.ext')))
-		self.assertEqual('name.ext', genutils.basename2('name.ext', ('.a')))
-
-	def test_basename2_tuple_b(self):
-		d = os.path.join('a',  'b', 'c')
-		act = os.path.join(d,  'name.ext')
-		exp = os.path.join(d,  'name')
-		exp2 = os.path.join(d,  'name.ext')
-		self.assertEqual(exp, genutils.basename2(act, ('.ext')))
-		self.assertEqual(exp, genutils.basename2(act, ('.ext', '.a')))
-		self.assertEqual(exp, genutils.basename2(act, ('.a', '.ext')))
-		self.assertEqual(exp2, genutils.basename2(act, ('.a')))
-
-	def test_basename2_list_a(self):
-		self.assertEqual('name', genutils.basename2('name.ext', [ '.ext' ]))
-		self.assertEqual('name', genutils.basename2('name.ext', ['.ext', '.a' ]))
-		self.assertEqual('name', genutils.basename2('name.ext', ['.a', '.ext' ]))
-
-	def test_basename2_list_b(self):
-		d = os.path.join('a',  'b', 'c')
-		act = os.path.join(d,  'name.ext')
-		exp = os.path.join(d,  'name')
-		self.assertEqual(exp, genutils.basename2(act, [ '.ext' ]))
-		self.assertEqual(exp, genutils.basename2(act, ['.ext', '.a' ]))
-		self.assertEqual(exp, genutils.basename2(act, ['.a', '.ext' ]))
-
-	def test_basename2_set_a(self):
-		self.assertEqual('name', genutils.basename2('name.ext', { '.ext' }))
-		self.assertEqual('name', genutils.basename2('name.ext', {'.ext', '.a' }))
-		self.assertEqual('name', genutils.basename2('name.ext', {'.a', '.ext' }))
-
-	def test_basename2_set_b(self):
-		d = os.path.join('a',  'b', 'c')
-		act = os.path.join(d,  'name.ext')
-		exp = os.path.join(d,  'name')
-		self.assertEqual(exp, genutils.basename2(act, { '.ext' }))
-		self.assertEqual(exp, genutils.basename2(act, {'.ext', '.a' }))
-		self.assertEqual(exp, genutils.basename2(act, {'.a', '.ext' }))
-
-	def test_basename2_texfilename(self):
+	def test_basename_with_path_texfilename(self):
 		d = os.path.join('a',  'b', 'c')
 		act = os.path.join(d,  'name+endname+tex.plot')
 		exp = os.path.join(d, 'name+endname')
-		self.assertEqual(exp, genutils.basename2(act, '.plott', '.plot_tex', '.plottex', '.plot+tex',
+		self.assertEqual(exp, genutils.basename_with_path(act, '.plott', '.plot_tex', '.plottex', '.plot+tex',
 												 '.tex.plot', '+tex.plot', '.gnut', '.gnu_tex', '.gnutex',
 												 '.gnu+tex', '.tex.gnu', '+tex.gnu'))
 
@@ -220,20 +136,7 @@ class TestUtils(AbstractBaseTest):
 		self.assertEqual('the_filename.myext', genutils.ensure_filename_extension('the_filename', '.myext'))
 
 	def test_ensure_filename_extension_oneext_otherext(self):
-		self.assertEqual('the_filename.jpg.myext', genutils.ensure_filename_extension('the_filename.jpg', '.myext'))
-
-	def test_ensure_filename_extension_twoext_exist0(self):
-		self.assertEqual('the_filename.myext', genutils.ensure_filename_extension('the_filename.myext', '.myext', '.pdf'))
-
-	def test_ensure_filename_extension_twoext_exist1(self):
-		self.assertEqual('the_filename.pdf', genutils.ensure_filename_extension('the_filename.pdf', '.myext', '.pdf'))
-
-	def test_ensure_filename_extension_twoext_noexist(self):
-		self.assertEqual('the_filename.myext', genutils.ensure_filename_extension('the_filename', '.myext', '.pdf'))
-
-	def test_ensure_filename_extension_twoext_otherext(self):
-		self.assertEqual('the_filename.jpg.myext', genutils.ensure_filename_extension('the_filename.jpg', '.myext', '.pdf'))
-
+		self.assertEqual('the_filename.myext', genutils.ensure_filename_extension('the_filename.jpg', '.myext'))
 
 
 

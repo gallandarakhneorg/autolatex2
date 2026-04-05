@@ -104,7 +104,7 @@ translator_function: |
     	raise Exception("Unable to find the java library of Astah. Please define the ASTAH_HOME environment variable")
     # Prepare the generation from Astah
     outputDir = os.path.relpath(os.path.dirname(_in))
-    shortBasename = genutils.basename(_in, _inexts)
+    shortBasename = genutils.simple_basename(_in, *_inexts)
     astahOutputDir = os.path.join(outputDir, shortBasename)
     if os.path.isdir(astahOutputDir):
     	shutil.rmtree(astahOutputDir)
@@ -124,9 +124,9 @@ translator_function: |
     			generated_files.append(png_file)
     	# Move the generated files
     	if len(generated_files) > 1:
-    		template = genutils.basename2(_out,  _outexts) + '_'
+    		template = genutils.basename_with_path(_out, *_outexts) + '_'
     		for generated_file in generated_files:
-    			bn = genutils.basename(generated_file,['.png'])
+    			bn = genutils.simple_basename(generated_file, '.png')
     			bn = re.sub('\\s+',  '_',  bn,  re.S)
     			bn = template + bn + _outext
     			genutils.unlink(bn)

@@ -28,7 +28,7 @@ output_extensions for eps:
 translator_python_dependencies:
     - import autolatex2.utils.utilfunctions as genutils
 translator_function: |
-    epsFile = genutils.basename2(_in,  _inexts)
+    epsFile = genutils.basename_with_path(_in, *_inexts)
     runner_output = Runner.run_command( 'asy', '-o', epsFile, _in)
     Runner.check_runner_status(runner_output)
     if _pdfmode:

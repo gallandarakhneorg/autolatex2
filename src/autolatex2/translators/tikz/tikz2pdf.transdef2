@@ -33,7 +33,7 @@ translator_python_dependencies:
     - autolatex2.tex.utils as texutils
 translator_function: |
     os.chdir(_outdir)
-    basename = genutils.basename(_in, _inexts)
+    basename = genutils.simple_basename(_in, *_inexts)
     text = textwrap.dedent("""\
     	\\documentclass{standalone}
     	\\usepackage{pgfplots}
@@ -63,7 +63,7 @@ translator_function: |
     		dvi_file = os.path.join(_outdir, basename + '.dvi')
     		#genutils.unlink(dvi_file)
     finally:
-    	genutils.unlink(genutils.basename2(_in, _inexts) + '.aux')
-    	genutils.unlink(genutils.basename2(_in, _inexts) + '.log')
+    	genutils.unlink(genutils.basename_with_path(_in, *_inexts) + '.aux')
+    	genutils.unlink(genutils.basename_with_path(_in, *_inexts) + '.log')
 ...
 

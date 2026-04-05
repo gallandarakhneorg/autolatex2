@@ -120,7 +120,7 @@ class TestGlossaryAnalyzer(AbstractBaseTest):
 		self.__lastBasename = os.path.basename(name)
 		f.file.write(bytes(self.IDXFILE, 'UTF-8'))
 		f.seek(0)
-		f.close
+		f.close()
 		analyzer = glossaryanalyzer.GlossaryAnalyzer(name)
 		analyzer.run()
 		return analyzer

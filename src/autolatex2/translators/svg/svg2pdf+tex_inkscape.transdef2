@@ -52,8 +52,8 @@ translator_function: |
     	ext1 = '.eps_tex'
     	ext2 = '.pstex_t'
     	opt = '--export-type=eps'
-    pdftexfile = genutils.basename2(_out, _outexts) + ext1
-    pdftexfile2 = genutils.basename2(_out, _outexts) + ext2
+    pdftexfile = genutils.basename_with_path(_out, *_outexts) + ext1
+    pdftexfile2 = genutils.basename_with_path(_out, *_outexts) + ext2
     runner_output = Runner.run_command('inkscape', '--export-area-page', opt, '--export-filename=' + _out, '--export-latex', _in)
     Runner.check_runner_status(runner_output)
     shutil.move(pdftexfile, pdftexfile2)

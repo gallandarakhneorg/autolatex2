@@ -65,9 +65,8 @@ class MakerAction(AbstractMakerAction):
 			if ddir and not cli_arguments.nochdir:
 				os.chdir(ddir)
 			maker = self._internal_create_maker()
-			idx_ext = FileType.idx.extension()
 			for root_file in maker.root_files:
-				idx_file = genutils.basename2(root_file,  *FileType.tex_extensions()) + idx_ext
+				idx_file = FileType.idx.ensure_extension(root_file)
 				result = maker.run_makeindex(idx_file)
 				if result is not None:
 					if result.return_code != 0:

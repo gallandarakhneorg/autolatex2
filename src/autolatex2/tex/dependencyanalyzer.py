@@ -672,9 +672,9 @@ class DependencyAnalyzer(Observer):
 		"""
 		# Special case: the bibunit
 		if self.__in_bibunit:
-			bbl_file = genutils.basename2(bbl_file, '.bbl') + str(self.__bibunit_index)
+			bbl_file = genutils.basename_with_path(bbl_file, *FileType.bibliography_extensions()) + str(self.__bibunit_index)
 		if not os.path.isabs(bbl_file):
-			bbl_file = genutils.ensure_filename_extension(bbl_file, '.bbl')
+			bbl_file = FileType.bbl.ensure_extension(bbl_file)
 			bbl_file = os.path.normpath(os.path.join(self.root_directory, bbl_file))
 		for param in files:
 			value = param.text
@@ -955,7 +955,7 @@ class DependencyAnalyzer(Observer):
 		:rtype: str
 		"""
 		if self.__include_extra_macros:
-			return genutils.basename(self.main_filename, *FileType.tex_extensions()) + '.'
+			return genutils.simple_basename(self.main_filename, *FileType.tex_extensions()) + '.'
 		return 'bu'
 
 	@override

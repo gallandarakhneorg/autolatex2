@@ -69,7 +69,7 @@ class TestReadBuildStampsMaker(AbstractBaseTest):
 
 
 	def test_run_empty(self):
-		self.__maker.write_build_stamps(self.__tmp_folder_name, basename = 'stamps', stamps = self.__stamps)
+		self.__maker.stamp_manager.write_build_stamps(self.__tmp_folder_name, basename = 'stamps', stamps = self.__stamps)
 		with open(self.__root_file,  'r') as sf:
 			content = sf.read()
 			self.assertEqual("BIB(bib-md5):./file.bib\nBIB(bbl-md5):./file.bbl\nIDX(idx-md5):./file.idx\n", content)

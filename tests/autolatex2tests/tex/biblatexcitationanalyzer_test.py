@@ -115,7 +115,7 @@ class TestBiblatexCitationAnalyzer(AbstractBaseTest):
 		self.assertEqual(self.__lastFilename, self.analyzer.filename)
 
 	def test_citations(self):
-		self.assertEqual([
+		self.assertEqual('\n'.join([
 				'AGRE.05',
 				'Badeig2010',
 				'Bhouri2012',
@@ -136,7 +136,7 @@ class TestBiblatexCitationAnalyzer(AbstractBaseTest):
 				'Tamminga2014',
 				'Viroli2005',
 				'Weyns2007',
-				'Zargayouna2009'], self.analyzer.citations)
+				'Zargayouna2009']), '\n'.join(self.analyzer.citations))
 
 	def test_md5(self):
 		self.assertEqual('bbd691129292d9bf59a69cd62f4b921d', self.analyzer.md5)

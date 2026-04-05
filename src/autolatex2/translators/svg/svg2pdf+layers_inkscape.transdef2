@@ -98,7 +98,7 @@ translator_function: |
     			layerIndex = layerIndex + 1
     if not imageinclusions:
     	raise Exception(("No layer in the SVG file: %s") % (_in))
-    with open(genutils.basename2(_out,  _outexts) + ext1,  'wt') as out_file:
+    with open(genutils.basename_with_path(_out, *_outexts) + ext1,  'wt') as out_file:
     	out_file.write("\\begin{tikzpicture}%\n")
     	for inclusion in imageinclusions:
     		out_file.write(inclusion)

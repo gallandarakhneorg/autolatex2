@@ -122,7 +122,7 @@ def unlink(name : str):
 	except:
 		pass
 
-def basename(name : str, *ext : str) -> str:
+def simple_basename(name : str, *ext : str) -> str:
 	"""
 	Replies the basename, without the given extensions.
 	This function remove the directory name.
@@ -134,20 +134,20 @@ def basename(name : str, *ext : str) -> str:
 	:rtype: str
 	"""
 	bn = os.path.basename(name)
-	for e in ext:
-		if isinstance(e, list) or isinstance(e, tuple) or isinstance(e, set):
-			for e2 in e:
-				if bn.endswith(e2):
-					i = len(e2)
-					n = bn[0:-i]
-					return n
-		elif bn.endswith(e):
-			i = len(e)
-			n = bn[0:-i]
-			return n
-	return bn
+	n = len(ext)
+	if n == 0:
+		return bn
+	sbn = bn
+	n = 0
+	for ext0 in ext:
+		if bn.endswith(ext0):
+			n0 = len(ext0)
+			if n0 > n:
+				n = n0
+				sbn = bn[:-n0]
+	return sbn
 
-def basename2(name : str, *ext : str) -> str:
+def basename_with_path(name : str, *ext : str) -> str:
 	"""
 	Replies the basename, without the given extensions.
 	This function mimics the 'basename' command on Unix systems.
@@ -159,11 +159,18 @@ def basename2(name : str, *ext : str) -> str:
 	:return: The name.
 	:rtype: str
 	"""
-	bn = basename(name,  *ext)
-	dn = os.path.dirname(name)
-	if dn:
-		return os.path.join(dn,  bn)
-	return bn
+	n = len(ext)
+	if n == 0:
+		return name
+	sbn = name
+	n = 0
+	for ext0 in ext:
+		if name.endswith(ext0):
+			n0 = len(ext0)
+			if n0 > n:
+				n = n0
+				sbn = name[:-n0]
+	return sbn
 
 def get_filename_extension_from(name : str, *ext : str) -> str|None:
 	"""
@@ -175,16 +182,15 @@ def get_filename_extension_from(name : str, *ext : str) -> str|None:
 	:return: The extension, or None if no extension was found.
 	:rtype: str|None
 	"""
-	for extension in ext:
-		if name.endswith(extension):
-			return extension
+	components = os.path.splitext(name)
+	if len(components) > 1 and components[-1] in ext:
+		return components[-1]
 	return None
 
 
-def ensure_filename_extension(name : str, *ext : str) -> str:
+def ensure_filename_extension(name : str, ext : str) -> str:
 	"""
-	Ensure that the given filename has the specified file extension. If there is multiple extensions
-	provided, then the first one is selected as the reference.
+	Ensure that the given filename has the specified file extension. If an extension exists, it is replaced.
 	:param name: The filename.
 	:type name: str
 	:param ext: The extensions to search for.
@@ -192,20 +198,22 @@ def ensure_filename_extension(name : str, *ext : str) -> str:
 	:return: The filename with a correct extension.
 	:rtype: str
 	"""
-	for extension in ext:
-		if name.endswith(extension):
-			return name
-	return name + ext[0]
+	components = list(os.path.splitext(name))
+	l = len(components)
+	if l > 0:
+		components.pop()
+		return ''.join(components) + ext
+	return name + ext
 
 
 TO = TypeVar('TO')
-def first_of(*values : list[TO]) -> TO:
+def first_of(*values : TO) -> TO:
 	"""
 	Replies the first non-null value in the given values.
 	:param values: The array of values.
-	:type values: list[T]
+	:type values: list[T0]
 	:return: the first non-null value, or None.
-	:rtype: T
+	:rtype: T0
 	"""
 	for value in values:
 		if value is not None:

@@ -168,11 +168,10 @@ class AbstractMakerAction(ABC):
 				logging.error(T("Unable to find the name of the generated file for the viewer"))
 				return False
 
-			out_file = genutils.basename2(input_file, *FileType.tex_extensions())
 			if self.configuration.generation.pdf_mode:
-				out_file += '.pdf'
+				out_file = FileType.pdf.ensure_extension(input_file)
 			else:
-				out_file += '.ps'
+				out_file = FileType.ps.ensure_extension(input_file)
 			logging.debug(T("VIEWER: %s") % out_file)
 
 			cli = self.configuration.view.viewer_cli

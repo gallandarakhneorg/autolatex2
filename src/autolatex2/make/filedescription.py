@@ -132,6 +132,16 @@ class FileDescription:
 			self.__change_date = genutils.get_file_last_change(self.__output_filename)
 		return self.__change_date
 
+	@change.setter
+	def change(self, value : float | None):
+		"""
+		Change the date of the last change of the file.
+		:param value: The new value. If it is None, it means that the change becomes unknown.
+		:type value: float|None
+		"""
+		self.__has_change_date = True
+		self.__change_date = value
+
 	@property
 	def use_multibib(self) -> bool:
 		"""

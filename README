@@ -170,6 +170,14 @@ COMMANDS
         Displays the value of the PATH environment variable that is
         considered by AutoLaTeX.
 
+    stamps
+        Displays or update the list of stamps that are saved by AutoLaTeX.
+        Stamps are keys used to determine if some information (bibliography,
+        index, glossary, etc.) has changed since the previous run of
+        AutoLaTeX. They permit to AutoLaTeX to obtain a better detection of
+        changes than those only based on the dates of last-change of the
+        files.
+
     unusedimages
         Displays (or removes) figures in the document folder that are not
         included in the document.
@@ -537,6 +545,13 @@ OPTIONS FOR COMMANDS
         --level
         --nolevel   Shows or hides the activation levels for each
                     translator.
+
+    *stamps*
+
+        --reset     Reset to nothing the values of the stamps.
+
+        --update    Force the compuation of the stamps from the current
+                    content of the axuiliary files, and save the stamps.
 
     *unusedimages*
 
