@@ -25,6 +25,8 @@ import unittest
 from abc import ABC
 from typing import override
 
+from autolatex2.make.filedescription import FileDescription
+from autolatex2.tex.utils import FileType
 from autolatex2.utils import extprint
 
 
@@ -81,3 +83,63 @@ class AbstractBaseTest(unittest.TestCase,ABC):
 		"""
 		if directory is not None and self.autodelete:
 			directory.cleanup()
+
+	@property
+	def root_file(self):
+		raise NotImplementedError()
+
+	def __assertBuildingListItem(self, i : int, expected : dict, actual : FileDescription):
+		self.assertEqual(expected['output_filename'], actual.output_filename, "Invalid output filename for actual #%d" % i)
+		self.assertEqual(expected['input_filename'], actual.input_filename, "Invalid input filename for actual #%d" % i)
+		self.assertEqual(expected['type'], actual.file_type, "Invalid file type for actual #%d" % i)
+		self.assertEqual(self.root_file, actual.main_filename, "Invalid main filename for actual #%d" % i)
+		self.assertFalse(actual.use_biber, "Unexpected Biber usage for actual #%d" % i)
+		self.assertFalse(actual.use_xindy, "Unexpected Xindy usage for actual #%d" % i)
+
+	# noinspection PyMethodMayBeStatic
+	def __index_of(self, expected : list, output_filename : str, input_filename : str, file_type : FileType) -> int:
+		i = 0
+		for element in expected:
+			if isinstance(element, dict):
+				if ('type' in element and element['type'] == file_type and
+					'output_filename' in element and element['output_filename'] == output_filename and
+					'input_filename' in element and element['input_filename'] == input_filename):
+					return i
+			i += 1
+		return -1
+
+	def assertBuildingList(self, expected : list[dict|list[dict]], actual : list[FileDescription]):
+		if not expected:
+			self.assertFalse(actual, "Unexpected value for for actual. It is expected to be empty")
+		else:
+			i = 0
+			j = 0
+			candidate = expected[j]
+			for actual_element in actual:
+				if not candidate:
+					j += 1
+					candidate = expected[j]
+				if isinstance(candidate, list):
+					# Multiple candidates that may be found without a specific order
+					idx = self.__index_of(candidate, actual_element.output_filename,
+										  actual_element.input_filename, actual_element.file_type)
+					if idx < 0 or idx >= len(candidate):
+						self.fail('Unexpected element with index %d:  %s' % (idx, repr(actual_element)))
+					else:
+						found_candidate = candidate[idx]
+						self.__assertBuildingListItem(i, dict(found_candidate), actual_element)
+						del candidate[idx]
+				else:
+					# A specific item that must be next available
+					self.__assertBuildingListItem(i, dict(candidate), actual_element)
+					candidate = None
+				i += 1
+
+	def assertBuildingListOrder(self, build_list : list[FileDescription], *types : FileType):
+		atypes = [ *types ]
+		for build_item in build_list:
+			if atypes and build_item.file_type == atypes[0]:
+				# The build item corresponds to the first expected type
+				atypes = atypes[1:]
+		if atypes:
+			self.fail("File type %s not found" % atypes[0].name)

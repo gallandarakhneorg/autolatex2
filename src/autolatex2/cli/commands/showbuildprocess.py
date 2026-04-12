@@ -54,8 +54,7 @@ class MakerAction(AbstractMakerAction):
 				logging.debug(T("Building the execution list"))
 				build_list = maker.build_internal_execution_list(root_file=root_file,
 																 root_pdf_file=root_dep_file,
-																 dependencies=dependencies,
-																 force_changes=False)
+																 dependencies=dependencies)
 				self._show_build_list(build_list)
 		except BaseException as ex:
 			logging.error(str(ex))

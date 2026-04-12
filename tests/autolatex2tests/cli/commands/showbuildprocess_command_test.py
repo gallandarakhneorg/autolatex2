@@ -18,13 +18,13 @@
 # write to the Free Software Foundation, Inc., 59 Temple Place - Suite
 # 330, Boston, MA 02111-1307, USA.
 
-import logging
+import os
+import shutil
 import unittest
 from typing import override
 
-from autolatex2.cli.abstract_main import AbstractAutoLaTeXMain
-from autolatex2.cli.autolatexcommands import AutolatexCommand
-from autolatex2.cli.exiters import AutoLaTeXExceptionExiter
+from autolatex2.config.configobj import Config
+from autolatex2.config.configreader import OldStyleConfigReader
 from autolatex2tests.cli.commands.abstract_command_test import AbstractCommandTest
 
 
@@ -33,8 +33,54 @@ class TestShowBuildProcessAction(AbstractCommandTest):
 	def __init__(self, x):
 		super().__init__(x, 'showbuildprocess')
 
+	@override
+	def setUp(self):
+		super().setUp()
+		self._initialize_test_folder()
+
+	def _initialize_test_folder(self):
+		self._working_directory = os.getcwd()
+		self._resource_directory2 = os.path.normpath(os.path.join(os.path.dirname(__file__),  '..', '..', 'dev-resources'))
+		self._resource_directory = os.path.normpath(os.path.join(self._resource_directory2, 'translators'))
+		self._resource_directory = os.path.normpath(os.path.join(self._resource_directory2, 'translators'))
+
+		self._tmp_folder = self._create_temp_directory()
+		self._tmp_folder_name = self._tmp_folder.name
+		self._img_folder = os.path.normpath(os.path.join(self._tmp_folder_name, 'imgs', 'auto'))
+
+		self._config = Config()
+		self._config.document_directory = self._tmp_folder_name
+		self._config.document_filename = 'rootfile.tex'
+		self._config.translators.is_translator_enable = True
+		self._config.translators.ignore_user_translators = True
+		self._config.translators.ignore_document_translators = True
+		self._config.translators.add_image_path(self._img_folder)
+		config_reader = OldStyleConfigReader()
+		config_reader.read_system_config_safely(self._config)
+		config_reader.read_user_config_safely(self._config)
+
+		os.makedirs(self._img_folder)
+		shutil.copyfile(os.path.normpath(os.path.join(self._resource_directory, 'testimg.svg')),
+		                os.path.normpath(os.path.join(self._img_folder, 'img1.svg')))
+		shutil.copyfile(os.path.normpath(os.path.join(self._resource_directory, 'testimg.svg')),
+						os.path.normpath(os.path.join(self._img_folder, 'img2.svg')))
+		shutil.copyfile(os.path.normpath(os.path.join(self._resource_directory, 'testimg.jpg.gz')),
+						os.path.normpath(os.path.join(self._img_folder, 'img3.jpg.gz')))
+		shutil.copyfile(os.path.normpath(os.path.join(self._resource_directory2, 'test20.tex')),
+						os.path.normpath(os.path.join(self._tmp_folder_name, 'rootfile.tex')))
+
+		self._target_img1 = os.path.normpath(os.path.join(self._img_folder, 'img1.pdf'))
+		self._target_img2 = os.path.normpath(os.path.join(self._img_folder, 'img2.pdf'))
+		self._target_img3 = os.path.normpath(os.path.join(self._img_folder, 'img3.jpg'))
+
+
+	@override
+	def tearDown(self):
+		super().tearDown()
+		self._delete_temp_directory(self._tmp_folder)
+
 	def test_regular(self):
-		self.do_test()
+		self.do_test(config=self._config)
 
 
 if __name__ == '__main__':

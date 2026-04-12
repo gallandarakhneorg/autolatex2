@@ -142,6 +142,13 @@ class FileDescription:
 		self.__has_change_date = True
 		self.__change_date = value
 
+	def reset_change(self):
+		"""
+		Reset the reading of the last-change date in order to force its reading at the next call to change property.
+		"""
+		self.__has_change_date = False
+		self.__change_date = None
+
 	@property
 	def use_multibib(self) -> bool:
 		"""

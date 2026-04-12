@@ -29,9 +29,9 @@ from autolatex2.tex.utils import FileType
 from autolatex2.make.maker import AutoLaTeXMaker
 from autolatex2tests.abstract_base_test import AbstractBaseTest
 
-class TestBuildListMaker(AbstractBaseTest):
+class TestBuildListBibliographyMaker(AbstractBaseTest):
 	"""
-	Create a build list from a project without bibliography, index or glossary.
+	Create a build list from a project with bibliography.
 	"""
 
 	def __init__(self, *args, **kwargs):
@@ -61,6 +61,8 @@ class TestBuildListMaker(AbstractBaseTest):
 		self.__root_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'rootfile.tex'))
 		self.__texa_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'test12a.tex'))
 		self.__texb_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'test12b.tex'))
+		self.__bib_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'test5.bib'))
+		self.__bbl_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'rootfile.bbl'))
 		self.__aux_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'rootfile.aux'))
 		self.__img_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'img.pdf'))
 		self.__pdf_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'rootfile.pdf'))
@@ -69,9 +71,10 @@ class TestBuildListMaker(AbstractBaseTest):
 		self.__config.document_directory = self.__tmp_folder_name
 		self.__config.document_filename = 'rootfile.tex'
 
-		shutil.copyfile(os.path.normpath(os.path.join(self.__resource_directory, 'test35.tex')), self.__root_file)
+		shutil.copyfile(os.path.normpath(os.path.join(self.__resource_directory, 'test32.tex')), self.__root_file)
 		shutil.copyfile(os.path.normpath(os.path.join(self.__resource_directory, 'test12a.tex')), self.__texa_file)
 		shutil.copyfile(os.path.normpath(os.path.join(self.__resource_directory, 'test12b.tex')), self.__texb_file)
+		shutil.copyfile(os.path.normpath(os.path.join(self.__resource_directory, 'test5.bib')), self.__bib_file)
 		shutil.copyfile(os.path.normpath(os.path.join(self.__resource_directory, 'test12img.pdf')), self.__img_file)
 
 		self.__maker = AutoLaTeXMaker.create(self.__config)
@@ -100,6 +103,11 @@ class TestBuildListMaker(AbstractBaseTest):
 				"type": FileType.aux,
 			},
 			{
+				"output_filename": self.__bbl_file,
+				"input_filename": self.__aux_file,
+				"type": FileType.bbl,
+			},
+			{
 				"output_filename": self.__pdf_file,
 				"input_filename": self.__root_file,
 				"type": FileType.pdf,
@@ -115,6 +123,11 @@ class TestBuildListMaker(AbstractBaseTest):
 		build_list = self.__maker.build_internal_execution_list(self.__root_file, self.__pdf_file, self.__dependencies,
 																enable_initial_latex_run=False)
 		expected_list = [
+			{
+				"output_filename": self.__bbl_file,
+				"input_filename": self.__aux_file,
+				"type": FileType.bbl,
+			},
 			{
 				"output_filename": self.__pdf_file,
 				"input_filename": self.__root_file,

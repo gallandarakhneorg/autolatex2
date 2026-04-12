@@ -20,10 +20,13 @@
 
 import unittest
 import logging
+from collections.abc import Callable
 from typing import override
 
 from autolatex2.config.configobj import Config
+from autolatex2.make.abstractbuilder import Builder
 from autolatex2.make.maker import AutoLaTeXMaker
+from autolatex2.tex.utils import FileType
 from autolatex2tests.abstract_base_test import AbstractBaseTest
 
 class TestMaker(AbstractBaseTest):
@@ -161,6 +164,22 @@ class TestMaker(AbstractBaseTest):
 		self.assertEqual(
 			list(),
 			warns)
+
+	def assertBuilder(self, builders : dict[FileType,Callable[[],Builder]], name : FileType):
+		self.assertIn(name, builders)
+		self.assertIsNotNone(builders[name])
+		instance = builders[name]()
+		self.assertIsNotNone(instance)
+
+	def test_build_builder_dict(self):
+		builders = self.__maker.build_builder_dict('autolatex2.make.builders')
+		self.assertEqual(6, len(builders))
+		self.assertBuilder(builders, FileType.aux)
+		self.assertBuilder(builders, FileType.bbl)
+		self.assertBuilder(builders, FileType.gls)
+		self.assertBuilder(builders, FileType.idx)
+		self.assertBuilder(builders, FileType.ind)
+		self.assertBuilder(builders, FileType.pdf)
 
 
 if __name__ == '__main__':

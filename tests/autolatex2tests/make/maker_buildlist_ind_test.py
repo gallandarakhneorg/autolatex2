@@ -29,9 +29,9 @@ from autolatex2.tex.utils import FileType
 from autolatex2.make.maker import AutoLaTeXMaker
 from autolatex2tests.abstract_base_test import AbstractBaseTest
 
-class TestBuildListMaker(AbstractBaseTest):
+class TestBuildListIndexMaker(AbstractBaseTest):
 	"""
-	Create a build list from a project without bibliography, index or glossary.
+	Create a build list from a project with index.
 	"""
 
 	def __init__(self, *args, **kwargs):
@@ -64,12 +64,14 @@ class TestBuildListMaker(AbstractBaseTest):
 		self.__aux_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'rootfile.aux'))
 		self.__img_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'img.pdf'))
 		self.__pdf_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'rootfile.pdf'))
+		self.__idx_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'rootfile.idx'))
+		self.__ind_file = os.path.normpath(os.path.join(self.__tmp_folder_name, 'rootfile.ind'))
 
 		self.__config = Config()
 		self.__config.document_directory = self.__tmp_folder_name
 		self.__config.document_filename = 'rootfile.tex'
 
-		shutil.copyfile(os.path.normpath(os.path.join(self.__resource_directory, 'test35.tex')), self.__root_file)
+		shutil.copyfile(os.path.normpath(os.path.join(self.__resource_directory, 'test33.tex')), self.__root_file)
 		shutil.copyfile(os.path.normpath(os.path.join(self.__resource_directory, 'test12a.tex')), self.__texa_file)
 		shutil.copyfile(os.path.normpath(os.path.join(self.__resource_directory, 'test12b.tex')), self.__texb_file)
 		shutil.copyfile(os.path.normpath(os.path.join(self.__resource_directory, 'test12img.pdf')), self.__img_file)
@@ -99,6 +101,18 @@ class TestBuildListMaker(AbstractBaseTest):
 				"input_filename": self.__root_file,
 				"type": FileType.aux,
 			},
+			[
+				{
+					"output_filename": self.__ind_file,
+					"input_filename": self.__idx_file,
+					"type": FileType.ind,
+				},
+				{
+					"output_filename": self.__idx_file,
+					"input_filename": self.__root_file,
+					"type": FileType.idx,
+				},
+			],
 			{
 				"output_filename": self.__pdf_file,
 				"input_filename": self.__root_file,
@@ -106,6 +120,7 @@ class TestBuildListMaker(AbstractBaseTest):
 			}
 		]
 		self.assertBuildingList(expected_list, build_list)
+		self.assertBuildingListOrder(build_list, FileType.idx, FileType.ind)
 
 
 	def test_fresh_wo_initial_latex(self):
@@ -115,6 +130,18 @@ class TestBuildListMaker(AbstractBaseTest):
 		build_list = self.__maker.build_internal_execution_list(self.__root_file, self.__pdf_file, self.__dependencies,
 																enable_initial_latex_run=False)
 		expected_list = [
+			[
+				{
+					"output_filename": self.__ind_file,
+					"input_filename": self.__idx_file,
+					"type": FileType.ind,
+				},
+				{
+					"output_filename": self.__idx_file,
+					"input_filename": self.__root_file,
+					"type": FileType.idx,
+				},
+			],
 			{
 				"output_filename": self.__pdf_file,
 				"input_filename": self.__root_file,
@@ -122,6 +149,7 @@ class TestBuildListMaker(AbstractBaseTest):
 			}
 		]
 		self.assertBuildingList(expected_list, build_list)
+		self.assertBuildingListOrder(build_list, FileType.idx, FileType.ind)
 
 
 

@@ -45,7 +45,7 @@ configuring, and installing AutoLaTeX.
 
 =head1 COMMANDS
 
-AutoLaTeX provides a fixed set of commands to perform specific actions on your document. The default command is B<all>.
+AutoLaTeX provides a fixed set of commands to perform specific actions on your document. The default command is B<build>.
 Some commands accept optional arguments; use B<--help> after the command name for details.
 
 The available commands are:
@@ -459,7 +459,7 @@ See options for the I<images>, I<document>  and I<view> commands, if any.
 
 =item B<--nochdir>
 
-Prevents AutoLaTeX from changing the current directory to the document's root directory before starting the build process.
+Prevents AutoLaTeX from changing the current directory to the document's root directory before starting the cleaning process.
 
 =item B<--norecursive>
 
