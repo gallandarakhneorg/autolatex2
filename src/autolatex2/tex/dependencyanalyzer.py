@@ -249,7 +249,7 @@ class TypeDependencyRepository(Sized):
 		"""
 		if self.__buffer_new_database is None:
 			self.__buffer_new_database = dict()
-		assert self.__buffer_new_database is not None
+		assert self.__buffer_new_database is not None, "self.__buffer_new_database is None"
 		if scope not in self.__buffer_new_database:
 			self.__buffer_new_database[scope] = dict()
 			for name, dep in self.__database.items():
@@ -265,7 +265,7 @@ class TypeDependencyRepository(Sized):
 		"""
 		if self.__buffer_scopes is None:
 			self.__buffer_scopes = set()
-			assert self.__buffer_scopes is not None
+			assert self.__buffer_scopes is not None, "self.__buffer_scopes is None"
 			for name, dep in self.__database.items():
 				if dep.scopes:
 					self.__buffer_scopes.update(dep.scopes)
@@ -331,7 +331,7 @@ class _DependencyRepository(Sized):
 		"""
 		if self.__buffer_bibliography_databases is None:
 			self.__buffer_bibliography_databases = set()
-			assert self.__buffer_bibliography_databases is not None
+			assert self.__buffer_bibliography_databases is not None, "self.__buffer_bibliography_databases is None"
 			for btype in FileType.bibliography_types():
 				if btype in self.__database:
 					content = self.__database[btype]
@@ -729,7 +729,7 @@ class DependencyAnalyzer(Observer):
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol=False)
 	def _expand__documentclass(self, name : str, parameters : list[TeXMacroParameter]):
-		assert len(parameters) > 1
+		assert len(parameters) > 1, "Invalid parameters for \\documentclass: %s" % str(parameters)
 		cls = parameters[1].text
 		if cls.endswith('.cls'):
 			cls_file = cls
@@ -788,20 +788,20 @@ class DependencyAnalyzer(Observer):
 
 	@expand_function(start_symbol = True)
 	def _expand__bibliography(self, name : str, parameters : list[TeXMacroParameter]):
-		assert len(parameters) > 0
+		assert len(parameters) > 0, "Invalid parameters for \\bibliography: %s" % str(parameters)
 		bibdb = self.__extract_bibdb('\\bibliography', name)
 		self.__parse_bib_references(bibdb, bibdb, *parameters)
 
 	@expand_function(start_symbol = True)
 	def _expand__bibliographystyle(self, name : str, parameters : list[TeXMacroParameter]):
-		assert len(parameters) > 0
+		assert len(parameters) > 0, "Invalid parameters for \\bibliographystyle: %s" % str(parameters)
 		bibdb = self.__extract_bibdb('\\bibliographystyle', name)
 		self.__analyse_bst_specification(bibdb, parameters)
 
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol = False)
 	def _expand__addbibresource(self, name : str, parameters : list[TeXMacroParameter]):
-		assert len(parameters) > 0
+		assert len(parameters) > 0, "Invalid parameters for \\addbibresource: %s" % str(parameters)
 		bibdb = self.basename
 		self.__parse_bib_references(bibdb, *parameters)
 
@@ -827,13 +827,13 @@ class DependencyAnalyzer(Observer):
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol = False)
 	def _expand__begin(self, name : str, parameters : list[TeXMacroParameter]):
-		assert len(parameters) > 1
+		assert len(parameters) > 1, "Invalid parameters for \\begin: %s" % str(parameters)
 		tex_name = parameters[1].text
 		if tex_name == 'bibunit':
 			self.__is_bibunits = True
 			self.__in_bibunit = True
 			self.__bibunit_index = self.__bibunit_index + 1
-			assert len(parameters) > 2
+			assert len(parameters) > 2, "Invalid parameters for \\begin{bibunits}: %s" % str(parameters)
 			if parameters[2].text:
 				self.__analyse_bst_specification(self.basename, [ parameters[2] ])
 		elif self.__include_extra_macros and tex_name == 'bibliographysection':
@@ -845,7 +845,7 @@ class DependencyAnalyzer(Observer):
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol = False)
 	def _expand__end(self, name : str, parameters : list[TeXMacroParameter]):
-		assert len(parameters) > 0
+		assert len(parameters) > 0, "Invalid parameters for \\end: %s" % str(parameters)
 		tex_name = parameters[0].text
 		if tex_name == 'bibunit' or (self.__include_extra_macros and tex_name == 'bibliographysection'):
 			self.__is_bibunits = True
@@ -854,7 +854,7 @@ class DependencyAnalyzer(Observer):
 	# noinspection DuplicatedCode,PyUnusedLocal
 	@expand_function(start_symbol=False)
 	def _expand__usepackage(self, name : str, parameters : list[TeXMacroParameter]):
-		assert len(parameters) > 1
+		assert len(parameters) > 1, "Invalid parameters for \\usepackage: %s" % str(parameters)
 		sty = parameters[1].text
 		if sty.endswith('.sty'):
 			sty_file = sty

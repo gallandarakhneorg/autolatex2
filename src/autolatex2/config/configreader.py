@@ -391,8 +391,8 @@ class OldStyleConfigReader:
 		if filename and os.path.isfile(filename) and os.access(filename, os.R_OK):
 			try:
 				self.read(filename, TranslatorLevel.SYSTEM, config)
-			except:
-				pass
+			except BaseException as ex:
+				logging.debug(str(ex))
 		return config
 
 	# noinspection PyBroadException,DuplicatedCode
@@ -410,8 +410,8 @@ class OldStyleConfigReader:
 		if filename and os.path.isfile(filename) and os.access(filename, os.R_OK):
 			try:
 				self.read(filename, TranslatorLevel.USER, config)
-			except:
-				pass
+			except BaseException as ex:
+				logging.debug(str(ex))
 		return config
 
 	# noinspection PyBroadException

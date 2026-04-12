@@ -112,7 +112,7 @@ class GlossaryAnalyzer(Observer):
 				self.__glossary_entries_computed = True
 				self.run()
 			self.__md5 = md5(bytes('\\'.join(self.glossary_entries), 'UTF-8')).hexdigest()
-		assert self.__md5 is not None
+		assert self.__md5 is not None, "MD5 is None"
 		return self.__md5
 
 	# noinspection DuplicatedCode

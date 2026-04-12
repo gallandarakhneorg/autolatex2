@@ -118,7 +118,8 @@ class MakerAction(AbstractMakerAction):
 								logging.info(T("Rebuild is needed because: %s") % all_msgs)
 							else:
 								logging.info(T("Output file is up-to-date; No rebuild is needed"))
-						except:
+						except BaseException as ex:
+							logging.debug(str(ex))
 							valid = False
 					else:
 						valid = False

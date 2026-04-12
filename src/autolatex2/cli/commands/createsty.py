@@ -70,6 +70,6 @@ class MakerAction(AbstractMakerAction):
 			os.makedirs(out_directory, exist_ok=True)
 			shutil.copyfile(in_file,  out_file)
 			return True
-		except object as ex:
+		except BaseException as ex:
 			logging.error(str(ex))
 			return False

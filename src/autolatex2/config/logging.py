@@ -29,7 +29,6 @@ class LoggingConfig:
 	"""
 	Configuration of a AutoLaTeX instance.
 	"""
-
 	DEFAULT_LEVEL : int = LogLevel.INFO
 	DEFAULT_LOG_MESSAGE : str = T('%(levelname)s: %(message)s')
 

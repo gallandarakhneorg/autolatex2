@@ -29,6 +29,7 @@ import inspect
 from json import JSONEncoder
 from typing import override, Any
 
+from autolatex2.config import logging
 from autolatex2.config.generation import GenerationConfig
 from autolatex2.config.translator import TranslatorConfig
 from autolatex2.config.view import ViewerConfig
@@ -133,12 +134,6 @@ class Config:
 		"""
 		class JsonEncoder(JSONEncoder):
 			def default(self, obj) -> dict[str,Any] | list[Any]:
-				try:
-					iterable = iter(obj)
-				except TypeError:
-					pass
-				else:
-					return list(iterable)
 				properties = inspect.getmembers(obj.__class__, lambda o: isinstance(o, property))
 				return {k : v.fget(obj) for k, v in properties}
 		return json.dumps(self, indent=4, cls=JsonEncoder)
@@ -406,8 +401,8 @@ class Config:
 						if content.startswith('autolatex'):
 							self.__installation_directory = path
 							return self.__installation_directory or ''
-					except:
-						pass			
+					except BaseException as ex:
+						logging.debug(str(ex))
 				path = os.path.dirname(path)
 		return self.__installation_directory or ''
 

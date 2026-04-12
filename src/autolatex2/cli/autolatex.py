@@ -20,6 +20,7 @@
 # 330, Boston, MA 02111-1307, USA.
 
 import argparse
+import logging
 from argparse import Namespace
 from typing import override
 
@@ -116,8 +117,8 @@ class AutoLaTeXMain(AbstractAutoLaTeXMain):
 				if value:
 					try:
 						outer.configuration.infinite_loop_delay = int(value)
-					except:
-						pass
+					except BaseException as ex:
+						logging.debug(str(ex))
 
 		continuous_group.add_argument('--continuous',
 			action = ContinuousAction, 

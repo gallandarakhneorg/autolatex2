@@ -153,7 +153,7 @@ class AuxiliaryCitationAnalyzer(Observer):
 				self.__citations_computed = True
 				self.run()
 			self.__md5 = md5(bytes('\\'.join(self.citations), 'UTF-8')).hexdigest()
-		assert self.__md5 is not None
+		assert self.__md5 is not None, "MD5 is none"
 		return self.__md5
 
 	@override
@@ -180,31 +180,35 @@ class AuxiliaryCitationAnalyzer(Observer):
 
 	@expand_function
 	def _expand__citation(self, parameters : list[TeXMacroParameter]):
-		assert len(parameters) > 1 and parameters[1].text
-		for bibkey in re.split(r'\s*,\s*', parameters[1].text):
-			if bibkey:
-				self.__citations.add(bibkey)
+		assert len(parameters) > 1, "Invalid parameters for \\citation: %s" % str(parameters)
+		if parameters[1].text:
+			for bibkey in re.split(r'\s*,\s*', parameters[1].text):
+				if bibkey:
+					self.__citations.add(bibkey)
 
 	@expand_function
 	def _expand__bibcite(self, parameters : list[TeXMacroParameter]):
-		assert len(parameters) > 1 and parameters[1].text
-		for bibkey in re.split(r'\s*,\s*', parameters[1].text):
-			if bibkey:
-				self.__citations.add(bibkey)
+		assert len(parameters) > 1, "Invalid parameters for \\bibcite: %s" % str(parameters)
+		if parameters[1].text:
+			for bibkey in re.split(r'\s*,\s*', parameters[1].text):
+				if bibkey:
+					self.__citations.add(bibkey)
 
 	@expand_function
 	def _expand__bibdata(self, parameters : list[TeXMacroParameter]):
-		assert len(parameters) > 1 and parameters[1].text
-		for bibdb in re.split(r'\s*,\s*', parameters[1].text):
-			if bibdb:
-				self.__databases.add(bibdb)
+		assert len(parameters) > 1, "Invalid parameters for \\bibdata: %s" % str(parameters)
+		if parameters[1].text:
+			for bibdb in re.split(r'\s*,\s*', parameters[1].text):
+				if bibdb:
+					self.__databases.add(bibdb)
 
 	@expand_function
 	def _expand__bibstyle(self, parameters : list[TeXMacroParameter]):
-		assert len(parameters) > 1 and parameters[1].text
-		for bibst in re.split(r'\s*,\s*', parameters[1].text):
-			if bibst:
-				self.__styles.add(bibst)
+		assert len(parameters) > 1, "Invalid parameters for \\bibstyle: %s" % str(parameters)
+		if parameters[1].text:
+			for bibst in re.split(r'\s*,\s*', parameters[1].text):
+				if bibst:
+					self.__styles.add(bibst)
 
 	# noinspection DuplicatedCode
 	def run(self):
@@ -320,7 +324,7 @@ class BiblatexCitationAnalyzer(Observer):
 		"""
 		if self.__citations is None:
 			self.__citations = SortedSet()
-		assert self.__citations is not None
+		assert self.__citations is not None, "Citations is none"
 		return self.__citations
 
 	@property
@@ -333,7 +337,7 @@ class BiblatexCitationAnalyzer(Observer):
 			if self.__citations is None:
 				self.run()
 			self.__md5 = md5(bytes('\\'.join(self.citations), 'UTF-8')).hexdigest()
-		assert self.__md5 is not None
+		assert self.__md5 is not None, "MD5 is none"
 		return self.__md5
 
 	# noinspection DuplicatedCode

@@ -278,7 +278,7 @@ class ImageInclusions(Observer):
 
 	@expand_function(extra_macro=True)
 	def _expand__figureslide(self, parser : Parser, parameters : list[TeXMacroParameter]) -> str | None:
-		assert len(parameters) > 2
+		assert len(parameters) > 2, "Invalid parameters for \\figureslide: %s" % str(parameters)
 		self.__find_picture(parameters[2].text)
 		return None
 
@@ -301,21 +301,21 @@ class ImageInclusions(Observer):
 	# noinspection PyUnusedLocal
 	@expand_function
 	def _expand__includegraphics(self, parser : Parser, parameters : list[TeXMacroParameter]) -> str | None:
-		assert len(parameters) > 1
+		assert len(parameters) > 1, "Invalid parameters for \\includegraphics: %s" % str(parameters)
 		self.__find_picture(parameters[1].text)
 		return None
 
 	# noinspection PyUnusedLocal
 	@expand_function
 	def _expand__libraryslide(self, parser : Parser, parameters : list[TeXMacroParameter]) -> str | None:
-		assert len(parameters) > 1
+		assert len(parameters) > 1, "Invalid parameters for \\libraryslide: %s" % str(parameters)
 		self.__find_picture(parameters[1].text)
 		return None
 
 	# noinspection PyUnusedLocal
 	@expand_function
 	def _expand__graphicspath(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
-		assert len(parameters) > 1
+		assert len(parameters) > 1, "Invalid parameters for \\graphicspath: %s" % str(parameters)
 		t = parameters[1].text
 		if t:
 			r = re.match(r'^\s*(?:\{([^}]+)}|([^,]+))\s*[,;]?\s*(.*)$', t)
@@ -343,7 +343,7 @@ class ImageInclusions(Observer):
 	# noinspection PyUnusedLocal
 	@expand_function(extra_macro=True)
 	def _expand__mfigure(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
-		assert len(parameters) > 2
+		assert len(parameters) > 2, "Invalid parameters for \\mfigure: %s" % str(parameters)
 		self.__find_picture(parameters[2].text)
 		return None
 
@@ -354,28 +354,28 @@ class ImageInclusions(Observer):
 	# noinspection PyUnusedLocal
 	@expand_function(extra_macro=True)
 	def _expand__msubfigure(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
-		assert len(parameters) > 0
+		assert len(parameters) > 0, "Invalid parameters for \\msubfigure: %s" % str(parameters)
 		self.__find_picture(parameters[0].text)
 		return None
 
 	# noinspection PyUnusedLocal
 	@expand_function(extra_macro=True)
 	def _expand__partnerlogo(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
-		assert len(parameters) > 0
+		assert len(parameters) > 0, "Invalid parameters for \\partnerlogo: %s" % str(parameters)
 		self.__find_picture(parameters[0].text)
 		return None
 
 	# noinspection PyUnusedLocal
 	@expand_function(extra_macro=True)
 	def _expand__resolvepicturename(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
-		assert len(parameters) > 0
+		assert len(parameters) > 0, "Invalid parameters for \\resolvepicturename: %s" % str(parameters)
 		self.__find_picture(parameters[0].text)
 		return None
 
 	# noinspection PyUnusedLocal
 	@expand_function
 	def _expand__pgfdeclareimage(self, parser : Parser, name: str, parameters: list[TeXMacroParameter]) -> str | None:
-		assert len(parameters) > 2
+		assert len(parameters) > 2, "Invalid parameters for \\pgfdeclareimage: %s" % str(parameters)
 		self.__find_picture(parameters[2].text)
 		return None
 
@@ -386,7 +386,7 @@ class ImageInclusions(Observer):
 	# noinspection DuplicatedCode
 	@expand_function
 	def _expand__input(self, parser : Parser, parameters: list[TeXMacroParameter]) -> str | None:
-		assert len(parameters) > 2
+		assert len(parameters) > 2, "Invalid parameters for \\input: %s" % str(parameters)
 		self.__find_picture(parameters[2].text)
 		filename = self.__make_filename(parameters[0].text, '.tex')
 		with open(filename) as f:

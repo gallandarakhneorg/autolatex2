@@ -77,7 +77,7 @@ class TestMaker(AbstractBaseTest):
 
 
 	def test_extended_warnings_code(self):
-		self.asserNotEqual('', self.__maker.extended_warnings_code)
+		self.assertNotEqual('', self.__maker.extended_warnings_code)
 
 
 	def test_latex_cli(self):

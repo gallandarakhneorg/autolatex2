@@ -396,7 +396,7 @@ class Flattener(Observer):
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol=False)
 	def _expand__begin(self, parser : Parser, name : str, parameters : list[TeXMacroParameter]) -> str:
-		assert len(parameters) > 1
+		assert len(parameters) > 1, "Invalid parameters for \\begin: %s" % str(parameters)
 		tex_name = parameters[1].text
 		if tex_name == 'filecontents*':
 			self.__file_content_counter = self.__file_content_counter + 1
@@ -413,7 +413,7 @@ class Flattener(Observer):
 
 	@expand_function(start_symbol=False)
 	def _expand__end(self, parser: Parser, name: str, parameters: list[TeXMacroParameter]) -> str:
-		assert len(parameters) > 1
+		assert len(parameters) > 1, "Invalid parameters for \\end: %s" % str(parameters)
 		tex_name = parameters[1].text
 		if tex_name == 'filecontents*':
 			self.__file_content_counter = self.__file_content_counter - 1
@@ -444,7 +444,7 @@ class Flattener(Observer):
 	# noinspection DuplicatedCode
 	@expand_function(start_symbol=False)
 	def _expand__usepackage(self, parser: Parser, name: str, parameters: list[TeXMacroParameter]) -> str:
-		assert len(parameters) > 1
+		assert len(parameters) > 1, "Invalid parameters for \\usepackage: %s" % str(parameters)
 		tex_name = parameters[1].text
 		if tex_name == 'bibunits' and not self.use_biblio:
 			return ''
@@ -506,7 +506,7 @@ class Flattener(Observer):
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol=False)
 	def _expand__documentclass(self, parser: Parser, name: str, parameters: list[TeXMacroParameter]) -> str:
-		assert len(parameters) > 1
+		assert len(parameters) > 1, "Invalid parameters for \\documentclass: %s" % str(parameters)
 		tex_name = parameters[1].text
 		filename = self.__make_filename(tex_name, '.cls')
 		if self.__is_document_file(filename):
@@ -537,7 +537,7 @@ class Flattener(Observer):
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol=False)
 	def _expand__includegraphics(self, parser: Parser, name: str, parameters: list[TeXMacroParameter]) -> str:
-		assert len(parameters) > 1
+		assert len(parameters) > 1, "Invalid parameters for \\includegraphics: %s" % str(parameters)
 		tex_name, prefix = self.__find_picture(parameters[1].text)
 		ret = prefix + name
 		if parameters[0].text:
@@ -548,7 +548,7 @@ class Flattener(Observer):
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol=False)
 	def _expand__graphicspath(self, parser: Parser, name: str, parameters: list[TeXMacroParameter]) -> str:
-		assert len(parameters) > 1
+		assert len(parameters) > 1, "Invalid parameters for \\graphicspath: %s" % str(parameters)
 		t = parameters[1].text
 		if t:
 			r = re.match(r'^\s*(?:\{([^}]+)}|([^,]+))\s*[,;]?\s*(.*)$', t)
@@ -578,7 +578,7 @@ class Flattener(Observer):
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol=False, extra_macro=True)
 	def _expand__mfigure(self, parser: Parser, name: str, parameters: list[TeXMacroParameter]) -> str:
-		assert len(parameters) > 4
+		assert len(parameters) > 4, "Invalid parameters for \\mfigure: %s" % str(parameters)
 		tex_name, prefix = self.__find_picture(parameters[2].text)
 		ret = prefix + name
 		if parameters[0].text:
@@ -593,7 +593,7 @@ class Flattener(Observer):
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol=False, extra_macro=True)
 	def _expand__msubfigure(self, parser: Parser, name: str, parameters: list[TeXMacroParameter]) -> str:
-		assert len(parameters) > 3
+		assert len(parameters) > 3, "Invalid parameters for \\msubfigure: %s" % str(parameters)
 		tex_name, prefix = self.__find_picture(parameters[2].text)
 		ret = prefix + name
 		if parameters[0].text:
@@ -604,7 +604,7 @@ class Flattener(Observer):
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol=False)
 	def _expand__pgfdeclareimage(self, parser: Parser, name: str, parameters: list[TeXMacroParameter]) -> str:
-		assert len(parameters) > 2
+		assert len(parameters) > 2, "Invalid parameters for \\pgfdeclareimage: %s" % str(parameters)
 		tex_name, prefix = self.__find_picture(parameters[2].text)
 		ret = prefix + name
 		if parameters[0].text:
@@ -619,7 +619,7 @@ class Flattener(Observer):
 	# noinspection PyUnusedLocal,DuplicatedCode
 	@expand_function(start_symbol=False)
 	def _expand__input(self, parser: Parser, name: str, parameters: list[TeXMacroParameter]) -> str:
-		assert len(parameters) > 0
+		assert len(parameters) > 0, "Invalid parameters for \\input: %s" % str(parameters)
 		filename = self.__make_filename(parameters[0].text, '.tex')
 		with open(filename) as f:
 			subcontent = f.read()
@@ -639,7 +639,7 @@ class Flattener(Observer):
 	# noinspection PyUnusedLocal,DuplicatedCode
 	@expand_function(start_symbol=True)
 	def _expand__bibliographystyle(self, parser: Parser, name: str, parameters: list[TeXMacroParameter]) -> str:
-		assert len(parameters) > 0
+		assert len(parameters) > 0, "Invalid parameters for \\bibliographystyle: %s" % str(parameters)
 		self.__explicit_bibliography_style = True
 		if self.use_biblio:
 			tex_name = parameters[0].text
@@ -653,7 +653,7 @@ class Flattener(Observer):
 	# noinspection PyUnusedLocal,DuplicatedCode
 	@expand_function(start_symbol=False)
 	def _expand__defaultbibliographystyle(self, parser: Parser, name: str, parameters: list[TeXMacroParameter]) -> str:
-		assert len(parameters) > 0
+		assert len(parameters) > 0, "Invalid parameters for \\defaultbibliographystyle: %s" % str(parameters)
 		self.__default_bibliography_style = parameters[0].text
 		if self.use_biblio:
 			tex_name = parameters[0].text
@@ -667,7 +667,7 @@ class Flattener(Observer):
 	# noinspection PyUnusedLocal,DuplicatedCode
 	@expand_function(start_symbol=True)
 	def _expand__bibliography(self, parser: Parser, name: str, parameters: list[TeXMacroParameter]) -> str:
-		assert len(parameters) > 0
+		assert len(parameters) > 0, "Invalid parameters for \\bibliography: %s" % str(parameters)
 		if parameters[0].text:
 			files = re.split(r'\s*,\s*', parameters[0].text)
 			self.__explicit_bibliography = True
@@ -684,7 +684,7 @@ class Flattener(Observer):
 	# noinspection PyUnusedLocal
 	@expand_function(start_symbol=False)
 	def _expand__addbibresource(self, parser: Parser, name: str, parameters: list[TeXMacroParameter]) -> str:
-		assert len(parameters) > 1
+		assert len(parameters) > 1, "Invalid parameters for \\addbibresource: %s" % str(parameters)
 		if parameters[1].text:
 			self.__explicit_bibliography = True
 			files = re.split(r'\s*,\s*', parameters[1].text)
@@ -714,7 +714,7 @@ class Flattener(Observer):
 	# noinspection DuplicatedCode,PyUnusedLocal
 	@expand_function(start_symbol=False)
 	def _expand__putbib(self, parser: Parser, name: str, parameters: list[TeXMacroParameter]) -> str:
-		assert len(parameters) > 0
+		assert len(parameters) > 0, "Invalid parameters for \\putbib: %s" % str(parameters)
 		if parameters[0].text:
 			files = re.split(r'\s*,\s*', parameters[0].text)
 		elif self.__explicit_bibliography:
@@ -737,7 +737,7 @@ class Flattener(Observer):
 	# noinspection PyUnusedLocal,DuplicatedCode
 	@expand_function(start_symbol=False)
 	def _expand__defaultbibliography(self, parser: Parser, name: str, parameters: list[TeXMacroParameter]) -> str:
-		assert len(parameters) > 0
+		assert len(parameters) > 0, "Invalid parameters for \\defaultbibliography: %s" % str(parameters)
 		if parameters[0].text:
 			lst = list()
 			for param in re.split(r'\s*,\s*', parameters[0].text):
@@ -762,7 +762,7 @@ class Flattener(Observer):
 		:return: the text to be put back in the flattened version of the document.
 		:rtype: str
 		"""
-		assert self.use_biblio
+		assert self.use_biblio, "self.use_biblio is False"
 		new_tex_names = list()
 		for file in files:
 			filename = self.__make_filename(file, '.bib')
@@ -787,7 +787,7 @@ class Flattener(Observer):
 		:return: the text to be put back in the flattened version of the document.
 		:rtype: str
 		"""
-		assert not self.use_biblio
+		assert not self.use_biblio, "self.use_biblio is False"
 		if self.__in_bibunit:
 			bbl_name = self.basename + '.' + str(self.__bibunits_aux_index)
 		else:

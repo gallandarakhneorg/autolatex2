@@ -58,8 +58,8 @@ def get_java_version():
 			if m:
 				version = m.group(1)
 				return tuple(str(version).split('.'))
-	except FileNotFoundError:
-		pass
+	except FileNotFoundError as e:
+		logging.debug(str(e))
 	except Exception as e:
 		raise e
 	return None
@@ -120,7 +120,8 @@ def unlink(name : str):
 	"""
 	try:
 		os.unlink(name)
-	except:
+	except BaseException as ex:
+		logging.debug(str(ex))
 		pass
 
 def simple_basename(name : str, *ext : str) -> str:
@@ -244,7 +245,8 @@ def get_file_last_change(filename : str) -> float | None:
 	try:
 		p = Path(filename)
 		return p.stat().st_mtime
-	except:
+	except BaseException as e:
+		logging.debug(str(e))
 		return None
 
 def parse_cli(command_line : str, environment : dict[str,str] = None, exceptions : set[Any] = None, all_protect : bool = False) -> list[str]:
