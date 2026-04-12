@@ -48,7 +48,7 @@ DESCRIPTION
 
 COMMANDS
     AutoLaTeX provides a fixed set of commands to perform specific actions
-    on your document. The default command is all. Some commands accept
+    on your document. The default command is build. Some commands accept
     optional arguments; use --help after the command name for details.
 
     The available commands are:
@@ -426,7 +426,7 @@ OPTIONS FOR COMMANDS
 
         --nochdir   Prevents AutoLaTeX from changing the current directory
                     to the document's root directory before starting the
-                    build process.
+                    cleaning process.
 
         --norecursive
                     Disables cleaning in subfolders.
@@ -457,6 +457,9 @@ OPTIONS FOR COMMANDS
         --force     Overwrites the .sty file for LaTeX if it exists.
 
     *document*
+
+        --force     Force the building of all the intermediary files (bbl,
+                    idx, ind, gls, etc.) even if they are up-to-date.
 
         --nochdir   Prevents AutoLaTeX from changing the current directory
                     to the document's root directory before starting the

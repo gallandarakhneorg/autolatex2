@@ -48,7 +48,7 @@ class MakerAction(AbstractMakerAction):
 		"""
 		self.parse_cli.add_argument('--force',
 			action = 'store_true',
-			help = T('Force the generation of the images even if the source image is not more recent than the generated image'))
+			help = T('Force the generation of the images and the building of all the intermediary files, even if they are up-to-date'))
 
 		self.parse_cli.add_argument('--nochdir',
 			action = 'store_true',

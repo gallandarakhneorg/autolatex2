@@ -143,10 +143,11 @@ class AbstractMakerAction(ABC):
 		old_dir = os.getcwd()
 		try:
 			ddir = self.configuration.document_directory
+			forced = cli_arguments.force if hasattr(cli_arguments, 'force') else False
 			nochdir = cli_arguments.nochdir if hasattr(cli_arguments, 'nochdir') else False
 			if ddir and not nochdir:
 				os.chdir(ddir)
-			return maker.build()
+			return maker.build(force_change=forced)
 		finally:
 			os.chdir(old_dir)
 

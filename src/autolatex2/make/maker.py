@@ -18,13 +18,14 @@
 # write to the Free Software Foundation, Inc., 59 Temple Place - Suite
 # 330, Boston, MA 02111-1307, USA.
 
+from dataclasses import dataclass
 import logging
 import os
 import re
 import sys
 import textwrap
 from collections import deque
-from typing import Any, Callable, override
+from typing import Any, override, Type
 
 from autolatex2.config.configobj import Config
 from autolatex2.make.abstractmaker import TeXMaker
@@ -46,6 +47,33 @@ from autolatex2.utils.runner import Runner, ScriptOutput
 from autolatex2.utils import extprint
 import autolatex2.utils.utilfunctions as genutils
 from autolatex2.utils.i18n import T
+
+@dataclass
+class BuilderFactory:
+	"""
+	Class for keeping track of all information about a builder.
+	"""
+	builder_output : FileType
+	builder_type: Type[Builder]
+	builder_instance: Builder|None = None
+
+	def builder(self) -> Builder:
+		"""
+		Replies the builder.
+		:return: the builder
+		"""
+		if self.builder_instance is None:
+			self.builder_instance = self.builder_type()
+		assert self.builder_instance is not None
+		return self.builder_instance
+
+	def __call__(self, *args, **kwargs) -> Builder:
+		"""
+		Replies the builder.
+		:return: the builder
+		"""
+		return self.builder()
+
 
 # noinspection DuplicatedCode
 class AutoLaTeXMaker(TeXMaker):
@@ -225,39 +253,20 @@ class AutoLaTeXMaker(TeXMaker):
 		self.__instance_compiler_definition : dict[str,str|list[str]|None] | None = None
 
 		# Initialization of the builders
-		self.__registered_builders : dict[FileType,Callable[[],Builder]] = AutoLaTeXMaker.build_builder_dict('autolatex2.make.builders')
+		self.__registered_builders : dict[FileType,BuilderFactory] = AutoLaTeXMaker.build_builder_dict('autolatex2.make.builders')
 
 		# Initialize fields by resetting them
 		self.reset()
 
 	@property
-	def registered_builders(self) -> dict[FileType,Callable[[],Builder]]:
+	def registered_builders(self) -> dict[FileType,BuilderFactory]:
 		"""
 		Replies the registered builders.
 		:return: the mapping from the output file type to the lambda expression that permits to create a builder for this
 		file type.
-		:rtype: dict[FileType,Callable[[],Builder]]
+		:rtype: dict[FileType,BuilderFactory]
 		"""
 		return self.__registered_builders
-
-	# noinspection PyBroadException
-	def create_registered_builder(self, file_type : FileType) -> Builder | None:
-		"""
-		Create the instance of a registered builder for the given file type.
-		:param file_type: the type of the files to be created by the builder.
-		:type file_type: FileType
-		:return: the instance of the builder, or None if no builder was found.
-		:rtype: Builder | None
-		"""
-		builders = self.registered_builders
-		if file_type in builders:
-			factory = builders[file_type]
-			if factory is not None:
-				try:
-					return factory()
-				except:
-					pass
-		return None
 
 	@property
 	@override
@@ -1325,9 +1334,9 @@ class AutoLaTeXMaker(TeXMaker):
 									  dependencies : dict[str,FileDescription],
 									  enable_initial_latex_run : bool = True) -> list[FileDescription]:
 		"""
-		Build the list of files that needs to be generated in the best order. For each file, a building function named "_build_<ext>" is defined and must be invoked.
-		This function uses the lasted change date of each file to determine if a build is needed, except if force_changes is True.
-		If force_changes is True, all the files are supported to be built.
+		Build the list of files that needs to be generated in the best order. For each file, a builder is defined and must be invoked.
+		This function  does not use the lasted change date of each file to determine if a build is needed. It is delegated to
+		the builders themselves.
 		This function must be invoked after a call to compute_dependencies().
 		:param root_file: The LaTeX file to compile.
 		:type root_file: str
@@ -1375,12 +1384,89 @@ class AutoLaTeXMaker(TeXMaker):
 			generated_images[img] = generated_image
 		return generated_images
 
+	# noinspection PyMethodMayBeStatic
+	def __need_rebuild(self, root_file : str, file : FileDescription,
+					   dependencies : dict[str,FileDescription],
+					   builder : Builder) -> bool:
+		"""
+		Determines if a rebuild is needed for the file according to the behavior of the given builder.
+		The builder is invoked for each registered dependencies of the file. If the builder replies that a rebuild
+		is needed for at least one of these dependencies, then this function returns True.
+		:param root_file: the name of the root TeX file.
+		:type root_file: str
+		:param file: the description of the file to be build up.
+		:type file: FileDescription
+		:param dependencies: list of known files in the dependency list.
+		:type dependencies: dict[str,FileDescription]
+		:param builder: The builder to consider.
+		:type builder: Builder
+		:return: True if a building is needed according to the behavior of the builder.
+		:rtype: bool
+		"""
+		if builder.consider_dependencies():
+			if file.dependencies:
+				for dependency in file.dependencies:
+					dependency_file = dependencies[dependency] if dependency in dependencies else None
+					if dependency_file:
+						if builder.need_rebuild(current_file=file,
+												dependency_file=dependency_file,
+												root_tex_file=root_file,
+												maker=self):
+							return True
+					else:
+						return True
+			return False
+		else:
+			return builder.need_rebuild(current_file=file,
+			                     dependency_file=None,
+			                     root_tex_file=root_file,
+			                     maker=self)
+
+	# noinspection PyMethodMayBeStatic
+	def __launch_file_build(self, root_file : str, file : FileDescription, force_change : bool,
+							dependencies : dict[str,FileDescription]) -> bool:
+		"""
+		Launch the builder for the given file. If the builder does not exist, the function returns with True.
+		If a builder is defined, the function tests with the builder is a build is needed. If a build is not
+		needed, it means that the output file is up-to-date and nothing appends. If a build is needed, the
+		builder is invoked for building.
+		:param root_file: the name of the root TeX file.
+		:type root_file: str
+		:param file: the description of the file to be build up.
+		:type file: FileDescription
+		:param force_change: Indicates if the file needs to be changed or not.
+		:type force_change: bool
+		:param dependencies: list of known files in the dependency list.
+		:type dependencies: dict[str,FileDescription]
+		:return: the continuation status of the building process. If True is returned, it means that the building
+		process could continue; Otherwise, the building process has to stop because of an abnormal condition from
+		the builder.
+		:rtype: bool
+		"""
+		builders = self.registered_builders
+		if builders and file.file_type in builders:
+			builder_factory = builders[file.file_type]
+			if builder_factory:
+				builder = builder_factory()
+				if builder and (force_change
+								or self.__need_rebuild(root_file, file, dependencies, builder)):
+					# Build is needed
+					return builder.build(root_file=root_file,
+								  input_file=file,
+								  maker=self)
+			else:
+				logging.error(T("A builder is defined for type '%s' without the definition of its internal factory" % file.file_type.name))
+				return False
+		return True
+
 	# noinspection PyBroadException
-	def build(self) -> bool:
+	def build(self, force_change : bool = False) -> bool:
 		"""
 		Launch the building process (latex*, BibTeX, Makeindex, Makeglossaries).
 		Caution: this function does not generate the images (See run_translators function).
 		Caution: this function may invoke multiple times the latex tool.
+		:param force_change: Indicates if the file needs to be changed or not.
+		:type force_change: bool
 		:return: True to continue process. False to stop the process.
 		"""
 		self.__reset_process_data()
@@ -1412,7 +1498,10 @@ class AutoLaTeXMaker(TeXMaker):
 			# Build the files
 			if builds:
 				for file in builds:
-					continuation = self.__launch_file_build(root_file, file)
+					continuation = self.__launch_file_build(root_file=root_file,
+															file=file,
+															force_change=force_change,
+															dependencies=dependencies)
 					if not continuation:
 						return False
 
@@ -1468,20 +1557,20 @@ class AutoLaTeXMaker(TeXMaker):
 		return True
 
 	@staticmethod
-	def build_builder_dict(package_name : str) -> dict[FileType,Callable[[],Builder]]:
+	def build_builder_dict(package_name : str) -> dict[FileType,BuilderFactory]:
 		"""
 		Build the dictionary that maps the builder id to AutoLaTeX dynamic builders.
 		:param package_name: The name of the package to explore.
 		:type package_name: str
 		:return: the dict of the factories of builders.
-		:rtype: dict[FileType,Callable[[],Builder]]
+		:rtype: dict[FileType,BuilderFactory]
 		"""
 		execution_environment : dict[str,Any] = {
 			'modules': None,
 		}
 		exec("import " + package_name + "\nmodules = " + package_name + ".__all__",  None, execution_environment)
 		modules = execution_environment['modules']
-		ids = dict()
+		ids : dict[FileType,BuilderFactory] = dict()
 		for module in modules:
 			execution_environment = {
 				'type': None,
@@ -1493,6 +1582,11 @@ class AutoLaTeXMaker(TeXMaker):
 						output = DynamicBuilder.output
 				""") % (package_name,  module)
 			exec(cmd,  None, execution_environment)
-			output = execution_environment['output']
-			ids[output] = lambda: execution_environment['type']()
+			builder_type : Type[Builder] = execution_environment['type']
+			builder_output : FileType = execution_environment['output']
+			if builder_output and builder_type:
+				ids[builder_output] = BuilderFactory(
+					builder_output = builder_output,
+					builder_type = builder_type)
 		return ids
+

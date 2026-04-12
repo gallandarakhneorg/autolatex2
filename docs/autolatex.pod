@@ -523,6 +523,10 @@ Overwrites the .sty file for LaTeX if it exists.
 
 =over 12
 
+=item B<--force>
+
+Force the building of all the intermediary files (bbl, idx, ind, gls, etc.) even if they are up-to-date.
+
 =item B<--nochdir>
 
 Prevents AutoLaTeX from changing the current directory to the document's root directory before starting the build process.

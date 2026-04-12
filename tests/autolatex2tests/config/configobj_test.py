@@ -50,7 +50,7 @@ class AbstractTestConfig(AbstractBaseTest,ABC):
 
 	@property
 	def expectedAutoLaTeXVersion(self) -> str:
-		return "50.2"
+		return "51.0"
 
 
 class TestPosixConfig(AbstractTestConfig):

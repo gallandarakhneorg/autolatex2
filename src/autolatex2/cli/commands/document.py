@@ -46,7 +46,11 @@ class MakerAction(AbstractMakerAction):
 		"""
 		super()._add_command_cli_arguments(command_name, command_help, command_aliases)
 
-		self.parse_cli.add_argument('--nochdir', 
+		self.parse_cli.add_argument('--force',
+			action = 'store_true',
+			help = T('Force the building of all the intermediary files, even if they are up-to-date'))
+
+		self.parse_cli.add_argument('--nochdir',
 			action = 'store_true', 
 			help = T('Don\'t set the current directory of the application to document\'s root directory before the launch of the building process'))
 

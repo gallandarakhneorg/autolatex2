@@ -20,12 +20,10 @@
 
 import unittest
 import logging
-from collections.abc import Callable
 from typing import override
 
 from autolatex2.config.configobj import Config
-from autolatex2.make.abstractbuilder import Builder
-from autolatex2.make.maker import AutoLaTeXMaker
+from autolatex2.make.maker import AutoLaTeXMaker, BuilderFactory
 from autolatex2.tex.utils import FileType
 from autolatex2tests.abstract_base_test import AbstractBaseTest
 
@@ -43,7 +41,8 @@ class TestMaker(AbstractBaseTest):
 		self.__maker = AutoLaTeXMaker.create(self.__config)
 
 	def test_reset_commands(self):
-		self.__maker.compiler_definition
+		defs = self.__maker.compiler_definition
+		self.assertIsNotNone(defs)
 		self.__maker.reset_commands()
 		compiler = self.__maker.compiler_definition
 		self.assertIsNotNone(compiler)
@@ -165,7 +164,7 @@ class TestMaker(AbstractBaseTest):
 			list(),
 			warns)
 
-	def assertBuilder(self, builders : dict[FileType,Callable[[],Builder]], name : FileType):
+	def assertBuilder(self, builders : dict[FileType,BuilderFactory], name : FileType):
 		self.assertIn(name, builders)
 		self.assertIsNotNone(builders[name])
 		instance = builders[name]()

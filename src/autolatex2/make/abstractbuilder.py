@@ -44,15 +44,26 @@ class Builder(ABC):
 		raise NotImplementedError()
 
 	# noinspection PyMethodMayBeStatic
-	def need_rebuild(self, current_file : FileDescription, dependency_file : FileDescription,
+	def consider_dependencies(self) -> bool:
+		"""
+		Replies if this builder must test the need of rebuild for each file in the dependencies of the current file.
+		If the function replies True, the function need_rebuild() will be invoked on each file in the dependencies;
+		Otherwise, the function need_rebuild() will be invoked once with the argument dependency_file to None.
+		:return: True to invoke need_rebuild() for each dependency.
+		:rtype: bool
+		"""
+		raise NotImplementedError()
+
+	# noinspection PyMethodMayBeStatic
+	def need_rebuild(self, current_file : FileDescription, dependency_file : FileDescription|None,
 					 root_tex_file : str, maker : TeXMaker) -> bool:
 		"""
-		Test if a rebuild is needed for the given files. The default implementation is testin the
+		Test if a rebuild is needed for the given files. The default implementation is testing the
 		file timestamps of the two provided files.
 		:param current_file: The description of the current file that is under analysis.
 		:type current_file: FileDescription
-		:param dependency_file: The description of the file that is a dependency.
-		:type dependency_file: FileDescription
+		:param dependency_file: The description of the file that is a dependency, if provided
+		:type dependency_file: FileDescription|None
 		:param root_tex_file: Name of the main TeX file.
 		:type root_tex_file: str
 		:param maker: reference to the general maker instance that provides general building tools.
@@ -60,4 +71,6 @@ class Builder(ABC):
 		:return: True if the current file needs to be rebuilt.
 		:rtype: bool
 		"""
-		return maker.is_obsolete_timestamp(current_file.change, dependency_file.change)
+		if dependency_file:
+			return maker.is_obsolete_timestamp(current_file.change, dependency_file.change)
+		return False
