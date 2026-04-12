@@ -38,7 +38,7 @@ from autolatex2.tex.bibtex import BibTeXErrorParser
 from autolatex2.tex.citationanalyzer import AuxiliaryCitationAnalyzer
 from autolatex2.tex.dependencyanalyzer import DependencyAnalyzer
 import autolatex2.tex.utils as texutils
-from autolatex2.tex.utils import TeXWarnings, FileType
+from autolatex2.tex.utils import TeXWarnings, FileType, fix_tex_message_format
 from autolatex2.translator.translatorrepository import TranslatorRepository
 from autolatex2.translator.translatorrunner import TranslatorRunner
 import autolatex2.utils.extlogging as extlogging
@@ -1521,7 +1521,8 @@ class AutoLaTeXMaker(TeXMaker):
 			# Output the warnings from the last TeX builds
 			if self.extended_warnings:
 				for w in self.extended_warnings:
-					logging.warning(T("%s:%d: %s") % (w['filename'], w['lineno'], w['message']))
+					logging.warning(T("%s:%d: %s") % (w['filename'], w['lineno'],
+													  fix_tex_message_format(w['message'])))
 				self.__reset_warnings()
 
 			# Write building stamps
