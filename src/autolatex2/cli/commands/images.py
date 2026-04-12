@@ -59,11 +59,7 @@ class MakerAction(AbstractMakerAction):
 		maker = self._internal_create_maker()
 		generated_images = self._internal_run_images(maker, cli_arguments)
 		# Output the result of the command
-		nb = 0
-		if generated_images:
-			for source,  target in generated_images.items():
-				if target:
-					nb = nb + 1
+		nb = len(generated_images)
 		if nb > 0:
 			logging.info(T("%d images were generated") % nb)
 		else:

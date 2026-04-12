@@ -1380,7 +1380,9 @@ class AutoLaTeXMaker(TeXMaker):
 		:type force_generation: bool
 		:param detect_conflicts: Indicates if the conflicts in translator loading is run. Default is True.
 		:type detect_conflicts: bool
-		:return: the dictionary that maps the source image's filename to the generated image's filename.
+		:return: the dictionary that maps the source image's filename to the generated image's filename. Only the mapping for
+		the images that are generated during this invocation of run_translators() are included in the dictionary.
+		The images that are up-to-date are not put in the dictionary.
 		:rtype: dict[str,str]
 		"""
 		self.translator_runner.sync(detect_conflicts = detect_conflicts)
@@ -1388,7 +1390,8 @@ class AutoLaTeXMaker(TeXMaker):
 		generated_images = dict()
 		for img in images:
 			generated_image = self.translator_runner.generate_image(in_file = img, only_more_recent = not force_generation)
-			generated_images[img] = generated_image
+			if generated_image:
+				generated_images[img] = generated_image
 		return generated_images
 
 	# noinspection PyMethodMayBeStatic
@@ -1610,3 +1613,19 @@ class AutoLaTeXMaker(TeXMaker):
 		"""
 		if filename in self.__files:
 			self.__files[filename].reset_change()
+
+
+	# noinspection PyBroadException
+	def remove_output_file(self):
+		"""
+		Remove the output file from the TeX process if it exists.
+		"""
+		for root_file in self.__root_files:
+			out_type = FileType.pdf if self.configuration.generation.pdf_mode else FileType.dvi
+			out_file = out_type.ensure_extension(root_file)
+			if os.path.isfile(out_file):
+				try:
+					os.unlink(out_file)
+				except:
+					pass
+

@@ -126,7 +126,9 @@ class AbstractMakerAction(ABC):
 		:param maker: the maker.
 		:param cli_arguments: the arguments.
 		:type cli_arguments: Namespace
-		:return: the dictionary that maps the source image's filename to the generated image's filename.
+		:return: the dictionary that maps the source image's filename to the generated image's filename. Only the mapping for
+		the images that are generated during this invocation of run_translators() are included in the dictionary.
+		The images that are up-to-date are not put in the dictionary.
 		:rtype: dict[str,str]
 		"""
 		forced = cli_arguments.force if hasattr(cli_arguments, 'force') else False

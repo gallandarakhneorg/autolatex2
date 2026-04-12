@@ -69,7 +69,11 @@ class MakerAction(AbstractMakerAction):
 		:rtype: bool
 		"""
 		maker = self._internal_create_maker()
-		self._internal_run_images(maker, cli_arguments)
+		generated_images = self._internal_run_images(maker, cli_arguments)
+		if generated_images:
+			# Remove the output file to give the opportunity to the building process
+			# to generate the proper document
+			maker.remove_output_file()
 		if self._internal_run_build(maker, cli_arguments):
 			return self._internal_run_viewer(maker, cli_arguments)
 		return False
