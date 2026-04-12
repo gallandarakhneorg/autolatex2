@@ -167,7 +167,7 @@ class TestMaker(AbstractBaseTest):
 	def assertBuilder(self, builders : dict[FileType,BuilderFactory], name : FileType):
 		self.assertIn(name, builders)
 		self.assertIsNotNone(builders[name])
-		instance = builders[name]()
+		instance = builders[name].builder(self.__config)
 		self.assertIsNotNone(instance)
 
 	def test_build_builder_dict(self):

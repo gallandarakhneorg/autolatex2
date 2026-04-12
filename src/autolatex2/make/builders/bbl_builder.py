@@ -70,15 +70,13 @@ class DynamicBuilder(Builder):
 		return False
 
 	@override
-	def need_rebuild(self, current_file: FileDescription, dependency_file: FileDescription|None,
-		                 root_tex_file: str, maker: TeXMaker) -> bool:
+	def need_rebuild_without_dependency(self, current_file: FileDescription,
+										root_tex_file: str, maker: TeXMaker) -> bool:
 		"""
 		Test if a rebuild is needed for the given files. The default implementation is testing the
 		file timestamps of the two provided files.
 		:param current_file: The description of the current file that is under analysis.
 		:type current_file: FileDescription
-		:param dependency_file: The description of the file that is a dependency, if provided.
-		:type dependency_file: FileDescription|None
 		:param root_tex_file: Name of the main TeX file.
 		:type root_tex_file: str
 		:param maker: reference to the general maker instance that provides general building tools.

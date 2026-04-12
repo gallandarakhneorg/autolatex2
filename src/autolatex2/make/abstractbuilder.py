@@ -20,6 +20,7 @@
 
 from abc import ABC, abstractmethod
 
+from autolatex2.config.configobj import Config
 from autolatex2.make.filedescription import FileDescription
 from autolatex2.make.abstractmaker import TeXMaker
 
@@ -27,6 +28,18 @@ class Builder(ABC):
 	"""
 	Build a part of the document using a specific tool.
 	"""
+
+	def __init__(self, configuration : Config):
+		"""
+		Construct a builder.
+		:param configuration: The configuration to be used.
+		:type configuration: Config
+		"""
+		self.__config = configuration
+
+	@property
+	def configuration(self) -> Config:
+		return self.__config
 
 	@abstractmethod
 	def build(self, root_file : str, input_file : FileDescription, maker : TeXMaker) -> bool:
@@ -55,7 +68,24 @@ class Builder(ABC):
 		raise NotImplementedError()
 
 	# noinspection PyMethodMayBeStatic
-	def need_rebuild(self, current_file : FileDescription, dependency_file : FileDescription|None,
+	def need_rebuild_without_dependency(self, current_file : FileDescription,
+					 root_tex_file : str, maker : TeXMaker) -> bool:
+		"""
+		Test if a rebuild is needed for the given file without considering the dependencies.
+		The default implementation replies False.
+		:param current_file: The description of the current file that is under analysis.
+		:type current_file: FileDescription
+		:param root_tex_file: Name of the main TeX file.
+		:type root_tex_file: str
+		:param maker: reference to the general maker instance that provides general building tools.
+		:type maker: TeXMaker
+		:return: True if the current file needs to be rebuilt.
+		:rtype: bool
+		"""
+		return False
+
+	# noinspection PyMethodMayBeStatic
+	def need_rebuild_with_dependency(self, current_file : FileDescription, dependency_file : FileDescription,
 					 root_tex_file : str, maker : TeXMaker) -> bool:
 		"""
 		Test if a rebuild is needed for the given files. The default implementation is testing the
@@ -71,6 +101,4 @@ class Builder(ABC):
 		:return: True if the current file needs to be rebuilt.
 		:rtype: bool
 		"""
-		if dependency_file:
-			return maker.is_obsolete_timestamp(current_file.change, dependency_file.change)
-		return False
+		return maker.is_obsolete_timestamp(current_file.change, dependency_file.change)

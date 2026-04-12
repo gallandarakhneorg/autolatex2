@@ -53,7 +53,7 @@ class DynamicBuilder(Builder):
 		if maker.configuration.generation.is_glossary_enable:
 			tex_wo_ext = genutils.basename_with_path(input_file.input_filename, *FileType.tex_extensions())
 			glo_file = tex_wo_ext + FileType.glo.extension()
-			input_change = genutils.get_file_last_change(input_file.input_filename)
+			input_change = input_file.change
 			glo_change = genutils.get_file_last_change(glo_file)
 			if maker.is_obsolete_timestamp(glo_change, input_change) and not maker.run_latex(input_file.input_filename, loop=False):
 				return False
@@ -72,15 +72,13 @@ class DynamicBuilder(Builder):
 		return False
 
 	@override
-	def need_rebuild(self, current_file: FileDescription, dependency_file: FileDescription|None,
-		                 root_tex_file: str, maker: TeXMaker) -> bool:
+	def need_rebuild_without_dependency(self, current_file: FileDescription,
+										root_tex_file: str, maker: TeXMaker) -> bool:
 		"""
 		Test if a rebuild is needed for the given files. The default implementation is testing the
 		file timestamps of the two provided files.
 		:param current_file: The description of the current file that is under analysis.
 		:type current_file: FileDescription
-		:param dependency_file: The description of the file that is a dependency, if provided.
-		:type dependency_file: FileDescription|None
 		:param root_tex_file: Name of the main TeX file.
 		:type root_tex_file: str
 		:param maker: reference to the general maker instance that provides general building tools.

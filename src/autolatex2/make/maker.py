@@ -57,22 +57,18 @@ class BuilderFactory:
 	builder_type: Type[Builder]
 	builder_instance: Builder|None = None
 
-	def builder(self) -> Builder:
+	def builder(self, configuration : Config) -> Builder:
 		"""
 		Replies the builder.
+		:param configuration: the configuration to pass to the builder.
+		:type configuration: Config
 		:return: the builder
+		:rtype: Builder
 		"""
 		if self.builder_instance is None:
-			self.builder_instance = self.builder_type()
+			self.builder_instance = self.builder_type(configuration)
 		assert self.builder_instance is not None
 		return self.builder_instance
-
-	def __call__(self, *args, **kwargs) -> Builder:
-		"""
-		Replies the builder.
-		:return: the builder
-		"""
-		return self.builder()
 
 
 # noinspection DuplicatedCode
@@ -655,7 +651,7 @@ class AutoLaTeXMaker(TeXMaker):
 			rerun = texutils.extract_tex_warning_from_line(content, self.__standards_warnings)
 			if rerun and loop:
 				return True
-			if self.__is_extended_warning_enable:
+			if self.extended_warnings_enabled:
 				warns = re.findall(re.escape('!!!![BeginWarning]')+'(.*?)'+ re.escape('!!!![EndWarning]'), content, re.S)
 				for warn in warns:
 					m = re.search(r'^(.*?):([^:]*):([0-9]+):\s*(.*?)\s*$', warn, re.S)
@@ -700,7 +696,7 @@ class AutoLaTeXMaker(TeXMaker):
 				os.remove(log_file)
 			command_output = None
 			continue_to_compile = False
-			if self.__is_extended_warning_enable:
+			if self.extended_warnings_enabled:
 				with open(filename, "r") as f:
 					content = f.readlines()
 				autofile = texutils.create_extended_tex_filename(filename)
@@ -1318,7 +1314,7 @@ class AutoLaTeXMaker(TeXMaker):
 			seen_files.add(current_filename)
 			if current_file.dependencies:
 				is_source_type = current_file.file_type.is_source_type()
-				is_obsolete = False
+				is_buildable = False
 				for dependency in current_file.dependencies:
 					dependency_file = self.__build_internal_execution_list_rec(root_tex_file=root_tex_file,
 																			   current_filename=dependency,
@@ -1326,17 +1322,14 @@ class AutoLaTeXMaker(TeXMaker):
 																			   builds=builds,
 																			   seen_files=seen_files)
 					# Propagate the timestamp if parent and child are source types
-					if (is_source_type and dependency_file.file_type.is_source_type()
-							and self.is_obsolete_timestamp(current_file.change, dependency_file.change)):
-						current_file.change = dependency_file.change
-					# Determine if the current is obsolete
-					elif not is_obsolete and not is_source_type:
-						is_obsolete = True
-				if is_obsolete:
-					# Remove the known change date to propagate the building need to parent files
-					current_file.change = None
-					if current_file.file_type in self.registered_builders:
-						builds.append(current_file)
+					if is_source_type:
+						if dependency_file.file_type.is_source_type() \
+								and self.is_obsolete_timestamp(current_file.change, dependency_file.change):
+							current_file.change = dependency_file.change
+					elif not is_buildable:
+						is_buildable = True
+				if is_buildable and current_file.file_type in self.registered_builders:
+					builds.append(current_file)
 		return current_file
 
 
@@ -1367,11 +1360,13 @@ class AutoLaTeXMaker(TeXMaker):
 		if enable_initial_latex_run:
 			# Launch one LaTeX compilation to be sure that every auxiliary file that is expected is generated
 			main_aux_file = FileType.aux.ensure_extension(root_file)
-			builds.append(FileDescription(
+			description = FileDescription(
 					output_filename = main_aux_file,
 					file_type = FileType.aux,
 					input_filename = root_file,
-					main_filename = root_file))
+					main_filename = root_file)
+			description.dependencies.add(root_file)
+			builds.append(description)
 
 		seen_files = set()
 		self.__build_internal_execution_list_rec(root_file, root_pdf_file, dependencies, builds, seen_files)
@@ -1415,24 +1410,23 @@ class AutoLaTeXMaker(TeXMaker):
 		:return: True if a building is needed according to the behavior of the builder.
 		:rtype: bool
 		"""
+		if builder.need_rebuild_without_dependency(current_file=file,
+												   root_tex_file=root_file,
+												   maker=self):
+			return True
 		if builder.consider_dependencies():
 			if file.dependencies:
 				for dependency in file.dependencies:
 					dependency_file = dependencies[dependency] if dependency in dependencies else None
 					if dependency_file:
-						if builder.need_rebuild(current_file=file,
-												dependency_file=dependency_file,
-												root_tex_file=root_file,
-												maker=self):
+						if builder.need_rebuild_with_dependency(current_file=file,
+																dependency_file=dependency_file,
+																root_tex_file=root_file,
+																maker=self):
 							return True
 					else:
 						return True
-			return False
-		else:
-			return builder.need_rebuild(current_file=file,
-			                     dependency_file=None,
-			                     root_tex_file=root_file,
-			                     maker=self)
+		return False
 
 	# noinspection PyMethodMayBeStatic
 	def __launch_file_build(self, root_file : str, file : FileDescription, force_change : bool,
@@ -1459,13 +1453,17 @@ class AutoLaTeXMaker(TeXMaker):
 		if builders and file.file_type in builders:
 			builder_factory = builders[file.file_type]
 			if builder_factory:
-				builder = builder_factory()
+				builder = builder_factory.builder(self.configuration)
 				if builder and (force_change
 								or self.__need_rebuild(root_file, file, dependencies, builder)):
 					# Build is needed
-					return builder.build(root_file=root_file,
+					continuation =  builder.build(root_file=root_file,
 								  input_file=file,
 								  maker=self)
+					# Reset the last change date of the output file to force the next builders to use
+					# the last updated date
+					file.reset_change()
+					return continuation
 			else:
 				logging.error(T("A builder is defined for type '%s' without the definition of its internal factory" % file.file_type.name))
 				return False
@@ -1602,3 +1600,13 @@ class AutoLaTeXMaker(TeXMaker):
 					builder_type = builder_type)
 		return ids
 
+	@override
+	def reset_file_change_for(self, filename : str):
+		"""
+		Reset the buffered last-changed date for the given filename, if it is known.
+		If the filename is not known, this function does nothing.
+		:param filename: The name of the file for which the last-change date should be reset.
+		:type filename: str
+		"""
+		if filename in self.__files:
+			self.__files[filename].reset_change()

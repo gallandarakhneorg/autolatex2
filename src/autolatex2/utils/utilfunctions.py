@@ -28,6 +28,7 @@ import os
 import re
 import subprocess
 import sys
+from pathlib import Path
 from typing import TypeVar, Any
 
 from autolatex2.utils.i18n import T
@@ -241,13 +242,8 @@ def get_file_last_change(filename : str) -> float | None:
 	Replies the time of the last change on the given file.
 	"""
 	try:
-		t1 = os.path.getmtime(filename)
-		t2 = os.path.getctime(filename)
-		if t1 is None:
-			return t2
-		if t2 is None:
-			return t1
-		return t1 if t1 >= t2 else t2
+		p = Path(filename)
+		return p.stat().st_mtime
 	except:
 		return None
 

@@ -31,6 +31,15 @@ class TeXMaker(Runner, ABC):
 	Abstract implementation of a TeX Maker
 	"""
 
+	def reset_file_change_for(self, filename : str):
+		"""
+		Reset the buffered last-changed date for the given filename, if it is known.
+		If the filename is not known, this function does nothing.
+		:param filename: The name of the file for which the last-change date should be reset.
+		:type filename: str
+		"""
+		raise NotImplementedError()
+
 	@property
 	def stamp_manager(self) -> StampManager:
 		"""

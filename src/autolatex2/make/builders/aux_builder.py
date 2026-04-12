@@ -25,6 +25,7 @@ from autolatex2.make.abstractbuilder import Builder
 from autolatex2.make.filedescription import FileDescription
 from autolatex2.make.abstractmaker import TeXMaker
 from autolatex2.tex.utils import FileType
+import autolatex2.utils.utilfunctions as genutils
 
 
 class DynamicBuilder(Builder):
@@ -65,18 +66,16 @@ class DynamicBuilder(Builder):
 		:return: True to invoke need_rebuild() for each dependency.
 		:rtype: bool
 		"""
-		return False
+		return True
 
 	@override
-	def need_rebuild(self, current_file: FileDescription, dependency_file: FileDescription|None,
-		                 root_tex_file: str, maker: TeXMaker) -> bool:
+	def need_rebuild_without_dependency(self, current_file: FileDescription,
+										root_tex_file: str, maker: TeXMaker) -> bool:
 		"""
 		Test if a rebuild is needed for the given files. The default implementation is testing the
 		file timestamps of the two provided files.
 		:param current_file: The description of the current file that is under analysis.
 		:type current_file: FileDescription
-		:param dependency_file: The description of the file that is a dependency, if provided.
-		:type dependency_file: FileDescription|None
 		:param root_tex_file: Name of the main TeX file.
 		:type root_tex_file: str
 		:param maker: reference to the general maker instance that provides general building tools.
@@ -85,3 +84,37 @@ class DynamicBuilder(Builder):
 		:rtype: bool
 		"""
 		return not os.path.isfile(current_file.output_filename)
+
+	@override
+	def need_rebuild_with_dependency(self, current_file: FileDescription,
+									 dependency_file : FileDescription,
+									 root_tex_file: str, maker: TeXMaker) -> bool:
+		"""
+		Test if a rebuild is needed for the given files. The default implementation is testing the
+		file timestamps of the two provided files.
+		:param current_file: The description of the current file that is under analysis.
+		:type current_file: FileDescription
+		:param dependency_file: The description of the file that is a dependency, if provided
+		:type dependency_file: FileDescription|None
+		:param root_tex_file: Name of the main TeX file.
+		:type root_tex_file: str
+		:param maker: reference to the general maker instance that provides general building tools.
+		:type maker: TeXMaker
+		:return: True if the current file needs to be rebuilt.
+		:rtype: bool
+		"""
+		# If the output file exists and is outdated, this builder is run to
+		# generate the output file before the bibliography, index and glossary builders.
+		# In this way, these laters will have the opportunity to be run also before
+		# the final round of LaTeX building.
+		if self.configuration.generation.pdf_mode:
+			output_file = FileType.pdf.ensure_extension(root_tex_file)
+		else:
+			output_file = FileType.dvi.ensure_extension(root_tex_file)
+		if os.path.isfile(output_file) and os.path.isfile(dependency_file.output_filename):
+			input_change_date = dependency_file.change
+			output_change_date = genutils.get_file_last_change(output_file)
+			if maker.is_obsolete_timestamp(output_change_date, input_change_date):
+				maker.reset_file_change_for(output_file)
+				return True
+		return False
