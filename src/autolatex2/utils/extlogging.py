@@ -255,6 +255,36 @@ def multiline_warning(message : Any):
 		for line in msg:
 			logging.warning(line)
 
+def multiline_fine_warning(message : Any):
+	"""
+	Show up a fine warning message that may be split on multiple logging's lines.
+	:param message: The multiline message.
+	:type message: str or list
+	"""
+	if logging.getLogger().isEnabledFor(LogLevel.FINE_WARNING) and message:
+		if isinstance(message,  list):
+			msg = message
+		else:
+			msg = re.split('[\n\r]',
+						   str(message).strip())
+		for line in msg:
+			logging.log(LogLevel.FINE_WARNING, line)
+
+def multiline_fine_info(message : Any):
+	"""
+	Show up a fine information message that may be split on multiple logging's lines.
+	:param message: The multiline message.
+	:type message: str or list
+	"""
+	if logging.getLogger().isEnabledFor(LogLevel.FINE_INFO) and message:
+		if isinstance(message,  list):
+			msg = message
+		else:
+			msg = re.split('[\n\r]',
+						   str(message).strip())
+		for line in msg:
+			logging.log(LogLevel.FINE_INFO, line)
+
 def multiline_error(message : Any):
 	"""
 	Show up an error message that may be split on multiple logging's lines.

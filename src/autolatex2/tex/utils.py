@@ -424,13 +424,13 @@ def get_original_tex_filename(filename : str) -> str:
 		new_basename += ext
 	return new_basename
 
-def fix_tex_message_format(text : str) -> str:
+def fix_tex_message_format(text : str) -> list[str]:
 	"""
 	Reformat the TeX message in order to remove improper carriage returns.
 	:param text: the original TeX message.
 	:return: the fixed message.
 	"""
-	text0 = re.sub(r'\n\([^)]*\)', ' ', text.strip())
+	text0 = re.sub(r'[\r\n]\([^)]*\)', '', text.strip())
 	text0 = re.sub(r'[\n\r]', '', text0)
 	text0 = re.sub(r'\s+', ' ', text0)
 	return text0

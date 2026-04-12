@@ -738,7 +738,10 @@ class AutoLaTeXMaker(TeXMaker):
 				logging.debug(T("LATEX: Error when processing %s") % os.path.basename(filename))
 
 				# Parse the log to extract the blocks of messages
-				fatal_error, log_blocks = texutils.parse_tex_log_file(log_file)
+				if os.path.isfile(log_file):
+					fatal_error, log_blocks = texutils.parse_tex_log_file(log_file)
+				else:
+					raise Exception(T("Log file not found: %s" % log_file))
 
 				# Display the message
 				if fatal_error:
@@ -1520,9 +1523,12 @@ class AutoLaTeXMaker(TeXMaker):
 
 			# Output the warnings from the last TeX builds
 			if self.extended_warnings:
-				for w in self.extended_warnings:
-					logging.warning(T("%s:%d: %s") % (w['filename'], w['lineno'],
-													  fix_tex_message_format(w['message'])))
+				if logging.getLogger().isEnabledFor(LogLevel.FINE_INFO):
+					for w in self.extended_warnings:
+						extlogging.multiline_fine_info(textwrap.wrap(
+							T("%s:%d: %s") % (str(w['filename']), int(w['lineno']),
+											  fix_tex_message_format(str(w['message']))),
+							width=80))
 				self.__reset_warnings()
 
 			# Write building stamps
