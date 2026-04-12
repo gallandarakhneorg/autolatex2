@@ -673,6 +673,7 @@ class DependencyAnalyzer(Observer):
 		# Special case: the bibunit
 		if self.__in_bibunit:
 			bbl_file = genutils.basename_with_path(bbl_file, *FileType.bibliography_extensions()) + str(self.__bibunit_index)
+			bbl_file = FileType.bbl.add_extension(bbl_file)
 		if not os.path.isabs(bbl_file):
 			bbl_file = FileType.bbl.ensure_extension(bbl_file)
 			bbl_file = os.path.normpath(os.path.join(self.root_directory, bbl_file))
@@ -829,12 +830,14 @@ class DependencyAnalyzer(Observer):
 		assert len(parameters) > 1
 		tex_name = parameters[1].text
 		if tex_name == 'bibunit':
+			self.__is_bibunits = True
 			self.__in_bibunit = True
 			self.__bibunit_index = self.__bibunit_index + 1
 			assert len(parameters) > 2
 			if parameters[2].text:
 				self.__analyse_bst_specification(self.basename, [ parameters[2] ])
 		elif self.__include_extra_macros and tex_name == 'bibliographysection':
+			self.__is_bibunits = True
 			self.__in_bibunit = True
 			self.__bibunit_index = self.__bibunit_index + 1
 			self.__parse_bib_references(self.basename, self.__build_bibunit_auxiliary_basename_prefix(), TeXMacroParameter(text='biblio'))
@@ -845,6 +848,7 @@ class DependencyAnalyzer(Observer):
 		assert len(parameters) > 0
 		tex_name = parameters[0].text
 		if tex_name == 'bibunit' or (self.__include_extra_macros and tex_name == 'bibliographysection'):
+			self.__is_bibunits = True
 			self.__in_bibunit = False
 
 	# noinspection DuplicatedCode,PyUnusedLocal

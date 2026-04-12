@@ -1057,6 +1057,18 @@ class AutoLaTeXMaker(TeXMaker):
 													 use_biber=analyzer.is_biber,
 													 use_bibunits=analyzer.is_bibunits,
 													 use_multibib=analyzer.is_multibib)
+				# The bibliography and index flags must be propagated to the root tex file in order to be
+				# detected outside this function
+				if tex_file != tex_root_filename and tex_root_filename in self.__files:
+					root_description = self.__files[tex_root_filename]
+					if analyzer.is_bibunits:
+						root_description.use_bibunits = True
+					if analyzer.is_multibib:
+						root_description.use_multibib = True
+					if analyzer.is_biber:
+						root_description.use_biber = True
+					if analyzer.is_xindy_index:
+						root_description.use_xindy = True
 				changed = changed or chg
 				all_dep_types = analyzer.get_dependency_types()
 				# Treat the pure TeX files

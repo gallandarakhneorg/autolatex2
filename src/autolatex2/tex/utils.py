@@ -261,6 +261,17 @@ class FileType(IntEnum):
 		"""
 		return genutils.ensure_filename_extension(filename, self.extension())
 
+	def add_extension(self, filename : str) -> str:
+		"""
+		Ensure the given filename has the extension of this file type. Any previous file extension is NOT removed
+		from the given filename.
+		:param filename: the filename to check.
+		:type filename: str
+		:return: the filename with the correct file extension
+		:rtype: str
+		"""
+		return filename + self.extension()
+
 
 @dataclass
 class TeXMacroParameter:
