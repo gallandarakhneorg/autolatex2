@@ -73,7 +73,7 @@ class TestMaker(AbstractBaseTest):
 
 
 	def test_extended_warnings_enabled(self):
-		self.assertTrue(self.__maker.extended_warnings_enabled)
+		self.assertTrue(self.__maker.detailed_warnings_enabled)
 
 
 	def test_extended_warnings_code(self):
@@ -158,8 +158,8 @@ class TestMaker(AbstractBaseTest):
 			warns)
 
 
-	def test_extended_warnings(self):
-		warns = self.__maker.extended_warnings
+	def test_detailed_warnings(self):
+		warns = self.__maker.detailed_warnings
 		self.assertEqual(
 			list(),
 			warns)

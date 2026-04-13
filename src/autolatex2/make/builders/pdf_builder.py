@@ -24,6 +24,7 @@ from typing import override
 from autolatex2.make.abstractbuilder import Builder
 from autolatex2.make.filedescription import FileDescription
 from autolatex2.make.abstractmaker import TeXMaker
+from autolatex2.tex.texlogparser import TeXLogParser
 from autolatex2.tex.utils import FileType
 
 
@@ -83,6 +84,11 @@ class DynamicBuilder(Builder):
 		:rtype: bool
 		"""
 		log_file = FileType.log.ensure_extension(root_tex_file)
-		return (log_file is not None
-				and os.path.isfile(log_file)
-				and maker.extract_info_from_tex_log_file(log_file, True))
+		if log_file is not None and os.path.isfile(log_file):
+			log_parser = TeXLogParser(log_file=log_file)
+			return log_parser.extract_warnings(enable_loop=True,
+			                                   enable_detailed_warnings=False,
+			                                   standards_warnings=None,
+			                                   detailed_warnings=None)
+		else:
+			return False

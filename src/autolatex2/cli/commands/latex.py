@@ -24,10 +24,9 @@ import os
 from typing import override
 
 from autolatex2.cli.abstract_actions import AbstractMakerAction
-from autolatex2.tex.utils import TeXWarnings, FileType
+from autolatex2.tex.texlogparser import TeXLogParser, TeXWarnings
+from autolatex2.tex.utils import FileType
 from autolatex2.utils import extlogging
-import autolatex2.tex.utils as texutils
-import autolatex2.utils.utilfunctions as genutils
 from autolatex2.utils.i18n import T
 
 
@@ -93,11 +92,11 @@ class MakerAction(AbstractMakerAction):
 					if os.path.isfile(log_file):
 						try:
 							warnings = set()
-							with open(log_file, "r") as input_log:
-								log_content = input_log.readline()
-								while log_content:
-									texutils.extract_tex_warning_from_line(log_content, warnings)
-									log_content = input_log.readline()
+							log_parser = TeXLogParser(log_file=log_file)
+							log_parser.extract_warnings(enable_loop=False,
+							                            enable_detailed_warnings=False,
+							                            standards_warnings=warnings,
+							                            detailed_warnings=None)
 							if warnings:
 								all_msgs = ''
 								for warning in warnings:

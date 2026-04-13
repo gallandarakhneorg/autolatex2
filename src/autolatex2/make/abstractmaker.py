@@ -130,16 +130,3 @@ class TeXMaker(Runner, ABC):
 		:rtype: bool
 		"""
 		raise NotImplementedError()
-
-	@abstractmethod
-	def extract_info_from_tex_log_file(self, log_file : str, loop : bool) -> bool:
-		"""
-		Parse the TeX log in order to extract warnings and replies if another TeX compilation is needed.
-		:param log_file: The filename of the log file that is used for detecting the compilation loop.
-		:type log_file: str
-		:param loop: Indicates if the compilation loop is enabled.
-		:type loop: bool
-		:return: True if another compilation is needed; Otherwise returns False
-		:rtype: bool
-		"""
-		raise NotImplementedError()

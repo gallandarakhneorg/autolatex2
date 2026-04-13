@@ -38,7 +38,8 @@ from autolatex2.tex.bibtex import BibTeXErrorParser
 from autolatex2.tex.citationanalyzer import AuxiliaryCitationAnalyzer
 from autolatex2.tex.dependencyanalyzer import DependencyAnalyzer
 import autolatex2.tex.utils as texutils
-from autolatex2.tex.utils import TeXWarnings, FileType, fix_tex_message_format
+from autolatex2.tex.texlogparser import TeXLogParser, TeXWarnings, DetailedTeXWarning
+from autolatex2.tex.utils import FileType
 from autolatex2.translator.translatorrepository import TranslatorRepository
 from autolatex2.translator.translatorrunner import TranslatorRunner
 import autolatex2.utils.extlogging as extlogging
@@ -238,6 +239,8 @@ class AutoLaTeXMaker(TeXMaker):
 		self.__root_files : set[str] = set()
 		self.__files : dict[str,FileDescription] = dict()
 		self.__stamps : StampManager = StampManager()
+		self.__standards_warnings : set[TeXWarnings] = set()
+		self.__detailed_warnings : list[DetailedTeXWarning] = list()
 		self.translator_runner : TranslatorRunner = translator_runner
 		if self.translator_runner is None:
 			self.__configuration : Config = Config()
@@ -501,7 +504,7 @@ class AutoLaTeXMaker(TeXMaker):
 		Reset the lists of warnings.
 		"""
 		self.__standards_warnings : set[TeXWarnings] = set()
-		self.__detailled_warnings = list()
+		self.__detailed_warnings : list[DetailedTeXWarning] = list()
 
 	@property
 	def compiler_definition(self) -> dict[str,Any]:
@@ -514,9 +517,9 @@ class AutoLaTeXMaker(TeXMaker):
 		return self.__instance_compiler_definition
 
 	@property
-	def extended_warnings_enabled(self) -> bool:
+	def detailed_warnings_enabled(self) -> bool:
 		"""
-		Replies if the extended warnings are supported by the TeX compiler.
+		Replies if the detailed warnings are supported by the TeX compiler.
 		:rtype: bool
 		"""
 		self.__internal_register_commands()
@@ -627,42 +630,12 @@ class AutoLaTeXMaker(TeXMaker):
 		return self.__standards_warnings
 
 	@property
-	def extended_warnings(self) -> list[dict[str,str|int]]:
+	def detailed_warnings(self) -> list[DetailedTeXWarning]:
 		"""
-		The extended warnings that are discovered during the lastest compilation process.
-		:rtype: list[dict[str,str|int]]
+		The detailed warnings that are discovered during the lastest compilation process.
+		:rtype: list[DetailedTeXWarning]
 		"""
-		return self.__detailled_warnings
-
-	def extract_info_from_tex_log_file(self, log_file : str, loop : bool) -> bool:
-		"""
-		Parse the TeX log in order to extract warnings and replies if another TeX compilation is needed.
-		:param log_file: The filename of the log file that is used for detecting the compilation loop.
-		:type log_file: str
-		:param loop: Indicates if the compilation loop is enabled.
-		:type loop: bool
-		:return: True if another compilation is needed; Otherwise returns False
-		:rtype: bool
-		"""
-		logging.debug(T("Reading log file: %s") % os.path.basename(log_file))
-		if os.path.exists(log_file):
-			with open(log_file, 'r') as f:
-				content = f.read()
-			rerun = texutils.extract_tex_warning_from_line(content, self.__standards_warnings)
-			if rerun and loop:
-				return True
-			if self.extended_warnings_enabled:
-				warns = re.findall(re.escape('!!!![BeginWarning]')+'(.*?)'+ re.escape('!!!![EndWarning]'), content, re.S)
-				for warn in warns:
-					m = re.search(r'^(.*?):([^:]*):([0-9]+):\s*(.*?)\s*$', warn, re.S)
-					if m is not None:
-						warn_details = dict()
-						warn_details['filename'] = m.group(1)
-						warn_details['extension'] = m.group(2)
-						warn_details['lineno'] = int(m.group(3))
-						warn_details['message'] = m.group(4)
-						self.__detailled_warnings.append(warn_details)
-		return False
+		return self.__detailed_warnings
 
 	@override
 	def run_latex(self, filename : str, loop : bool = False, extra_run_support : bool = False) -> int:
@@ -687,6 +660,7 @@ class AutoLaTeXMaker(TeXMaker):
 			if mfn is not None and mfn != '':
 				filename = mfn
 		log_file = FileType.log.ensure_extension(filename)
+		log_parser = TeXLogParser(log_file=log_file)
 		nb_runs = 0
 		# This is a do-while implementation
 		while True:
@@ -696,7 +670,7 @@ class AutoLaTeXMaker(TeXMaker):
 				os.remove(log_file)
 			command_output = None
 			continue_to_compile = False
-			if self.extended_warnings_enabled:
+			if self.detailed_warnings_enabled:
 				with open(filename, "r") as f:
 					content = f.readlines()
 				autofile = texutils.create_extended_tex_filename(filename)
@@ -739,21 +713,12 @@ class AutoLaTeXMaker(TeXMaker):
 
 				# Parse the log to extract the blocks of messages
 				if os.path.isfile(log_file):
-					fatal_error, log_blocks = texutils.parse_tex_log_file(log_file)
+					fatal_error, log_blocks = log_parser.extract_failure()
 				else:
 					raise Exception(T("Log file not found: %s" % log_file))
 
 				# Display the message
 				if fatal_error:
-
-					# Test if the message is an emergency stop
-					if re.search(r'^.*?:[0-9]+:\s*emergency\s+stop\.', fatal_error, re.I | re.M):
-						for block in log_blocks:
-							m = re.search(r'^\s*!\s*(.*?)\s*$', block, re.S | re.M)
-							if m:
-								fatal_error += "\n" + m.group(1)
-
-					fatal_error = re.sub(r'^latex_autogenerated.tex:', os.path.basename(filename) + ':', fatal_error)
 					logging.debug(T("LATEX: The first error found in the log file is:"))
 					extlogging.multiline_error(fatal_error)
 					logging.debug(T("LATEX: End of error log."))
@@ -762,8 +727,13 @@ class AutoLaTeXMaker(TeXMaker):
 
 				raise Exception(T("LaTeX compiler fail. See log file for details"))
 
+			elif not os.path.isfile(log_file):
+				raise Exception(T("Log file not found: %s" % log_file))
 			else:
-				continue_to_compile = self.extract_info_from_tex_log_file(log_file, loop)
+				continue_to_compile = log_parser.extract_warnings(enable_loop=loop,
+				                                                  enable_detailed_warnings=self.detailed_warnings_enabled,
+				                                                  standards_warnings=self.__standards_warnings,
+				                                                  detailed_warnings=self.__detailed_warnings)
 				logging.debug(T('Detection of rebuild: %s') % (str(continue_to_compile)))
 
 			# Stoping condition for the do-while loop
@@ -1489,16 +1459,16 @@ class AutoLaTeXMaker(TeXMaker):
 		for root_file in self.__root_files:
 			root_dir = os.path.dirname(root_file)
 
-			# Read building stamps
+			# 1. Read building stamps
 			logging.debug(T("Reading the saved stamps"))
 			self.stamp_manager.read_build_stamps(root_dir)
 
-			# Compute the dependencies of the files
+			# 2. Compute the dependencies of the files
 			logging.log(LogLevel.FINE_INFO, T("Building the file dependencies"))
 			root_dep_file, dependencies = self.compute_dependencies(root_file)
 			extlogging.multiline_debug(T("Dependency List = %s") % repr(dependencies))
 
-			# Construct the build list and launch the required builds
+			# 3. Construct the build list and launch the required builds
 			logging.log(LogLevel.FINE_INFO, T("Building the execution list"))
 			builds = self.build_internal_execution_list(root_file, root_dep_file, dependencies)
 			if logging.getLogger().isEnabledFor(logging.DEBUG):
@@ -1511,7 +1481,7 @@ class AutoLaTeXMaker(TeXMaker):
 				else:
 					logging.debug(T("Empty build list"))
 
-			# Build the files
+			# 4. Build the files
 			if builds:
 				for file in builds:
 					continuation = self.__launch_file_build(root_file=root_file,
@@ -1521,21 +1491,24 @@ class AutoLaTeXMaker(TeXMaker):
 					if not continuation:
 						return False
 
-			# Output the warnings from the last TeX builds
-			if self.extended_warnings:
-				if logging.getLogger().isEnabledFor(LogLevel.FINE_INFO):
-					for w in self.extended_warnings:
-						extlogging.multiline_fine_info(textwrap.wrap(
-							T("%s:%d: %s") % (str(w['filename']), int(w['lineno']),
-											  fix_tex_message_format(str(w['message']))),
-							width=80))
-				self.__reset_warnings()
-
-			# Write building stamps
+			# 5. Write building stamps
 			logging.debug(T("Saving the file stamps"))
 			self.stamp_manager.write_build_stamps(root_dir)
 
-			# Generate the Postscript-based file when requested
+			# 6. Output the warnings from the last TeX builds
+			main_tex_file = self.__files[root_file].main_filename or root_file
+			log_file = FileType.log.ensure_extension(main_tex_file)
+			log_parser = TeXLogParser(log_file=log_file)
+			detailed_warnings = self.detailed_warnings
+			if detailed_warnings:
+				if logging.getLogger().isEnabledFor(LogLevel.FINE_INFO):
+					for w in detailed_warnings:
+						extlogging.multiline_fine_info(textwrap.wrap(
+							T("%s:%d: %s") % (w.filename, w.lineno, w.message),
+							width=80))
+				self.__reset_warnings()
+
+			# 7. Generate the Postscript-based file when requested
 			if not self.configuration.generation.pdf_mode:
 				dvi_file = FileType.dvi.ensure_extension(root_file)
 				dvi_date = genutils.get_file_last_change(dvi_file)
@@ -1546,32 +1519,31 @@ class AutoLaTeXMaker(TeXMaker):
 						logging.log(LogLevel.FINE_INFO, T("Converting the DVI file: %s") % dvi_file)
 						self.run_dvips(dvi_file)
 
-			# Compute the log filename
-			main_tex_file = self.__files[root_file].main_filename or root_file
-			log_file = FileType.log.ensure_extension(main_tex_file)
-
-			# Detect warnings if not already done
+			# 8. Detect warnings from the log file if not already done
 			if not self.standard_warnings:
-				self.extract_info_from_tex_log_file(log_file, False)
+				log_parser.extract_warnings(enable_loop=False,
+				                            enable_detailed_warnings=self.detailed_warnings_enabled,
+				                            standards_warnings=self.__standards_warnings,
+				                            detailed_warnings=self.__detailed_warnings)
 
-			# Output the last LaTeX warning indicators.
+			# 9. Output the last LaTeX warning indicators.
 			if logging.getLogger().isEnabledFor(logging.WARNING):
-				if texutils.TeXWarnings.multiple_definition in self.standard_warnings:
+				if TeXWarnings.multiple_definition in self.standard_warnings:
 					s = T("LaTeX Warning: There were multiply-defined labels.")
 					logging.warning(s)
-					if self.extended_warnings_enabled:
+					if self.detailed_warnings_enabled:
 						extprint.eprint("!!" + log_file + ":W1: " + s + "\n")
-				if texutils.TeXWarnings.undefined_reference in self.standard_warnings:
+				if TeXWarnings.undefined_reference in self.standard_warnings:
 					s = T("LaTeX Warning: There were undefined references.")
 					logging.warning(s)
-					if self.extended_warnings_enabled:
+					if self.detailed_warnings_enabled:
 						extprint.eprint("!!" + log_file + ":W2: " + s + "\n")
-				if texutils.TeXWarnings.undefined_citation in self.standard_warnings:
+				if TeXWarnings.undefined_citation in self.standard_warnings:
 					s = T("LaTeX Warning: There were undefined citations.")
 					logging.warning(s)
-					if self.extended_warnings_enabled:
+					if self.detailed_warnings_enabled:
 						extprint.eprint("!!" + log_file + ":W3: " + s + "\n")
-				if texutils.TeXWarnings.other_warning in self.standard_warnings:
+				if TeXWarnings.other_warning in self.standard_warnings:
 					bn = os.path.basename(log_file)
 					logging.warning((T("LaTeX Warning: Please look inside %s for the other the warning messages.") % bn) + "\n")
 		return True
