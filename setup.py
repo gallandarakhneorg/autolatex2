@@ -58,7 +58,7 @@ class PostBuildCommand(build_py):
 	"""
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
-		self.unixman = False
+		self.unixman = None
 		self.install_layout = 'deb'
 
 	@override
@@ -84,6 +84,8 @@ class PostBuildCommand(build_py):
 		if self.unixman:
 			print("Building manual page")
 			PostBuildCommand.pod2man()
+		else:
+			print("WARN: Skipping manual page because not on Unix platform")
 
 	@staticmethod
 	def pod2man(in_pod : str = None, out_man : str = None, out_gz : str = None):

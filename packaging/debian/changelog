@@ -1,3 +1,13 @@
+autolatex (51.0-0arakhne0) noble; urgency=low
+
+  * Refactored TeX error and warning detection by consolidating log handling into a single class and fixing message extraction.
+  * Made the build process dynamic: tools are evaluated and run based on actual content changes, not just timestamps, and a `showbuildprocess` command was added.
+  * Improved rebuild detection by recognizing the “Rerun the LaTeX compile” log message and fixing PDF builder detection.
+  * Fixed TeX parser issues with macros (optional+mandatory arguments) and citation analyzer exceptions.
+  * Adapted the installation script to meet CTAN standards.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Mon, 13 Apr 2026 20:49:54 +0800
+
 autolatex (50.1-0arakhne0) noble; urgency=low
 
   * Fixing the invalid date format in the header of the STY files.
