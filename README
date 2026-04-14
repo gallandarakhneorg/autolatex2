@@ -77,7 +77,7 @@ COMMANDS
         Creates a LaTeX package file in the document directory that equips
         LaTeX Beamer text processor with the control sequences dedicated to
         AutoLaTeX (slides with animated figures). The package file is named
-        autolatex-beamer.sty. See the command createist for creating a
+        autolatex-beamer.sty. See the command createsty for creating a
         package dedicated to regular LaTeX document.
 
     createconfig
