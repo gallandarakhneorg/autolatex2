@@ -219,9 +219,9 @@ GLOBAL OPTIONS
            sleep sleep_duration
          done
 
-        The sleep_duration parameter specifies the waiting time between
-        loops. If not provided, it defaults to 0. The --continuous option
-        forces --asyncview to be enabled.
+        The sleep_duration parameter specifies the waiting time in seconds
+        between loops. If not provided, it defaults to 0. The --continuous
+        option forces --asyncview to be enabled.
 
         With a compatible viewer, the display will update automatically.
         Some UNIX/Linux versions of "gv -watch" support this for PostScript
