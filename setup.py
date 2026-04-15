@@ -91,31 +91,39 @@ class PostBuildCommand(build_py):
 
 	@staticmethod
 	def pod2man(in_pod : str = None, out_man : str = None, out_gz : str = None):
-		if not in_pod:
-			in_pod = os.path.join(CURRENT_DIR, 'docs', 'autolatex.pod')
-		if not out_man:
-			out_man = os.path.join(CURRENT_DIR, 'build', 'man', 'man1', 'autolatex.1')
-		if not out_gz:
-			out_gz = out_man + '.gz' #usr/share/man/man1
-		print("\tcreating %s and %s" % (out_man,out_gz))
-		os.makedirs(os.path.dirname(out_man), exist_ok=True)
-		rc = subprocess.call(['pod2man', '--center=AutoLaTeX', '--name=' + PROGRAM_NAME, '--release=' + PROGRAM_VERSION, in_pod, out_man])
-		if rc == 0:
-			with open(out_man, 'rb') as f_in:
-				with gzip.open(out_gz, 'wb') as f_out:
-					shutil.copyfileobj(f_in, f_out)
+		program = shutil.which('pod2man')
+		if program:
+			if not in_pod:
+				in_pod = os.path.join(CURRENT_DIR, 'docs', 'autolatex.pod')
+			if not out_man:
+				out_man = os.path.join(CURRENT_DIR, 'build', 'man', 'man1', 'autolatex.1')
+			if not out_gz:
+				out_gz = out_man + '.gz' #usr/share/man/man1
+			print("\tcreating %s and %s" % (out_man,out_gz))
+			os.makedirs(os.path.dirname(out_man), exist_ok=True)
+			rc = subprocess.call([program, '--center=AutoLaTeX', '--name=' + PROGRAM_NAME, '--release=' + PROGRAM_VERSION, in_pod, out_man])
+			if rc == 0:
+				with open(out_man, 'rb') as f_in:
+					with gzip.open(out_gz, 'wb') as f_out:
+						shutil.copyfileobj(f_in, f_out)
+			else:
+				sys.exit(rc)
 		else:
-			sys.exit(rc)
+			print("WARNING: pod2man cannot be find in PATH. Skipping the generation of the documentation")
 
 	@staticmethod
 	def update_readme(in_pod : str = None, out_readme : str = None):
-		if not in_pod:
-			in_pod = os.path.join(CURRENT_DIR, 'docs', 'autolatex.pod')
-		if not out_readme:
-			out_readme = os.path.join(CURRENT_DIR, 'README')
-		rc = subprocess.call(['pod2text', in_pod, out_readme])
-		if rc != 0:
-			sys.exit(rc)
+		program = shutil.which('pod2text')
+		if program:
+			if not in_pod:
+				in_pod = os.path.join(CURRENT_DIR, 'docs', 'autolatex.pod')
+			if not out_readme:
+				out_readme = os.path.join(CURRENT_DIR, 'README')
+			rc = subprocess.call([program, in_pod, out_readme])
+			if rc != 0:
+				sys.exit(rc)
+		else:
+			print("WARNING: pod2text cannot be find in PATH. Skipping the refreshing of README")
 
 	# noinspection DuplicatedCode
 	@staticmethod
