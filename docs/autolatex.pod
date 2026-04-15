@@ -76,7 +76,7 @@ This command is also known as B<mrproper>.
 Creates a LaTeX package file in the document directory that equips LaTeX Beamer text processor with the
 control sequences dedicated to AutoLaTeX (slides with animated figures). The package file is named
 B<autolatex-beamer.sty>.
-See the command B<createist> for creating a package dedicated to regular LaTeX document.
+See the command B<createsty> for creating a package dedicated to regular LaTeX document.
 
 =item B<createconfig>
 
