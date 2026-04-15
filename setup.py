@@ -119,9 +119,14 @@ class PostBuildCommand(build_py):
 				in_pod = os.path.join(CURRENT_DIR, 'docs', 'autolatex.pod')
 			if not out_readme:
 				out_readme = os.path.join(CURRENT_DIR, 'README')
-			rc = subprocess.call([program, in_pod, out_readme])
+			rc = subprocess.call([program, '--utf8', in_pod, out_readme])
 			if rc != 0:
 				sys.exit(rc)
+			with open(out_readme, 'r', encoding='utf-8') as f:
+				original = f.read()
+			modified = re.sub(r'[FB]<([^>]*)>', r'\1', original)
+			with open(out_readme, 'w', encoding='utf-8') as f:
+				f.write(modified)
 		else:
 			print("WARNING: pod2text cannot be find in PATH. Skipping the refreshing of README")
 

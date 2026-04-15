@@ -16,24 +16,24 @@ DESCRIPTION
     Without AutoLaTeX, producing a .pdf file might require the following
     commands:
 
-         F<pdflatex mydoc.tex>
-         F<bibtex mydoc>
-         F<makeindex mydoc>
-         F<makeglossaries mydoc>
-         F<pdflatex mydoc.tex>
-         F<pdflatex mydoc.tex>
-         F<pdflatex mydoc.tex>
+         pdflatex mydoc.tex
+         bibtex mydoc
+         makeindex mydoc
+         makeglossaries mydoc
+         pdflatex mydoc.tex
+         pdflatex mydoc.tex
+         pdflatex mydoc.tex
 
     The triple invocation of LaTeX ensures that all references are resolved
     and layout changes are accounted for. While not overly complex, this
     process still involves multiple commands. With AutoLaTeX, you can
     simplify this to:
 
-         F<autolatex -f mydoc.tex>
+         autolatex -f mydoc.tex
 
     or simply:
 
-         F<autolatex>
+         autolatex
 
     For documents requiring additional tools to generate PDF versions of
     included drawings or to run BibTeX/Biber for bibliographies, manual
@@ -216,7 +216,7 @@ GLOBAL OPTIONS
          while 1
          do
            autolatex "$@"
-           sleep B<sleep_duration>
+           sleep sleep_duration
          done
 
         The sleep_duration parameter specifies the waiting time between
