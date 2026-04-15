@@ -227,7 +227,7 @@ infinitely, similar to the following script (in bash):
    sleep B<sleep_duration>
  done
 
-The B<sleep_duration> parameter specifies the waiting time between loops. If not provided, it defaults to 0.
+The B<sleep_duration> parameter specifies the waiting time in seconds between loops. If not provided, it defaults to 0.
 The B<--continuous> option forces B<--asyncview> to be enabled.
 
 With a compatible viewer, the display will update automatically. Some UNIX/Linux versions of "gv -watch" support
