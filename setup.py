@@ -24,12 +24,13 @@ import logging
 import gzip
 import platform
 import os
+import glob
 import re
 import subprocess
 import sys
 from typing import override
 
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, Command
 from setuptools.command.build_py import build_py
 from setuptools.command.install import install
 from setuptools.command.sdist import sdist as sourcedist
@@ -50,6 +51,11 @@ def is_unix():
 	return platform.system() in ('Linux', 'Darwin', 'FreeBSD', 'OpenBSD', 'NetBSD')
 
 
+def has_pandoc():
+	if shutil.which('pandoc'):
+		return True
+	return False
+
 
 class PostBuildCommand(build_py):
 	"""
@@ -59,18 +65,22 @@ class PostBuildCommand(build_py):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.unixman = None
+		self.pandoc = None
 		self.install_layout = 'deb'
 
 	@override
 	def initialize_options(self):
 		super().initialize_options()
 		self.unixman = is_unix()
+		self.pandoc = has_pandoc()
 
 	@override
 	def finalize_options(self):
 		super().finalize_options()
 		if self.unixman is None:
 			self.unixman = is_unix()
+		if self.pandoc is None:
+			self.pandoc = has_pandoc()
 
 	@override
 	def run(self):
@@ -81,27 +91,37 @@ class PostBuildCommand(build_py):
 		print("Updating the VERSION file")
 		self.update_version_file()
 		super().run()
-		if self.unixman:
+		if self.pandoc:
 			print("Refreshing README")
 			PostBuildCommand.update_readme()
-			print("Building manual page")
-			PostBuildCommand.pod2man()
 		else:
-			print("WARN: Skipping manual page because not on Unix platform")
+			print("WARN: Skipping README updating because 'pandoc' cannot be found")
+		if self.pandoc:
+			print("Building ROFF man page")
+			PostBuildCommand.md2man()
+		else:
+			print("WARN: Skipping ROFF man page creation because 'pandoc' cannot be found")
 
 	@staticmethod
-	def pod2man(in_pod : str = None, out_man : str = None, out_gz : str = None):
-		program = shutil.which('pod2man')
+	def md2man(in_md : str = None, out_man : str = None, out_gz : str = None):
+		program = shutil.which('pandoc')
 		if program:
-			if not in_pod:
-				in_pod = os.path.join(CURRENT_DIR, 'docs', 'autolatex.pod')
+			if not in_md:
+				in_md = os.path.join(CURRENT_DIR, 'docs', 'autolatex.md')
 			if not out_man:
 				out_man = os.path.join(CURRENT_DIR, 'build', 'man', 'man1', 'autolatex.1')
 			if not out_gz:
 				out_gz = out_man + '.gz' #usr/share/man/man1
-			print("\tcreating %s and %s" % (out_man,out_gz))
+			print("\tcreating %s and %s" % (out_man, out_gz))
 			os.makedirs(os.path.dirname(out_man), exist_ok=True)
-			rc = subprocess.call([program, '--center=AutoLaTeX', '--name=' + PROGRAM_NAME, '--release=' + PROGRAM_VERSION, in_pod, out_man])
+			rc = subprocess.call([program, '-s',
+				'-t', 'man',
+				in_md,
+				'-o', out_man,
+				'--variable', f'title={PROGRAM_NAME}',
+				'--variable', 'section=1',
+				'--variable', 'header=AutoLaTeX',
+				'--variable', f'footer={PROGRAM_VERSION}'])
 			if rc == 0:
 				with open(out_man, 'rb') as f_in:
 					with gzip.open(out_gz, 'wb') as f_out:
@@ -109,26 +129,24 @@ class PostBuildCommand(build_py):
 			else:
 				sys.exit(rc)
 		else:
-			print("WARNING: pod2man cannot be find in PATH. Skipping the generation of the documentation")
+			print("WARNING: pandoc cannot be find in PATH. Skipping the generation of the ROFF man page")
 
 	@staticmethod
-	def update_readme(in_pod : str = None, out_readme : str = None):
-		program = shutil.which('pod2text')
+	def update_readme(in_md : str = None, out_readme : str = None):
+		program = shutil.which('pandoc')
 		if program:
-			if not in_pod:
-				in_pod = os.path.join(CURRENT_DIR, 'docs', 'autolatex.pod')
+			if not in_md:
+				in_md = os.path.join(CURRENT_DIR, 'docs', 'autolatex.md')
 			if not out_readme:
 				out_readme = os.path.join(CURRENT_DIR, 'README')
-			rc = subprocess.call([program, '--utf8', in_pod, out_readme])
+			rc = subprocess.call([program, '-s',
+				'-t', 'plain',
+				in_md,
+				'-o', out_readme])
 			if rc != 0:
 				sys.exit(rc)
-			with open(out_readme, 'r', encoding='utf-8') as f:
-				original = f.read()
-			modified = re.sub(r'[FB]<([^>]*)>', r'\1', original)
-			with open(out_readme, 'w', encoding='utf-8') as f:
-				f.write(modified)
 		else:
-			print("WARNING: pod2text cannot be find in PATH. Skipping the refreshing of README")
+			print("WARNING: pandoc cannot be find in PATH. Skipping the refreshing of README")
 
 	# noinspection DuplicatedCode
 	@staticmethod
@@ -229,17 +247,17 @@ class PostInstallCommand(install):
 		if self.is_local_layout:
 			path = os.path.join(str(path), 'local')
 
-		pod_path = os.path.join(str(path), 'share', 'doc', 'autolatex-base')
-		pod_path = os.path.normpath(pod_path)
+		doc_md_path = os.path.join(str(path), 'share', 'doc', 'autolatex-base')
+		doc_md_path = os.path.normpath(doc_md_path)
 
 		man_path = os.path.join(str(path), 'share', 'man', 'man1')
 		man_path = os.path.normpath(man_path)
 
-		src_pod_file = os.path.join(CURRENT_DIR, 'docs', 'autolatex.pod')
-		pod_file = os.path.join(pod_path, 'autolatex.pod')
-		if os.path.isfile(src_pod_file):
-			os.makedirs(os.path.dirname(pod_file), exist_ok=True)
-			self.copy_file(src_pod_file, pod_file, level=self.verbose)
+		src_doc_md_file = os.path.join(CURRENT_DIR, 'docs', 'autolatex.md')
+		doc_md_file = os.path.join(doc_md_path, 'autolatex.md')
+		if os.path.isfile(src_doc_md_file):
+			os.makedirs(os.path.dirname(doc_md_file), exist_ok=True)
+			self.copy_file(src_doc_md_file, doc_md_file, level=self.verbose)
 
 		src_mangz_file = os.path.join(CURRENT_DIR, 'build', 'man', 'man1', 'autolatex.1.gz')
 		mangz_file = os.path.join(man_path, 'autolatex.1.gz')
@@ -303,12 +321,77 @@ class CustomSourceDistributionCommand(sourcedist):
 				shutil.rmtree(base_dir, ignore_errors=True)
 
 
+class CustomCleanCommand(Command):
+	"""
+	Custom clean command to tidy up the project root.
+	"""
+
+	user_options = [
+		('all', 'a', 'Remove all temporary files, including Python cache files and extra folders'),
+	]
+
+	def initialize_options(self):
+		self.all = False   # default value
+
+	def finalize_options(self):
+		pass
+
+	def run(self):
+		# The base build directories setuptools usually creates
+		dirs_to_clean = [
+			'build',
+			'dist',
+			'*.egg-info',
+			'__pycache__',
+		]
+
+		# Custom files and directories to clean
+		extra_paths = [
+			'bin',
+			'autolatex_*.dsc',
+			'autolatex_*.tar.gz',
+			'autolatex_*.buildinfo',
+			'autolatex_*.changes',
+			'autolatex*.deb'
+		]
+
+		if self.all:
+			all_folders = dirs_to_clean + extra_paths
+		else:
+			all_folders = dirs_to_clean
+
+		# Remove directories
+		for pattern in all_folders:
+			# Check if pattern contains a wildcard
+			if '*' in pattern:
+				for path in glob.glob(pattern):
+					self._remove_path(path)
+			else:
+				self._remove_path(pattern)
+
+	# noinspection PyMethodMayBeStatic
+	def _remove_path(self, path):
+		"""
+		Safely remove a file or directory.
+		"""
+		try:
+			if os.path.isfile(path) or os.path.islink(path):
+				os.unlink(path)
+				print(f"Removed file: {path}")
+			elif os.path.isdir(path):
+				shutil.rmtree(path, ignore_errors=True)
+				print(f"Removed directory: {path}")
+		except Exception as e:
+			print(f"Error removing {path}: {e}")
+
+
 # Setup
 setup(
 	cmdclass ={
 		'build_py': PostBuildCommand,
 		'install': PostInstallCommand,
 		'sdist': CustomSourceDistributionCommand,
+		'clean': CustomCleanCommand,
 	},
 	name=PROGRAM_NAME,
 	version=PROGRAM_VERSION,
