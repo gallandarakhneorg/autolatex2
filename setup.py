@@ -82,6 +82,8 @@ class PostBuildCommand(build_py):
 		self.update_version_file()
 		super().run()
 		if self.unixman:
+			print("Refreshing README")
+			PostBuildCommand.update_readme()
 			print("Building manual page")
 			PostBuildCommand.pod2man()
 		else:
@@ -103,6 +105,16 @@ class PostBuildCommand(build_py):
 				with gzip.open(out_gz, 'wb') as f_out:
 					shutil.copyfileobj(f_in, f_out)
 		else:
+			sys.exit(rc)
+
+	@staticmethod
+	def update_readme(in_pod : str = None, out_readme : str = None):
+		if not in_pod:
+			in_pod = os.path.join(CURRENT_DIR, 'docs', 'autolatex.pod')
+		if not out_readme:
+			out_readme = os.path.join(CURRENT_DIR, 'README')
+		rc = subprocess.call(['pod2text', in_pod, out_readme])
+		if rc != 0:
 			sys.exit(rc)
 
 	# noinspection DuplicatedCode
