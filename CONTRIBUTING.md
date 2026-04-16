@@ -12,7 +12,7 @@ First off, thank you for considering contributing to AutoLaTeX!
 - [Pull Request Process](#pull-request-process)
   - [Step-by-Step Guide](#step-by-step-guide)
   - [Pull Request Guidelines](#pull-request-guidelines)
-    - [⚠️ Important Note on README.md ⚠️](#️-important-note-on-readmemd-️)
+    - [⚠️ Important Note on README ⚠️](#️-important-note-on-readmemd-️)
 - [Style Guidelines](#style-guidelines)
   - [Python Style Guide](#python-style-guide)
   - [Git Commit Messages](#git-commit-messages)
@@ -95,14 +95,15 @@ The primary method of contributing to AutoLaTeX is through GitHub Pull Requests.
 - **Link related issues** in your PR description using keywords like "Fixes #123" or "Resolves #456".
 - **Request a review** from a maintainer after making requested changes.
 
-### ⚠️ Important Note on README.md ⚠️
+### ⚠️ Important Note on README ⚠️
 
-**DO NOT edit the `README` file directly.** The `README` is automatically generated from the `docs/autolatex.pod` file (a Perl POD format documentation). Any changes to the project's main documentation should be made by editing `docs/autolatex.pod`. After updating the POD file, the `README` will be regenerated during the release process.
+**DO NOT edit the `README` file directly.** The `README` is automatically generated from the `docs/autolatex.md` file (in Markdown format). Any changes to the project's main documentation should be made by editing `docs/autolatex.md`. After updating the Markdown file, the `README` will be regenerated during the release process.
 
 If you need to update the project's documentation:
-1. Edit `docs/autolatex.pod` with your changes.
-2. Test your changes locally by converting the POD to text (using `pod2text docs/autolatex.pod > README`).
-3. If possible, include both the POD and the regenerated README in your pull request.
+1. Edit `docs/autolatex.md` with your changes.
+2. Test your changes locally by converting the Markdown to text (using `pandoc -s -t plain docs/autolatex.md -o README`).
+2. On Unix: Test your changes locally by converting the Markdown to Unix ROFF man page (using `pandoc -s -t man docs/autolatex.md -o README.1; man -l README.1`).
+3. If possible, include both the Markdown and the regenerated README in your pull request, but not the Unix ROFF man page.
 
 Other documentation files (such as this CONTRIBUTING.md) can be edited directly.
 
