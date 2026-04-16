@@ -160,6 +160,8 @@ class PostBuildCommand(build_py):
 			PostBuildCommand.md2pdf()
 		else:
 			print("WARN: Skipping PDF creation because 'pandoc' cannot be found")
+		if self.isunix:
+			PostBuildCommand.create_development_launcher()
 
 
 	@staticmethod
@@ -316,6 +318,12 @@ class PostBuildCommand(build_py):
 		print("\tcopying %s to %s" % (in_version, out_version))
 		self.copy_file(in_version, out_version, level=self.verbose)
 
+	@staticmethod
+	def create_development_launcher():
+		bash_code = "#!/usr/bin/env bash\nDIR=`dirname \"$0\"`\nPYTHONPATH=\"$DIR/src\" exec python3 -B -m autolatex2.cli.autolatex \"$@\""
+		bash_script = os.path.join(CURRENT_DIR, 'autolatex.sh')
+		with open(bash_script, 'wt') as f_out:
+			f_out.write(bash_code)
 
 class PostInstallCommand(install):
 	"""
