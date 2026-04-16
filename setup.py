@@ -145,7 +145,7 @@ class PostBuildCommand(build_py):
 		super().run()
 		if self.pandoc:
 			print("Refreshing README")
-			PostBuildCommand.update_readme()
+			PostBuildCommand.md2readme()
 		else:
 			print("WARN: Skipping README updating because 'pandoc' cannot be found")
 		if self.pandoc:
@@ -184,19 +184,25 @@ class PostBuildCommand(build_py):
 			print("WARNING: pandoc cannot be find in PATH. Skipping the generation of the ROFF man page")
 
 	@staticmethod
-	def update_readme(in_md : str = None, out_readme : str = None):
+
+	@staticmethod
+	def md2readme(in_md : str = None, out_readme : str = None):
 		program = shutil.which('pandoc')
 		if program:
 			if not in_md:
 				in_md = os.path.join(CURRENT_DIR, 'docs', 'autolatex.md')
 			if not out_readme:
 				out_readme = os.path.join(CURRENT_DIR, 'README')
-			rc = subprocess.call([program, '-s',
-				'-t', 'plain',
-				in_md,
-				'-o', out_readme])
-			if rc != 0:
-				sys.exit(rc)
+			in_filtered = PostBuildCommand.replace_standard_variables_in_file(in_md)
+			try:
+				rc = subprocess.call([program, in_filtered,
+					'-s',
+					'-t', 'plain',
+					'-o', out_readme])
+				if rc != 0:
+					sys.exit(rc)
+			finally:
+				os.unlink(in_filtered)
 		else:
 			print("WARNING: pandoc cannot be find in PATH. Skipping the refreshing of README")
 
@@ -210,12 +216,8 @@ class PostBuildCommand(build_py):
 		print("\treading %s" % in_sty)
 		with open(in_sty, 'rt') as f_in:
 			content = f_in.read()
-		now = datetime.now()
-		year = int(now.year)
-		month = int(now.month)
-		day = int(now.day)
 		content = re.sub('autolatex@package@ver\\{[^}]+}',
-						 'autolatex@package@ver{%s/%s/%s}' % (f'{year:04d}', f'{month:02d}', f'{day:02d}'),
+						 'autolatex@package@ver{%s}' % PUB_DATE_SLASH,
 						 content, re.DOTALL)
 		content = re.sub('autolatexversion\\{[^}]+}',
 						 'autolatexversion{%s}' % str(PROGRAM_VERSION),
@@ -234,12 +236,8 @@ class PostBuildCommand(build_py):
 		print("\treading %s" % in_sty)
 		with open(in_sty, 'rt') as f_in:
 			content = f_in.read()
-		now = datetime.now()
-		year = int(now.year)
-		month = int(now.month)
-		day = int(now.day)
 		content = re.sub('autolatexbeamer@package@ver\\{[^}]+}',
-						 'autolatexbeamer@package@ver{%s/%s/%s}' % (f'{year:04d}', f'{month:02d}', f'{day:02d}'),
+						 'autolatexbeamer@package@ver{%s}' % PUB_DATE_SLASH,
 						 content, re.DOTALL)
 		print("\twriting %s" % out_sty)
 		with open(out_sty, 'wt') as f_out:
