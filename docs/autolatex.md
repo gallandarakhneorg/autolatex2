@@ -1,18 +1,18 @@
-# autolatex - compile LaTeX and TeX documents
+# {{ program_name }} - compile LaTeX and TeX documents
 
 ## NAME
 
-**autolatex** - compile LaTeX and TeX documents
+**{{ program_name }}** - compile LaTeX and TeX documents
 
 ## SYNOPSIS
 
-`autolatex [global options] command [specific options]`
+`{{ program_name }} [global options] command [specific options]`
 
 ## DESCRIPTION
 
-AutoLaTeX is a tool for managing small to large LaTeX documents. It simplifies the process of producing PDF files or viewing documents by tracking file changes and automating the execution of required programs. One of AutoLaTeX's best features is its translator rules (also known as translators), which automatically generate drawings for inclusion in the PDF from various source formats such as SVG and GNU Plot.
+{{ readable_name }} is a tool for managing small to large LaTeX documents. It simplifies the process of producing PDF files or viewing documents by tracking file changes and automating the execution of required programs. One of {{ readable_name }}'s best features is its translator rules (also known as translators), which automatically generate drawings for inclusion in the PDF from various source formats such as SVG and GNU Plot.
 
-For example, consider a document with a single LaTeX file, `mydoc.tex`. Without AutoLaTeX, producing a `.pdf` file might require the following commands:
+For example, consider a document with a single LaTeX file, `mydoc.tex`. Without {{ readable_name }}, producing a `.pdf` file might require the following commands:
 
 ```bash
 pdflatex mydoc.tex
@@ -24,25 +24,25 @@ pdflatex mydoc.tex
 pdflatex mydoc.tex
 ```
 
-The triple invocation of LaTeX ensures that all references are resolved and layout changes are accounted for. While not overly complex, this process still involves multiple commands. With AutoLaTeX, you can simplify this to:
+The triple invocation of LaTeX ensures that all references are resolved and layout changes are accounted for. While not overly complex, this process still involves multiple commands. With {{ readable_name }}, you can simplify this to:
 
 ```bash
-autolatex -f mydoc.tex
+{{ program_name }} -f mydoc.tex
 ```
 
 or simply:
 
 ```bash
-autolatex
+{{ program_name }}
 ```
 
-For documents requiring additional tools to generate PDF versions of included drawings or to run BibTeX/Biber for bibliographies, manual compilation becomes cumbersome. AutoLaTeX automates these tasks: it calls the necessary translators and tools for you. Each translator converts a source file (e.g., EPS, SVG, Gnuplot) into a PDF or PNG file.
+For documents requiring additional tools to generate PDF versions of included drawings or to run BibTeX/Biber for bibliographies, manual compilation becomes cumbersome. {{ readable_name }} automates these tasks: it calls the necessary translators and tools for you. Each translator converts a source file (e.g., EPS, SVG, Gnuplot) into a PDF or PNG file.
 
-This introduction demonstrates how AutoLaTeX simplifies LaTeX document management. The system is user-friendly for small projects and robust enough for large ones. The rest of this manual provides comprehensive documentation on using, configuring, and installing AutoLaTeX.
+This introduction demonstrates how {{ readable_name }} simplifies LaTeX document management. The system is user-friendly for small projects and robust enough for large ones. The rest of this manual provides comprehensive documentation on using, configuring, and installing {{ readable_name }}.
 
 ## COMMANDS
 
-AutoLaTeX provides a fixed set of commands to perform specific actions on your document. The default command is **build**. Some commands accept optional arguments; use `--help` after the command name for details.
+{{ readable_name }} provides a fixed set of commands to perform specific actions on your document. The default command is **build**. Some commands accept optional arguments; use `--help` after the command name for details.
 
 The available commands are:
 
@@ -59,7 +59,7 @@ The available commands are:
 : Same as **clean**, but also removes Emacs `~` files, other backup files, generated figures, and the produced PDF. This command is also known as **mrproper**.
 
 **createbeamer**  
-: Creates a LaTeX package file in the document directory that equips LaTeX Beamer text processor with the control sequences dedicated to AutoLaTeX (slides with animated figures). The package file is named `autolatex-beamer.sty`. See the command **createsty** for creating a package dedicated to regular LaTeX document.
+: Creates a LaTeX package file in the document directory that equips LaTeX Beamer text processor with the control sequences dedicated to {{ readable_name }} (slides with animated figures). The package file is named `autolatex-beamer.sty`. See the command **createsty** for creating a package dedicated to regular LaTeX document.
 
 **createconfig**  
 : Creates a standard configuration file in the current directory based on the command-line configuration.
@@ -68,7 +68,7 @@ The available commands are:
 : Creates a default MakeIndex style file in the document directory, named `default.ist`.
 
 **createsty**  
-: Creates a LaTeX package file in the document directory that equips LaTeX text processor with the control sequences dedicated to AutoLaTeX (animated figures and figures with embedded TeX). The package file is named `autolatex.sty`. See the command **createbeamer** for creating a package dedicated to LaTeX Beamer.
+: Creates a LaTeX package file in the document directory that equips LaTeX text processor with the control sequences dedicated to {{ readable_name }} (animated figures and figures with embedded TeX). The package file is named `autolatex.sty`. See the command **createbeamer** for creating a package dedicated to LaTeX Beamer.
 
 **commit**  
 : Commits changes to a version control system (GIT, CVS, SVN...). The command line must be provided in the configuration file.
@@ -86,7 +86,7 @@ The available commands are:
 : Performs all processing required to generate the index (makeindex). This command is also known as **makeindex**.
 
 **init**  
-: Creates an empty LaTeX document in the current directory following a standard folder structure supported by AutoLaTeX.
+: Creates an empty LaTeX document in the current directory following a standard folder structure supported by {{ readable_name }}.
 
 **latex**  
 : Run one time the (La)TeX text processing to produce the `.pdf`, `.dvi`, or `.ps` file for the document. This command is also known as **tex** or **maketex**.
@@ -99,13 +99,13 @@ This command is useful for creating a version of the document that can be direct
 This command provides the CLI option `--externalbiblio` to specify whether the bibliography should be placed in a BibTeX file (external) or inlined in the TeX file (default: inlined).
 
 **showbuildprocess**  
-: Displays the list of actions that will be applied by AutoLaTeX during the building process. This function does not start the building process.
+: Displays the list of actions that will be applied by {{ readable_name }} during the building process. This function does not start the building process.
 
 **showconfig**  
 : Displays the configuration definitions read from the configuration files.
 
 **showconfigfiles**  
-: Displays the list of configuration filenames read by AutoLaTeX.
+: Displays the list of configuration filenames read by {{ readable_name }}.
 
 **showdependencies**  
 : Displays the dependencies of the main LaTeX document in terms of included and used files.
@@ -120,10 +120,10 @@ This command provides the CLI option `--externalbiblio` to specify whether the b
 : Displays the list of loaded translators. This command is also known as **translators**.
 
 **showpath**  
-: Displays the value of the PATH environment variable that is considered by AutoLaTeX.
+: Displays the value of the PATH environment variable that is considered by {{ readable_name }}.
 
 **stamps**  
-: Displays or update the list of stamps that are saved by AutoLaTeX. Stamps are keys used to determine if some information (bibliography, index, glossary, etc.) has changed since the previous run of AutoLaTeX. They permit to AutoLaTeX to obtain a better detection of changes than those only based on the dates of last-change of the files.
+: Displays or update the list of stamps that are saved by {{ readable_name }}. Stamps are keys used to determine if some information (bibliography, index, glossary, etc.) has changed since the previous run of {{ readable_name }}. They permit to {{ readable_name }} to obtain a better detection of changes than those only based on the dates of last-change of the files.
 
 **unusedimages**  
 : Displays (or removes) figures in the document folder that are not included in the document.
@@ -137,7 +137,7 @@ This command provides the CLI option `--externalbiblio` to specify whether the b
 ## GLOBAL OPTIONS
 
 **`--asyncview`**, **`--noasyncview`**  
-: Enables or disables asynchronous viewer launching. If enabled, AutoLaTeX does not wait for the viewer to close before stopping execution. If disabled, AutoLaTeX waits for the viewer to close.
+: Enables or disables asynchronous viewer launching. If enabled, {{ readable_name }} does not wait for the viewer to close before stopping execution. If disabled, {{ readable_name }} waits for the viewer to close.
 
 **`--auto`**, **`--noauto`**  
 : Enables or disables automatic figure generation using translators.
@@ -146,12 +146,12 @@ This command provides the CLI option `--externalbiblio` to specify whether the b
 : Enables or disables the bibliography tool (BibTeX, Biber, etc.) if not explicitly invoked from the command line.
 
 **`--continuous [sleep_duration]`**, **`--nocontinuous`**  
-: Runs AutoLaTeX continuously, repeatedly performing the specified actions. This option causes AutoLaTeX to loop infinitely, similar to the following script (in bash):
+: Runs {{ readable_name }} continuously, repeatedly performing the specified actions. This option causes {{ readable_name }} to loop infinitely, similar to the following script (in bash):
 
     ```bash
     while 1
     do
-      autolatex "$@"
+      {{ program_name }} "$@"
       sleep sleep_duration
     done
     ```
@@ -163,25 +163,25 @@ This command provides the CLI option `--externalbiblio` to specify whether the b
     Note: Adobe Acrobat Reader on MS-Windows locks the PDF file, preventing updates, so it is not recommended for continuous mode.
 
 **`--debug`**  
-: Runs AutoLaTeX with the logging level set to 'debug'. The available levels (from least to most verbose) are: off, critical, error, warning, info, fine_info, debug, trace.
+: Runs {{ readable_name }} with the logging level set to 'debug'. The available levels (from least to most verbose) are: off, critical, error, warning, info, fine_info, debug, trace.
 
 **`--defaultist`**  
-: Allows AutoLaTeX to use MakeIndex with the default style (.ist file). The default style is provided by the AutoLaTeX distribution. The `--index` and `--noindex` options modify AutoLaTeX's behavior regarding MakeIndex.
+: Allows {{ readable_name }} to use MakeIndex with the default style (.ist file). The default style is provided by the {{ readable_name }} distribution. The `--index` and `--noindex` options modify {{ readable_name }}'s behavior regarding MakeIndex.
 
 **`-d directory`**, **`--directory directory`**  
 : Specifies a directory containing a LaTeX document to compile. You can specify this option for each directory containing a LaTeX document. If not specified, the current directory is used.
 
 **`--dvi`**  
-: Specifies that the result of the AutoLaTeX process is a DVI or XDVI document, which will be converted to PostScript. This option has the same effect as `--ps`.
+: Specifies that the result of the {{ readable_name }} process is a DVI or XDVI document, which will be converted to PostScript. This option has the same effect as `--ps`.
 
 **`-e name`**, **`--exclude name`**  
-: Prevents AutoLaTeX from loading the translator named `name`. See below for available translators. The `--include` option includes a translator, and `--include-path` specifies where to find translator scripts.
+: Prevents {{ readable_name }} from loading the translator named `name`. See below for available translators. The `--include` option includes a translator, and `--include-path` specifies where to find translator scripts.
 
 **`--extramacro`**, **`--noextramacro`**  
 : Enables or disables the supports of extra TeX and LaTeX macros and environments. The list of these extra definitions in detailed in the dedicated section of this documentation.
 
 **`-f file`**, **`--file file`**  
-: Specifies the main LaTeX file to compile. If not specified, AutoLaTeX searches for a TeX file in the document directory.
+: Specifies the main LaTeX file to compile. If not specified, {{ readable_name }} searches for a TeX file in the document directory.
 
 **`--file-line-warning`**, **`--nofile-line-warning`**  
 : *Experimental:* Enables or disables the extended warning format for LaTeX. This format adds the filename and line number to the warning message, which is useful for extracting warnings from the log file.
@@ -193,19 +193,19 @@ This command provides the CLI option `--externalbiblio` to specify whether the b
 : Displays the manual. If used before any command, the global manual is shown. If used after a command, only the manual page for that command is displayed.
 
 **`-D directory`**, **`--imgdirectory directory`**  
-: Specifies a directory where AutoLaTeX will find figures to be processed by translators. Each use of this option adds a directory to the list.
+: Specifies a directory where {{ readable_name }} will find figures to be processed by translators. Each use of this option adds a directory to the list.
 
 **`-i name`**, **`--include name`**  
-: Forces AutoLaTeX to load the translator named `name`. See below for available translators. The `--exclude` option excludes a translator, and `--include-path` specifies where to find translator scripts.
+: Forces {{ readable_name }} to load the translator named `name`. See below for available translators. The `--exclude` option excludes a translator, and `--include-path` specifies where to find translator scripts.
 
 **`-I paths`**, **`--include-path paths`**  
-: Notifies AutoLaTeX of directories containing translator scripts. `paths` can be a list separated by the operating system's path separator (':' on Unix, ';' on Windows). The `--exclude` option excludes a translator, and `--include` includes a translator.
+: Notifies {{ readable_name }} of directories containing translator scripts. `paths` can be a list separated by the operating system's path separator (':' on Unix, ';' on Windows). The `--exclude` option excludes a translator, and `--include` includes a translator.
 
 **`--index [style_file]`**, **`--noindex`**  
-: Allows AutoLaTeX to use MakeIndex. If a value is provided, it is assumed to be an .ist file for MakeIndex. If no value is provided, AutoLaTeX uses MakeIndex and attempts to detect a MakeIndex style file (.ist) in the document directory. If none is found, no style is passed to MakeIndex. The `--defaultist` and `--noindex` options modify AutoLaTeX's behavior regarding MakeIndex.
+: Allows {{ readable_name }} to use MakeIndex. If a value is provided, it is assumed to be an .ist file for MakeIndex. If no value is provided, {{ readable_name }} uses MakeIndex and attempts to detect a MakeIndex style file (.ist) in the document directory. If none is found, no style is passed to MakeIndex. The `--defaultist` and `--noindex` options modify {{ readable_name }}'s behavior regarding MakeIndex.
 
 **`--info`**  
-: Runs AutoLaTeX with the logging level set to 'info'. The available levels (from least to most verbose) are: off, critical, error, warning, info, fine_info, debug, trace.
+: Runs {{ readable_name }} with the logging level set to 'info'. The available levels (from least to most verbose) are: off, critical, error, warning, info, fine_info, debug, trace.
 
 **`--latex`**  
 : Uses the LaTeX command: `latex`. See also: `--pdflatex`, `--lualatex`, and `--xelatex`.
@@ -214,51 +214,51 @@ This command provides the CLI option `--externalbiblio` to specify whether the b
 : Uses the LaTeX command: `lualatex`. See also: `--pdflatex`, `--latex`, and `--xelatex`.
 
 **`--pdf`**  
-: Specifies that the result of the AutoLaTeX process is a PDF document.
+: Specifies that the result of the {{ readable_name }} process is a PDF document.
 
 **`--pdflatex`**  
 : Uses the LaTeX command: `pdflatex`. See also: `--latex`, `--lualatex`, and `--xelatex`.
 
 **`--ps`**  
-: Specifies that the result of the AutoLaTeX process is a PostScript document. This option has the same effect as `--dvi`.
+: Specifies that the result of the {{ readable_name }} process is a PostScript document. This option has the same effect as `--dvi`.
 
 **`-q`**, **`--quiet`**  
-: Runs AutoLaTeX with only critical and error messages. The available levels (from least to most verbose) are: off, critical, error, warning, info, fine_info, debug, trace.
+: Runs {{ readable_name }} with only critical and error messages. The available levels (from least to most verbose) are: off, critical, error, warning, info, fine_info, debug, trace.
 
 **`--search-project-from file`**  
-: When specified, AutoLaTeX searches for a configuration file (usually `.autolatex_project.cfg` on Unix) in the directory of the specified `file` or its ancestors. This option does not replace the `-d` or `-f` options.
+: When specified, {{ readable_name }} searches for a configuration file (usually `.autolatex_project.cfg` on Unix) in the directory of the specified `file` or its ancestors. This option does not replace the `-d` or `-f` options.
 
 **`--showloglevel`**  
 : Show the current level of logging on the console. This option depends on the usage of the other logging options, such as `--verbose` or `--debug` for example.
 
 **`--silent`**  
-: Runs AutoLaTeX without logging messages (off logging level). The available levels (from least to most verbose) are: off, critical, error, warning, info, fine_info, debug, trace.
+: Runs {{ readable_name }} without logging messages (off logging level). The available levels (from least to most verbose) are: off, critical, error, warning, info, fine_info, debug, trace.
 
 **`--stderr`**, **`--stdout`**  
-: Directs AutoLaTeX to output regular messages (not logged) to standard output (stdout) or standard error (stderr).
+: Directs {{ readable_name }} to output regular messages (not logged) to standard output (stdout) or standard error (stderr).
 
 **`--synctex`**, **`--nosynctex`**  
 : Enables or disables the generation of SyncTeX-compatible output files. SyncTeX links a viewer and a TeX editor, allowing you to click in one and highlight the corresponding line in the other.
 
 **`--testlogs`**  
-: Show the a message for each level of logging. This option enables to show the behavior of the logging system that is used by AutoLaTeX. This option depends on the usage of the other logging options, such as `--verbose` or `--debug` for example.
+: Show the a message for each level of logging. This option enables to show the behavior of the logging system that is used by {{ readable_name }}. This option depends on the usage of the other logging options, such as `--verbose` or `--debug` for example.
 
 **`-v`**, **`--verbose`**  
 : Increases verbosity each time this option is specified. The available levels (from least to most verbose) are: off, critical, error, warning, info, fine_info, debug, trace.
 
-    Note: If you specify more verbosity than 'trace', AutoLaTeX stops immediately and displays the current in-memory configuration.
+    Note: If you specify more verbosity than 'trace', {{ readable_name }} stops immediately and displays the current in-memory configuration.
 
 **`--version`**  
-: Displays the version of AutoLaTeX.
+: Displays the version of {{ readable_name }}.
 
 **`--view`**, **`--noview`**  
 : Enables or disables the document viewer at the end of compilation.
 
 **`--Wall`**  
-: Runs AutoLaTeX with the logging level set to 'fine_info'. The available levels (from least to most verbose) are: off, critical, error, warning, info, fine_info, debug, trace.
+: Runs {{ readable_name }} with the logging level set to 'fine_info'. The available levels (from least to most verbose) are: off, critical, error, warning, info, fine_info, debug, trace.
 
 **`--Wnone`**  
-: Runs AutoLaTeX with the logging level set to 'error', suppressing warnings. The available levels (from least to most verbose) are: off, critical, error, warning, info, fine_info, debug, trace.
+: Runs {{ readable_name }} with the logging level set to 'error', suppressing warnings. The available levels (from least to most verbose) are: off, critical, error, warning, info, fine_info, debug, trace.
 
 **`--xelatex`**  
 : Uses the LaTeX command: `xelatex`. See also: `--pdflatex`, `--latex`, and `--lualatex`.
@@ -268,7 +268,7 @@ This command provides the CLI option `--externalbiblio` to specify whether the b
 ### `biblio`
 
 **`--nochdir`**  
-: Prevents AutoLaTeX from changing the current directory to the document's root directory before starting the build process.
+: Prevents {{ readable_name }} from changing the current directory to the document's root directory before starting the build process.
 
 ### `build`
 
@@ -277,7 +277,7 @@ See options for the `images`, `document` and `view` commands, if any.
 ### `clean`
 
 **`--nochdir`**  
-: Prevents AutoLaTeX from changing the current directory to the document's root directory before starting the cleaning process.
+: Prevents {{ readable_name }} from changing the current directory to the document's root directory before starting the cleaning process.
 
 **`--norecursive`**  
 : Disables cleaning in subfolders.
@@ -318,22 +318,22 @@ See the options for `clean`, except for `--all`, which is implicit for `cleanall
 : Force the building of all the intermediary files (bbl, idx, ind, gls, etc.) even if they are up-to-date.
 
 **`--nochdir`**  
-: Prevents AutoLaTeX from changing the current directory to the document's root directory before starting the build process.
+: Prevents {{ readable_name }} from changing the current directory to the document's root directory before starting the build process.
 
 ### `glossaries`
 
 **`--nochdir`**  
-: Prevents AutoLaTeX from changing the current directory to the document's root directory before starting the build process.
+: Prevents {{ readable_name }} from changing the current directory to the document's root directory before starting the build process.
 
 ### `images`
 
 **`--force`**  
-: Forces the overwriting of all generated figures, ensuring AutoLaTeX runs the translators for all of them.
+: Forces the overwriting of all generated figures, ensuring {{ readable_name }} runs the translators for all of them.
 
 ### `index`
 
 **`--nochdir`**  
-: Prevents AutoLaTeX from changing the current directory to the document's root directory before starting the build process.
+: Prevents {{ readable_name }} from changing the current directory to the document's root directory before starting the build process.
 
 ### `init`
 
@@ -346,7 +346,7 @@ See the options for `clean`, except for `--all`, which is implicit for `cleanall
 ### `latex`
 
 **`--nochdir`**  
-: Prevents AutoLaTeX from changing the current directory to the document's root directory before starting the build process.
+: Prevents {{ readable_name }} from changing the current directory to the document's root directory before starting the build process.
 
 **`--showneedloop`**  
 : Show if another run of the (La)TeX text processing is detected as needed for producing the .pdf, .dvi, .ps file.
@@ -365,10 +365,10 @@ See the options for `clean`, except for `--all`, which is implicit for `cleanall
 : Display the dependencies in the form of list of filenames in place of the default tree of dependencies.
 
 **`--noauxfile`**  
-: Prevents AutoLaTeX from reading the auxilliary files in order to extract file dependencies.
+: Prevents {{ readable_name }} from reading the auxilliary files in order to extract file dependencies.
 
 **`--times`**  
-: Display for each file the last-change time that is considered by AutoLaTeX in the processing stages.
+: Display for each file the last-change time that is considered by {{ readable_name }} in the processing stages.
 
 ### `showimages`
 
@@ -408,7 +408,7 @@ See the options for `clean`, except for `--all`, which is implicit for `cleanall
 
 A converter, called a translator, transforms a source figure into a target format supported by LaTeX. This converter can be an external program (e.g., epstopdf) or an internal Python, Perl, Ruby, or Bash script.
 
-Each supported translator is defined in a `.transdef2` file (the old format in the Perl implementation of AutoLaTeX uses `.transdef`). This file contains the shell command line or code to execute. To create a new translator, copy and modify an existing `.transdef2` file. Even if excluded from the command line, a translator is automatically included by AutoLaTeX if invoked by another included translator.
+Each supported translator is defined in a `.transdef2` file (the old format in the Perl implementation of {{ readable_name }} uses `.transdef`). This file contains the shell command line or code to execute. To create a new translator, copy and modify an existing `.transdef2` file. Even if excluded from the command line, a translator is automatically included by {{ readable_name }} if invoked by another included translator.
 
 The provided translators are (only pdf outputs are considered below, ps outputs are also possible):
 
@@ -654,29 +654,29 @@ The provided translators are (only pdf outputs are considered below, ps outputs 
 
 Animated figures represent a powerful mechanism for constructing dynamic visual content within LaTeX Beamer presentations. Unlike conventional static graphics, an animated figure consists of multiple visual layers that can appear progressively across the slides of a single frame. This approach enables the presenter to control the incremental disclosure of complex diagrams, illustrations, or schematics, thereby guiding the audience through a narrative sequence without requiring separate image files for each step.
 
-AutoLaTeX automates the generation of such figures by leveraging layered Scalable Vector Graphics (SVG) files and translating them into a Beamer-compatible format. The underlying principle relies on the mapping between layers in an SVG document and overlay specifications in Beamer. Each layer within the SVG file corresponds to a distinct visual element that may be shown or hidden on specific slides. To control this behavior, the author embeds a frame specification directly into the layer's name. This specification follows the format `<spec>`, where `spec` defines a set of slide numbers. The syntax accommodates single numbers (e.g., `<2>`), inclusive ranges (e.g., `<3-6>`), open-ended ranges (e.g., `<5->` for all slides from five onward, or `<-8>` for slides up to and including eight), and combinations thereof (separated by coma characters). When the SVG is processed by the appropriate AutoLaTeX translator (such as `svg2pdf+layers_inkscape`) these specifications are extracted and used to generate a Beamer overlay sequence. The resulting output comprises a set of PDF files, each corresponding to one layer, along with a TeX file that orchestrates their inclusion using Beamer's overlay mechanisms. Consequently, when the presentation is compiled, the figure animates: each layer appears exactly on the slides designated by its embedded specification, and layers without a specification typically appear from the beginning.
+{{ readable_name }} automates the generation of such figures by leveraging layered Scalable Vector Graphics (SVG) files and translating them into a Beamer-compatible format. The underlying principle relies on the mapping between layers in an SVG document and overlay specifications in Beamer. Each layer within the SVG file corresponds to a distinct visual element that may be shown or hidden on specific slides. To control this behavior, the author embeds a frame specification directly into the layer's name. This specification follows the format `<spec>`, where `spec` defines a set of slide numbers. The syntax accommodates single numbers (e.g., `<2>`), inclusive ranges (e.g., `<3-6>`), open-ended ranges (e.g., `<5->` for all slides from five onward, or `<-8>` for slides up to and including eight), and combinations thereof (separated by coma characters). When the SVG is processed by the appropriate {{ readable_name }} translator (such as `svg2pdf+layers_inkscape`) these specifications are extracted and used to generate a Beamer overlay sequence. The resulting output comprises a set of PDF files, each corresponding to one layer, along with a TeX file that orchestrates their inclusion using Beamer's overlay mechanisms. Consequently, when the presentation is compiled, the figure animates: each layer appears exactly on the slides designated by its embedded specification, and layers without a specification typically appear from the beginning.
 
 Integration with Beamer is achieved through the LaTeX macros provided by the `autolatex-beamer.sty` package (see below).
 
-Creating an animated figure suitable for AutoLaTeX and Beamer begins with designing the vector graphic in a tool that supports layers, such as Inkscape. The author constructs the diagram as a set of layers, where each layer represents one logical step of the animation. For instance, a technical drawing might have a base layer containing the background and axes, followed by successive layers adding curves, labels, or annotations. The crucial step lies in naming each layer to encode its appearance schedule. The author opens the layer properties dialog and sets the layer name to include the desired frame specification, such as "Base layer" for a layer that should always appear, or "Data curve <2-4>" for a layer that should appear only on slides two through four. After naming, the author saves the file with an extension that triggers the appropriate translator; typically, the `+layers.svg` extension is used to indicate that the file contains layered content intended for animation. AutoLaTeX's translator will then parse the layer names, generate the overlay structure, and produce the final assets ready for inclusion in the Beamer document.
+Creating an animated figure suitable for {{ readable_name }} and Beamer begins with designing the vector graphic in a tool that supports layers, such as Inkscape. The author constructs the diagram as a set of layers, where each layer represents one logical step of the animation. For instance, a technical drawing might have a base layer containing the background and axes, followed by successive layers adding curves, labels, or annotations. The crucial step lies in naming each layer to encode its appearance schedule. The author opens the layer properties dialog and sets the layer name to include the desired frame specification, such as "Base layer" for a layer that should always appear, or "Data curve <2-4>" for a layer that should appear only on slides two through four. After naming, the author saves the file with an extension that triggers the appropriate translator; typically, the `+layers.svg` extension is used to indicate that the file contains layered content intended for animation. {{ readable_name }}'s translator will then parse the layer names, generate the overlay structure, and produce the final assets ready for inclusion in the Beamer document.
 
-This workflow combines the expressive power of vector graphics editing with the precise overlay control of Beamer, all automated by AutoLaTeX. It eliminates the manual effort of exporting multiple static images and coding their appearance order, thereby streamlining the creation of sophisticated, animated presentations.
+This workflow combines the expressive power of vector graphics editing with the precise overlay control of Beamer, all automated by {{ readable_name }}. It eliminates the manual effort of exporting multiple static images and coding their appearance order, thereby streamlining the creation of sophisticated, animated presentations.
 
 ## FIGURES WITH EMBEDDED TEX CODE
 
-In scientific and technical documents, figures often require textual elements that demand the typographic quality and mathematical capabilities of LaTeX. Standard graphics formats such as Encapsulated PostScript (EPS) or Scalable Vector Graphics (SVG) typically render text using fonts and formatting determined by the drawing application, which may not align with the document's overall aesthetic or may lack support for complex mathematical notation. To overcome this limitation, many tools, including AutoLaTeX, provide a mechanism for embedding TeX and LaTeX macros directly into the textual components of vector figures. When such a figure is processed, the textual elements are extracted, typeset by the LaTeX engine, and reintegrated into the final graphic, ensuring perfect harmony with the surrounding document.
+In scientific and technical documents, figures often require textual elements that demand the typographic quality and mathematical capabilities of LaTeX. Standard graphics formats such as Encapsulated PostScript (EPS) or Scalable Vector Graphics (SVG) typically render text using fonts and formatting determined by the drawing application, which may not align with the document's overall aesthetic or may lack support for complex mathematical notation. To overcome this limitation, many tools, including {{ readable_name }}, provide a mechanism for embedding TeX and LaTeX macros directly into the textual components of vector figures. When such a figure is processed, the textual elements are extracted, typeset by the LaTeX engine, and reintegrated into the final graphic, ensuring perfect harmony with the surrounding document.
 
-With AutoLaTeX, the underlying principle rests on a class of translators that produce dual output: a PDF file containing the graphical elements (lines, shapes, images) and a companion TeX file that defines the textual overlays. The TeX file contains the macros necessary to position and typeset the text at precisely the coordinates intended by the figure's author. During document compilation, the LaTeX engine reads this TeX file and renders the text using the same font settings, mathematics mode, and cross‑referencing capabilities as the main document. This approach preserves the vector quality of the graphics while achieving seamless integration of LaTeX‑typeset text.
+With {{ readable_name }}, the underlying principle rests on a class of translators that produce dual output: a PDF file containing the graphical elements (lines, shapes, images) and a companion TeX file that defines the textual overlays. The TeX file contains the macros necessary to position and typeset the text at precisely the coordinates intended by the figure's author. During document compilation, the LaTeX engine reads this TeX file and renders the text using the same font settings, mathematics mode, and cross‑referencing capabilities as the main document. This approach preserves the vector quality of the graphics while achieving seamless integration of LaTeX‑typeset text.
 
-Several translators within AutoLaTeX support this dual‑output mode. For diagrams created with Xfig, the translator **fig2pdf+tex** processes files with extensions such as `+tex.fig`. The Xfig author must designate text objects that should be treated as LaTeX code by marking them in the editor (see documentation of Xfig). The translator extracts these objects, generates a separate TeX file, and produces a PDF of the graphic stripped of the original text. In Inkscape, the author creates text elements and applies the "LaTeX" rendering mode (via the "Text" menu or by setting the "LaTeX" output option in the export dialog). The translator then separates the graphical paths from the textual content, producing a PDF of the graphic and a `.pdftex_t` file containing the LaTeX code for the text.
+Several translators within {{ readable_name }} support this dual‑output mode. For diagrams created with Xfig, the translator **fig2pdf+tex** processes files with extensions such as `+tex.fig`. The Xfig author must designate text objects that should be treated as LaTeX code by marking them in the editor (see documentation of Xfig). The translator extracts these objects, generates a separate TeX file, and produces a PDF of the graphic stripped of the original text. In Inkscape, the author creates text elements and applies the "LaTeX" rendering mode (via the "Text" menu or by setting the "LaTeX" output option in the export dialog). The translator then separates the graphical paths from the textual content, producing a PDF of the graphic and a `.pdftex_t` file containing the LaTeX code for the text.
 
-Once the source figure has been prepared and saved with the appropriate extension, AutoLaTeX's translator system takes over. Upon detecting a change in the source file, the translator executes the necessary external commands (Inkscape, fig2dev, gnuplot, etc.) to generate the PDF and the TeX companion file. During the LaTeX compilation of the main document, these files are included using specialized macros. The `autolatex.sty` package provides `\includegraphicswtex{filename}`, which behaves like the standard `\includegraphics` but automatically incorporates the associated TeX macros from the companion file. The graphics path resolution for these macros is governed by `\DeclareGraphicsExtensionsWtex`, which by default includes `.pdftex_t`, `.pstex_t`, `.pdf_tex`, and `.ps_tex`.
+Once the source figure has been prepared and saved with the appropriate extension, {{ readable_name }}'s translator system takes over. Upon detecting a change in the source file, the translator executes the necessary external commands (Inkscape, fig2dev, gnuplot, etc.) to generate the PDF and the TeX companion file. During the LaTeX compilation of the main document, these files are included using specialized macros. The `autolatex.sty` package provides `\includegraphicswtex{filename}`, which behaves like the standard `\includegraphics` but automatically incorporates the associated TeX macros from the companion file. The graphics path resolution for these macros is governed by `\DeclareGraphicsExtensionsWtex`, which by default includes `.pdftex_t`, `.pstex_t`, `.pdf_tex`, and `.ps_tex`.
 
 The advantages of this approach extend beyond mere aesthetic consistency. Mathematical formulas, chemical notations, and custom LaTeX commands appear exactly as they do in the body text, with proper font selection, sizing, and spacing. References to equations, sections, or bibliographic items within figure labels become possible because the text is typeset at compilation time and can incorporate cross‑references. Moreover, the resulting PDF graphics remain fully scalable and resolution‑independent, preserving the crispness of both lines and text under zoom.
 
 ## LATEX PACKAGES
 
-AutoLaTeX provides two LaTeX packages called `autolatex.sty` and `autolatex-beamer.sty`. You could create a copy of these packages in the folder of your document by using the command-line's commands **createsty** and **createbeamer**.
+{{ readable_name }} provides two LaTeX packages called `autolatex.sty` and `autolatex-beamer.sty`. You could create a copy of these packages in the folder of your document by using the command-line's commands **createsty** and **createbeamer**.
 
 ### `autolatex.sty`
 
@@ -729,9 +729,9 @@ The LaTeX package `autolatex-beamer.sty` provides the following TeX macros:
 
 ### Location of the Configuration Files
 
-AutoLaTeX configuration files can be located in several places:
+{{ readable_name }} configuration files can be located in several places:
 
-- **System Configuration** (for all users): In the directory where AutoLaTeX is installed (typically `/usr/lib/python3/dist-packages/autolatex2` on Unix systems).
+- **System Configuration** (for all users): In the directory where {{ readable_name }} is installed (typically `/usr/lib/python3/dist-packages/autolatex2` on Unix systems).
 - **User Configuration**: Two cases apply: either the configuration directory (`$HOME/.autolatex` on Unix or `C:\Documents and Settings\<user>\Local Settings\Application Data\autolatex` on Windows) exists, or it does not.  
   In the first case, the configuration file is stored in the directory and named `autolatex.conf`.  
   In the second case, the configuration file is in the user directory and named `$HOME/.autolatex` on Unix, or `C:\Documents and Settings\<user>\Local Settings\Application Data\autolatex.conf` on Windows.
@@ -747,11 +747,11 @@ Each configuration directive must be within a configuration section, declared by
 
 Each directive is declared as: `directive name = value`
 
-Several section names are reserved by AutoLaTeX; others are assumed to be translator configurations.
+Several section names are reserved by {{ readable_name }}; others are assumed to be translator configurations.
 
 #### `[Generation]` section
 
-This section configures the generation process used by AutoLaTeX. Recognized directives:
+This section configures the generation process used by {{ readable_name }}. Recognized directives:
 
 - **`biber_cmd`**: Specifies the Biber tool command line. Accepted value: any command line.
 - **`biber_flags`**: Specifies options to pass to the Biber tool. Accepted value: any command line.
@@ -759,26 +759,26 @@ This section configures the generation process used by AutoLaTeX. Recognized dir
 - **`bibtex_flags`**: Specifies options to pass to the BibTeX tool. Accepted value: any command line.
 - **`dvi2ps_cmd`**: Specifies the dvips tool command line. Accepted value: any command line.
 - **`dvi2ps_flags`**: Specifies options to pass to the dvips tool. Accepted value: any command line.
-- **`generate images`**: Indicates whether AutoLaTeX automatically generates figures. Accepted values: `yes` or `no`.
+- **`generate images`**: Indicates whether {{ readable_name }} automatically generates figures. Accepted values: `yes` or `no`.
 - **`generation type`**: Indicates the type of generation. Accepted values:  
   - `pdf` – generate a PDF document  
   - `dvi` – generate a DVI or XDV document  
   - `ps` – generate a PS document
-- **`image directory`**: Specifies directories where AutoLaTeX finds pictures to be processed by translators. Paths are separated by the path-separator character (':' on Unix, ';' on Windows).
-- **`include extra macros`**: Specifies if the definition of extra TeX macros (not from TeX or LaTeX standards) must be included and supported by AutoLaTeX.
+- **`image directory`**: Specifies directories where {{ readable_name }} finds pictures to be processed by translators. Paths are separated by the path-separator character (':' on Unix, ';' on Windows).
+- **`include extra macros`**: Specifies if the definition of extra TeX macros (not from TeX or LaTeX standards) must be included and supported by {{ readable_name }}.
 - **`latex_cmd`**: Specifies the LaTeX tool command line. Accepted value: any command line.
 - **`latex_flags`**: Specifies options to pass to the LaTeX tool. Accepted value: any command line.
 - **`main file`**: Specifies the basename of the main TeX file to compile. This option is only available in the project's configuration file. See the section on extra macros for the details of the supported macros.
 - **`makeglossaries_cmd`**: Specifies the MakeGlossaries tool command line. Accepted value: any command line.
 - **`makeglossaries_flags`**: Specifies options to pass to the MakeGlossaries tool. Accepted value: any command line.
 - **`makeindex style`**: Specifies the style to be used by MakeIndex. This is a comma-separated list of values in order of preference. Values include:  
-  - `<filename>` – if a filename is specified, AutoLaTeX assumes it is the .ist file;  
-  - `@system` – AutoLaTeX uses the system default .ist file (from the AutoLaTeX distribution);  
-  - `@detect` – AutoLaTeX attempts to find a .ist file in the project's directory. If none is found, no style is passed to MakeIndex;  
-  - `@none` – AutoLaTeX assumes no .ist file should be passed to MakeIndex;  
-  - `<empty>` – AutoLaTeX assumes no .ist file should be passed to MakeIndex.  
+  - `<filename>` – if a filename is specified, {{ readable_name }} assumes it is the .ist file;  
+  - `@system` – {{ readable_name }} uses the system default .ist file (from the {{ readable_name }} distribution);  
+  - `@detect` – {{ readable_name }} attempts to find a .ist file in the project's directory. If none is found, no style is passed to MakeIndex;  
+  - `@none` – {{ readable_name }} assumes no .ist file should be passed to MakeIndex;  
+  - `<empty>` – {{ readable_name }} assumes no .ist file should be passed to MakeIndex.  
 
-    If the list contains multiple values, AutoLaTeX applies the corresponding behaviors in sequence.
+    If the list contains multiple values, {{ readable_name }} applies the corresponding behaviors in sequence.
 - **`makeindex_cmd`**: Specifies the MakeIndex tool command line. Accepted value: any command line.
 - **`makeindex_flags`**: Specifies options to pass to the MakeIndex tool. Accepted value: any command line.
 - **`synctex`**: Indicates whether the output document should be produced with SyncTeX support.
@@ -791,23 +791,23 @@ This section configures the generation process used by AutoLaTeX. Recognized dir
 
 #### `[Clean]` section
 
-This section configures the cleaning features of AutoLaTeX (targets `clean` and `cleanall`). Recognized directives:
+This section configures the cleaning features of {{ readable_name }} (targets `clean` and `cleanall`). Recognized directives:
 
 - **`files to clean`**: A list of files to remove when the 'clean' target is invoked. Shell wildcards are allowed.
 - **`files to desintegrate`**: A list of files to remove when the 'cleanall' target is invoked. Shell wildcards are allowed.
 
 #### `[Scm]` section
 
-This section configures the SCM support of AutoLaTeX (CVS, SVN, or others). Recognized directives:
+This section configures the SCM support of {{ readable_name }} (CVS, SVN, or others). Recognized directives:
 
 - **`scm commit`**: Specifies the command line to use when committing changes.
 - **`scm update`**: Specifies the command line to use when updating the local copy.
 
 #### `[Viewer]` section
 
-This section configures the viewer used by AutoLaTeX. Recognized directives:
+This section configures the viewer used by {{ readable_name }}. Recognized directives:
 
-- **`view`**: Indicates whether AutoLaTeX should launch a viewer after LaTeX compilation. Accepted values: `yes` or `no`.
+- **`view`**: Indicates whether {{ readable_name }} should launch a viewer after LaTeX compilation. Accepted values: `yes` or `no`.
 - **`viewer`**: The path or command line of the viewer to launch. Accepted value: any command line.
 
 #### Translator section
@@ -819,23 +819,23 @@ A translator section shares the name of the translator it configures. Recognized
 
 ## EXTRA TEX AND LATEX MACROS
 
-The recognition of the following TeX and LaTeX macros have been included in AutoLaTeX. These macros are not part of the standard TeX distributions. They are usually part of TeX templates provided by the authors of AutoLaTeX.
+The recognition of the following TeX and LaTeX macros have been included in {{ readable_name }}. These macros are not part of the standard TeX distributions. They are usually part of TeX templates provided by the authors of {{ readable_name }}.
 
-- **`\animatedfigureslide[options]{title}{path}`**: See above. Provided by AutoLaTeX.
+- **`\animatedfigureslide[options]{title}{path}`**: See above. Provided by {{ readable_name }}.
 - **`\begin{bibliographysection}\end{bibliographysection}`**: equivalent to `\begin{bibunit}\end{bibunit}` with a bibliography slide added at the end of the section with `\bibliographyslide`. Provided by the TeX-templates from <https://github.com/gallandarakhneorg/tex-templates>.
 - **`\bibliographyslide`**: a Beamer slide with a Bibunits bibliography. Provided by the TeX-templates from <https://github.com/gallandarakhneorg/tex-templates>.
 - **`\figureslide[options]{title}{path}`**: a Beamer slide that contains a single figure. Provided by the TeX-templates from <https://github.com/gallandarakhneorg/tex-templates>.
-- **`\includeanimatedfigure[options]{path}`**: See above. Provided by AutoLaTeX.
-- **`\includeanimatedfigurewtex[options]{path}`**: See above. Provided by AutoLaTeX.
-- **`\includefigurewtex[options]{path}`**: See above. Provided by AutoLaTeX.
-- **`\includegraphicswtex[options]{path}`**: See above. Provided by AutoLaTeX.
+- **`\includeanimatedfigure[options]{path}`**: See above. Provided by {{ readable_name }}.
+- **`\includeanimatedfigurewtex[options]{path}`**: See above. Provided by {{ readable_name }}.
+- **`\includefigurewtex[options]{path}`**: See above. Provided by {{ readable_name }}.
+- **`\includegraphicswtex[options]{path}`**: See above. Provided by {{ readable_name }}.
 - **`\libraryslide[options]{picture}{title}{authors}{how published}{isbn}`**: a Beamer slide that shows a description of a book. Provided by the TeX-templates from <https://github.com/gallandarakhneorg/tex-templates>.
 - **`\mfigure[position]{include graphics options}{filename}{caption}{label}[source text]`**: Include a floating figure with the given arguments. Provided by the tex-upmethodology from <https://github.com/gallandarakhneorg/tex-upmethodology>.
 - **`\mfigure*[position]{include graphics options}{filename}{caption}{label}[source text]`**: Include a floating figure with the given arguments. Provided by the tex-upmethodology from <https://github.com/gallandarakhneorg/tex-upmethodology>.
 - **`\msubfigure{filename}{caption}`**: Include a subfigure with the given arguments in a floating figure. Provided by the tex-upmethodology from <https://github.com/gallandarakhneorg/tex-upmethodology>.
 - **`\msubfigure*{filename}{caption}`**: Include a subfigure with the given arguments in a floating figure. Provided by the tex-upmethodology from <https://github.com/gallandarakhneorg/tex-upmethodology>.
-- **`\mfigurewtex[position]{include graphics options}{filename}{caption}{label}`**: Include a floating figure embedding TeX macros and with the given arguments. The concept of figure with embedded TeX is based on the AutoLaTeX translators "+tex" as defined above. Provided by the tex-upmethodology from <https://github.com/gallandarakhneorg/tex-upmethodology>.
-- **`\mfigurewtex*[position]{include graphics options}{filename}{caption}{label}`**: Include a floating figure embedding TeX macros and with the given arguments. The concept of figure with embedded TeX is based on the AutoLaTeX translators "+tex" as defined above. Provided by the tex-upmethodology from <https://github.com/gallandarakhneorg/tex-upmethodology>.
+- **`\mfigurewtex[position]{include graphics options}{filename}{caption}{label}`**: Include a floating figure embedding TeX macros and with the given arguments. The concept of figure with embedded TeX is based on the {{ readable_name }} translators "+tex" as defined above. Provided by the tex-upmethodology from <https://github.com/gallandarakhneorg/tex-upmethodology>.
+- **`\mfigurewtex*[position]{include graphics options}{filename}{caption}{label}`**: Include a floating figure embedding TeX macros and with the given arguments. The concept of figure with embedded TeX is based on the {{ readable_name }} translators "+tex" as defined above. Provided by the tex-upmethodology from <https://github.com/gallandarakhneorg/tex-upmethodology>.
 - **`\partnerlogo{path}`**: specification of a logo for an associated partner in Beamer template. Provided by the TeX-templates from <https://github.com/gallandarakhneorg/tex-templates>.
 - **`\resolvedfilename`**: result of the resolution of a picture name. See `\resolvepicturename` below. Provided by the TeX-templates from <https://github.com/gallandarakhneorg/tex-templates>.
 - **`\resolvepicturename{name}`**: search for a picture with the given basename inside one of the figure's paths and with one of the supported image filename extensions. The found filename for the picture is stored in the macro `\resolvedfilename`. Provided by the TeX-templates from <https://github.com/gallandarakhneorg/tex-templates>.
@@ -847,24 +847,24 @@ The recognition of the following TeX and LaTeX macros have been included in Auto
 To report bugs, provide feedback, or suggest new features (in preferred order):
 
 a) Visit the developer site on GitHub: <https://github.com/gallandarakhneorg/autolatex2/>  
-b) Visit the AutoLaTeX main page: <http://www.arakhne.org/autolatex/>  
+b) Visit the {{ readable_name }} main page: <http://www.arakhne.org/autolatex/>  
 c) Send an email to the main author: <galland@arakhne.org>.
 
 ## SYSTEM REQUIREMENTS
 
-AutoLaTeX can be used directly from any directory where it is uncompressed, but you may want to compile and install additional files (manuals, etc.).
+{{ readable_name }} can be used directly from any directory where it is uncompressed, but you may want to compile and install additional files (manuals, etc.).
 
-To configure and install AutoLaTeX, you may need Python 3.12 or higher and several Python packages, which are installed by the `setup.py` script.
+To configure and install {{ readable_name }}, you may need Python {{ python_version }} or higher and several Python packages, which are installed by the `setup.py` script.
 
-To use AutoLaTeX, you will require:
+To use {{ readable_name }}, you will require:
 
-- LaTeX. AutoLaTeX was developed using the TeX Live distribution.
-- Python 3.12 or higher.
+- LaTeX. {{ readable_name }} was developed using the TeX Live distribution.
+- Python {{ python_version }} or higher.
 - Several Python packages, typically included in your Python distribution.
 
 ## INSTALLATION
 
-To install AutoLaTeX, run the `setup.py` script to compile and install AutoLaTeX. The basic commands are:
+To install {{ readable_name }}, run the `setup.py` script to compile and install {{ readable_name }}. The basic commands are:
 
 ```bash
 cd path_to_autoloader_sources/
@@ -875,7 +875,7 @@ cd path_to_autoloader_sources/
 
 GNU Lesser General Public License (LGPL)
 
-Copyright (c) 1998-2026 Stephane GALLAND <galland@arakhne.org>
+Copyright (c) 1998-{{ copyright_year }} Stephane GALLAND <galland@arakhne.org>
 
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU [Lesser General Public License](http://www.gnu.org/copyleft/lgpl.html) as published by the [Free Software Foundation](http://www.fsf.org/); either version 2 of the License, or (at your option) any later version.
 
@@ -887,9 +887,13 @@ You should have received a copy of the GNU Lesser General Public License along w
 
 GNU Free Documentation License (FDL)
 
-Copyright (c) 1998-2026 Stephane Galland <galland@arakhne.org>.
+Copyright (c) 1998-{{ copyright_year }} Stephane Galland <galland@arakhne.org>.
 
 Permission is granted to copy, distribute, and/or modify this document under the terms of the [GNU Free Documentation License](http://www.gnu.org/licenses/fdl.txt), Version 1.2 or any later version published by the [Free Software Foundation](http://www.fsf.org/); with the Invariant Sections being **AUTOLATEX LICENSE** and **MANUAL COPYRIGHT**, no Front-Cover Texts, and no Back-Cover Texts. A copy of the license is included in the file `GNU Free Documentation License.txt`.
+
+## DOCUMENTED VERSION OF AUTOLATEX
+
+This documentation is related to the version {{ program_version }} of {{ readable_name }} that was generated {{ pub_date }}. 
 
 ## SEE ALSO
 
