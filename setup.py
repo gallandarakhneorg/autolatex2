@@ -143,6 +143,8 @@ class PostBuildCommand(build_py):
 		print("Updating the VERSION file")
 		self.update_version_file()
 		super().run()
+		print("Building final Markdown documentation")
+		PostBuildCommand.md2md()
 		if self.pandoc:
 			print("Refreshing README")
 			PostBuildCommand.md2readme()
@@ -153,6 +155,21 @@ class PostBuildCommand(build_py):
 			PostBuildCommand.md2man()
 		else:
 			print("WARN: Skipping ROFF man page creation because 'pandoc' cannot be found")
+
+
+	@staticmethod
+	def md2md(in_md : str = None, out_md : str = None):
+		if not in_md:
+			in_md = os.path.join(CURRENT_DIR, 'docs', 'autolatex.md')
+		if not out_md:
+			out_md = os.path.join(CURRENT_DIR, 'build', 'doc', 'autolatex-base', 'autolatex.md')
+		os.makedirs(os.path.dirname(out_md), exist_ok=True)
+		in_filtered = PostBuildCommand.replace_standard_variables_in_file(in_md)
+		try:
+			shutil.copyfile(in_filtered, out_md)
+		finally:
+			os.unlink(in_filtered)
+
 
 	@staticmethod
 	def md2man(in_md : str = None, out_man : str = None, out_gz : str = None):
