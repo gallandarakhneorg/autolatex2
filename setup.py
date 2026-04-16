@@ -358,10 +358,12 @@ class PostInstallCommand(install):
 	def run(self):
 		super().run()
 		if self.unixman:
-			print("Installing manual page")
+			print("Installing Unix manual page")
 			self.install_man()
+		print("Installing regular documentation")
+		self.install_docs()
 
-	def install_man(self):
+	def compute_install_path(self):
 		if self.root:
 			pfx = self.prefix[1:] if self.prefix and str(self.prefix).startswith(os.path.sep) else self.prefix
 			path = os.path.join(self.root, str(pfx))
@@ -369,24 +371,37 @@ class PostInstallCommand(install):
 			path = self.prefix
 		if self.is_local_layout:
 			path = os.path.join(str(path), 'local')
+		return path
 
-		doc_md_path = os.path.join(str(path), 'share', 'doc', 'autolatex-base')
-		doc_md_path = os.path.normpath(doc_md_path)
+	def install_man(self):
+		path = self.compute_install_path()
 
 		man_path = os.path.join(str(path), 'share', 'man', 'man1')
 		man_path = os.path.normpath(man_path)
-
-		src_doc_md_file = os.path.join(CURRENT_DIR, 'docs', 'autolatex.md')
-		doc_md_file = os.path.join(doc_md_path, 'autolatex.md')
-		if os.path.isfile(src_doc_md_file):
-			os.makedirs(os.path.dirname(doc_md_file), exist_ok=True)
-			self.copy_file(src_doc_md_file, doc_md_file, level=self.verbose)
 
 		src_mangz_file = os.path.join(CURRENT_DIR, 'build', 'man', 'man1', 'autolatex.1.gz')
 		mangz_file = os.path.join(man_path, 'autolatex.1.gz')
 		if os.path.isfile(src_mangz_file):
 			os.makedirs(os.path.dirname(mangz_file), exist_ok=True)
 			self.copy_file(src_mangz_file, mangz_file, level=self.verbose)
+
+	def install_docs(self):
+		path = self.compute_install_path()
+
+		doc_md_path = os.path.join(str(path), 'share', 'doc', 'autolatex-base')
+		doc_md_path = os.path.normpath(doc_md_path)
+
+		src_doc_md_file = os.path.join(CURRENT_DIR, 'build', 'doc', 'autolatex-base', 'autolatex.md')
+		doc_md_file = os.path.join(doc_md_path, 'autolatex.md')
+		if os.path.isfile(src_doc_md_file):
+			os.makedirs(os.path.dirname(doc_md_file), exist_ok=True)
+			self.copy_file(src_doc_md_file, doc_md_file, level=self.verbose)
+
+		src_doc_pdf_file = os.path.join(CURRENT_DIR, 'build', 'doc', 'autolatex-base', 'autolatex.pdf')
+		doc_pdf_file = os.path.join(doc_md_path, 'autolatex.pdf')
+		if os.path.isfile(src_doc_pdf_file):
+			os.makedirs(os.path.dirname(doc_pdf_file), exist_ok=True)
+			self.copy_file(src_doc_pdf_file, doc_pdf_file, level=self.verbose)
 
 
 class CustomSourceDistributionCommand(sourcedist):
