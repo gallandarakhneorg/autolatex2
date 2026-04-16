@@ -341,12 +341,14 @@ class CustomCleanCommand(Command):
 		dirs_to_clean = [
 			'build',
 			'dist',
-			'*.egg-info',
-			'__pycache__',
+			'**/*.egg-info',
+			'**/__pycache__',
 		]
 
 		# Custom files and directories to clean
 		extra_paths = [
+			'autolatex.sh',
+			'filtered_markdown.md',
 			'bin',
 			'autolatex_*.dsc',
 			'autolatex_*.tar.gz',
@@ -363,8 +365,10 @@ class CustomCleanCommand(Command):
 		# Remove directories
 		for pattern in all_folders:
 			# Check if pattern contains a wildcard
-			if '*' in pattern:
-				for path in glob.glob(pattern):
+			rec = '**' in pattern
+			if rec or '*' in pattern:
+				#print(f'\tcleaning: {pattern}')
+				for path in glob.glob(pattern, recursive=rec):
 					self._remove_path(path)
 			else:
 				self._remove_path(pattern)
@@ -375,6 +379,7 @@ class CustomCleanCommand(Command):
 		Safely remove a file or directory.
 		"""
 		try:
+			#print(f"Removing: {path}")
 			if os.path.isfile(path) or os.path.islink(path):
 				os.unlink(path)
 				print(f"Removed file: {path}")
