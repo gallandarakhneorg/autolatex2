@@ -155,6 +155,11 @@ class PostBuildCommand(build_py):
 			PostBuildCommand.md2man()
 		else:
 			print("WARN: Skipping ROFF man page creation because 'pandoc' cannot be found")
+		if self.pandoc:
+			print("Building PDF documentation")
+			PostBuildCommand.md2pdf()
+		else:
+			print("WARN: Skipping PDF creation because 'pandoc' cannot be found")
 
 
 	@staticmethod
@@ -205,6 +210,45 @@ class PostBuildCommand(build_py):
 			print("WARNING: pandoc cannot be find in PATH. Skipping the generation of the ROFF man page")
 
 	@staticmethod
+	def md2pdf(in_md : str = None, out_pdf : str = None):
+		program0 = shutil.which('pandoc')
+		if program0:
+			program1 = shutil.which('libreoffice')
+			if program1:
+				if not in_md:
+					in_md = os.path.join(CURRENT_DIR, 'docs', 'autolatex.md')
+				if not out_pdf:
+					out_pdf = os.path.join(CURRENT_DIR, 'build', 'doc', 'autolatex-base', 'autolatex.pdf')
+				out_pdf_basename, out_pdf_ext = os.path.splitext(out_pdf)
+				out_odt = out_pdf_basename + '.odt'
+				os.makedirs(os.path.dirname(out_odt), exist_ok=True)
+				print("\tgenerating ODT in %s" % out_odt)
+				in_filtered = PostBuildCommand.replace_standard_variables_in_file(in_md)
+				try:
+					rc = subprocess.call([program0, in_filtered,
+										  '-s',
+										  '-t', 'odt',
+										  '-o', out_odt])
+				finally:
+					os.unlink(in_filtered)
+				if rc == 0:
+					try:
+						rc = subprocess.call([program1,
+											  '--headless',
+											  '--nologo',
+											  '--convert-to', 'pdf',
+											  '--outdir', os.path.dirname(out_pdf),
+											  out_odt])
+						if rc != 0:
+							sys.exit(rc)
+					finally:
+						os.unlink(out_odt)
+				else:
+					sys.exit(rc)
+			else:
+				print("WARNING: libreoffice cannot be find in PATH. Skipping the generation of the PDF documentation")
+		else:
+			print("WARNING: pandoc cannot be find in PATH. Skipping the generation of the ODT/PDF documentation")
 
 	@staticmethod
 	def md2readme(in_md : str = None, out_readme : str = None):
