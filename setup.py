@@ -46,6 +46,14 @@ with open(os.path.join(CURRENT_DIR, 'src', 'autolatex2', 'VERSION'), 'r', encodi
 	else:
 		raise Exception("Cannot read VERSION file")
 
+now = datetime.now()
+COPYRIGHT_YEAR = str(now.year)
+PUB_YEAR = int(now.year)
+PUB_MONTH = int(now.month)
+PUB_DAY = int(now.day)
+PUB_DATE_SLASH = f'{PUB_YEAR:04d}/{PUB_MONTH:02d}/{PUB_DAY:02d}'
+PUB_DATE_DASH = f'{PUB_YEAR:04d}-{PUB_MONTH:02d}-{PUB_DAY:02d}'
+
 
 def is_unix():
 	return platform.system() in ('Linux', 'Darwin', 'FreeBSD', 'OpenBSD', 'NetBSD')
@@ -62,8 +70,10 @@ class PostBuildCommand(build_py):
 	Custom build process that update the date in the STY files, ensure the version number in the root VERSION
 	file corresponds to those from src/, generate the manual pages.
 	"""
+
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
+		self.isunix = None
 		self.unixman = None
 		self.pandoc = None
 		self.install_layout = 'deb'
@@ -71,16 +81,58 @@ class PostBuildCommand(build_py):
 	@override
 	def initialize_options(self):
 		super().initialize_options()
-		self.unixman = is_unix()
+		self.isunix = is_unix()
+		self.unixman = self.isunix
 		self.pandoc = has_pandoc()
 
 	@override
 	def finalize_options(self):
 		super().finalize_options()
+		if self.isunix is None:
+			self.isunix = is_unix()
 		if self.unixman is None:
-			self.unixman = is_unix()
+			self.unixman = self.isunix
 		if self.pandoc is None:
 			self.pandoc = has_pandoc()
+
+	@staticmethod
+	def replace_variables_in_file(input_file : str, **variables : str) -> str:
+		"""
+		Replace the variables in the input file. A variable is represented by "{{ variable_name }}" in
+		the input file.
+		:param input_file: path of the input file.
+		:param variables: mapping from variable names to their values.
+		:return: the path to the result file.
+		"""
+		with open(input_file, 'r') as f:
+			content = f.read()
+		pattern = r'\{\{\s*(\w+)\s*\}\}'
+		def replacer(match):
+			key = match.group(1)
+			if key in variables:
+				return str(variables[key])
+			else:
+				return match.group(0)
+		content = re.sub(pattern, replacer, content)
+		filtered_file = os.path.join(CURRENT_DIR, 'filtered_markdown.md')
+		with open(filtered_file, 'w') as f:
+			f.write(content)
+		return filtered_file
+
+	@staticmethod
+	def replace_standard_variables_in_file(input_file : str) -> str:
+		"""
+		Replace the variables in the input file with the standard variables.
+		:param input_file: path of the input file.
+		:return: the path to the result file.
+		"""
+		return PostBuildCommand.replace_variables_in_file(input_file,
+		                                                  python_version='3.12',
+		                                                  program_name=f'{PROGRAM_NAME}',
+		                                                  readable_name='AutoLaTeX',
+		                                                  program_version=f'{PROGRAM_VERSION}',
+														  pub_date=f'{PUB_DATE_DASH}',
+		                                                  copyright_year=f'{COPYRIGHT_YEAR}')
 
 	@override
 	def run(self):
