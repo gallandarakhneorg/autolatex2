@@ -183,14 +183,18 @@ class PostBuildCommand(build_py):
 				out_gz = out_man + '.gz' #usr/share/man/man1
 			print("\tcreating %s and %s" % (out_man, out_gz))
 			os.makedirs(os.path.dirname(out_man), exist_ok=True)
-			rc = subprocess.call([program, '-s',
-				'-t', 'man',
-				in_md,
-				'-o', out_man,
-				'--variable', f'title={PROGRAM_NAME}',
-				'--variable', 'section=1',
-				'--variable', 'header=AutoLaTeX',
-				'--variable', f'footer={PROGRAM_VERSION}'])
+			in_filtered = PostBuildCommand.replace_standard_variables_in_file(in_md)
+			try:
+				rc = subprocess.call([program, in_filtered,
+									  '-s',
+									  '-t', 'man',
+									  '-o', out_man,
+									  '--variable', f'title={PROGRAM_NAME}',
+									  '--variable', 'section=1',
+									  '--variable', 'header=AutoLaTeX',
+									  '--variable', f'footer={PROGRAM_VERSION}'])
+			finally:
+				os.unlink(in_filtered)
 			if rc == 0:
 				with open(out_man, 'rb') as f_in:
 					with gzip.open(out_gz, 'wb') as f_out:
