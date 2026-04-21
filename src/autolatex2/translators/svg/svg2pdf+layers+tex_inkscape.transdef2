@@ -52,60 +52,30 @@ all_output_files:
     - ${outwoext}_*.pdf_tex
     - ${outwoext}_*.ps_tex
 translator_python_dependencies:
-    - os
-    - re
-    - import xml.etree.ElementTree as xmlparser
-    - import autolatex2.utils.utilfunctions as genutils
+    - from autolatex2.translators.svg.svgutils import SvgUtils
 translator_function: |
     if _pdfmode:
-    	ext1 = '.pdftex_t'
-    	ext2 = '.pdf'
-    	ext3 = '.pdf_tex'
-    	opt = '--export-type=pdf'
+        opt = '--export-type=pdf'
     else:
-    	ext1 = '.pstex_t'
-    	ext2 = '.eps'
-    	ext2 = '.ps_tex'
-    	opt = '--export-type=eps'
-    
-    xmltree = xmlparser.parse(_in)
-    xmlroot = xmltree.getroot()
-    
-    imageinclusions = list()
-    
-    if re.match('^(?:\\{.*?\\})?svg$', xmlroot.tag,  re.S):
-    	layerIndex = 1
-    
-    	for element in xmlroot:
-    		if re.match('^(?:\\{.*?\\})?g$', element.tag,  re.S) and '{http://www.inkscape.org/namespaces/inkscape}groupmode' in element.attrib and element.attrib['{http://www.inkscape.org/namespaces/inkscape}groupmode'] == 'layer' and ('style' not in element.attrib or element.attrib['style'] != 'display:none'):
-    			if '{http://www.inkscape.org/namespaces/inkscape}label' not in element.attrib or not element.attrib['{http://www.inkscape.org/namespaces/inkscape}label']:
-    				label = ''
-    			else:
-    				label = element.attrib['{http://www.inkscape.org/namespaces/inkscape}label'].strip()
-    			if 'id' not in element.attrib or not element.attrib['id']:
-    				id = ''
-    			else:
-    				id = element.attrib['id'].strip()
-    			overlay_spec = str(layerIndex)
-    			if label:
-    			    r = re.search('<([0-9\\-]+)>', label, re.S)
-    			    if r and r.group(1):
-    				    overlay_spec = r.group(1)
-    			outputbasename = _outwoext + "_" + id
-    			figureFile = os.path.join(_outdir, outputbasename + ext2)
-    			runner_output = Runner.run_command('inkscape', '--export-id', id, '--export-id-only', '--export-area-page', opt, '--export-filename=' + figureFile, '--export-latex', "--file=" + _in)
-    			Runner.check_runner_status(runner_output)
-    			texFile = os.path.join(_outdir, outputbasename + ext3)
-    			imageinclusions.append("\\node<" + str(overlay_spec) + "> (X) {\\input{" + str(texFile) + "}};%")
-    			layerIndex = layerIndex + 1
-    if not imageinclusions:
-    	raise Exception(("No layer in the SVG file: %s") % (_in))
-    with open(genutils.basename_with_path(_out, *_outexts) + ext1,  'wt') as out_file:
-    	out_file.write("\\bgroup%\n")
-    	out_file.write("\\begin{tikzpicture}%\n")
-    	for inclusion in imageinclusions:
-    		out_file.write(inclusion)
-    		out_file.write("\n")
-    	out_file.write("\\end{tikzpicture}%\n")
+        opt = '--export-type=eps'
+    SvgUtils.create_pdftex_for_layered_svg(
+        _in,
+        _out,
+        _outwoext,
+        _outdir,
+        _outexts,
+        _pdfmode,
+        False, # not TeX mode
+        lambda ink_identifier, ink_svg_file, ink_output_file, opt: \
+            Runner.run_command(
+                'inkscape',
+                '--export-id', ink_identifier,
+                '--export-id-only',
+                '--export-area-page',
+                opt,
+                '--export-filename=' + ink_output_file,
+                '--export-latex',
+                "--file=" + ink_svg_file),
+        opt)
 ...
 

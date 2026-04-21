@@ -1,3 +1,10 @@
+autolatex (51.1-0arakhne0) noble; urgency=low
+
+  * Fixing the parsing of the overlay specifications in layered SVG figures.
+  * Changing the documentation set.
+
+ -- Stephane GALLAND <galland@arakhne.org>  Tue, 21 Apr 2026 22:02:15 +0800
+
 autolatex (51.0-0arakhne0) noble; urgency=low
 
   * Refactored TeX error and warning detection by consolidating log handling into a single class and fixing message extraction.
