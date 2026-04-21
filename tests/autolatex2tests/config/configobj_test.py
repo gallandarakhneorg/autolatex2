@@ -17,7 +17,7 @@
 # License along with this library; see the file COPYING.  If not,
 # write to the Free Software Foundation, Inc., 59 Temple Place - Suite
 # 330, Boston, MA 02111-1307, USA.
-
+import re
 import unittest
 import logging
 import os
@@ -48,9 +48,27 @@ class ConfigMock(Config):
 
 class AbstractTestConfig(AbstractBaseTest,ABC):
 
+	def __init__(self, x):
+		super().__init__(x)
+		self.__expected_version : str | None = None
+
 	@property
 	def expectedAutoLaTeXVersion(self) -> str:
-		return "51.0"
+		if self.__expected_version is None:
+			root_dir : str = os.path.dirname(__file__)
+			for i in range(1,4):
+				root_dir = os.path.dirname(root_dir)
+			version_dir = os.path.join(root_dir, 'src', 'autolatex2')
+			with open(os.path.join(version_dir, 'VERSION'), 'r') as v:
+				content = v.read()
+			if content:
+				m = re.search(r'\s+([0-9.\-_]+)\s*$', content, re.S + re.DOTALL)
+				if m:
+					self.__expected_version = str(m.group(1))
+				else:
+					self.__expected_version = "X.X"
+		assert self.__expected_version is not None, 'Cannot determine the expected version from the VERSION file'
+		return self.__expected_version
 
 
 class TestPosixConfig(AbstractTestConfig):
