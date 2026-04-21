@@ -33,7 +33,7 @@ from autolatex2tests.abstract_base_test import AbstractBaseTest
 
 class TestIssue00001(AbstractBaseTest):
 	"""
-	Issue #1: Too restrictive definition of the \\gdef and \\def macros
+	Issue #1: Too restrictive definition of the \\gdef and \\def macros.
 	"""
 
 	AUXFILE: str = """

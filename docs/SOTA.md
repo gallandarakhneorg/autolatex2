@@ -6,17 +6,15 @@ This document provides an up-to-date comparison of freely accessible and open-so
 
 | Maker | Type | Date | Supported Tools | Detect Changes (TeX) | Detect Changes (BibTeX) | Detect Changes (Images) | To PS/PDF/PNG | To TeX | To PSTeX/PDFTeX | Export to Elsevier | Editor plugins |
 |-------|------|------|-----------------|----------------------|-------------------------|-------------------------|----------------|--------|-----------------|--------------------|----------------|
-| [AutoLaTeX (Python)](https://www.ctan.org/pkg/autolatex) | Python | 2026-04-14 | latex, pdflatex, xelatex, lualatex, bibtex, biber, makeindex, makeglossaries, dvips | ✓ | ✓ | ✓ | asta, asml, dia, dot, fig, ggb, gxl, odg, plot, svg, vsdx, xmi | c/c++, java, matlab, ml, perl, python, ruby, sql, svg layers | fig, plot, dia, svg, svg layers | ✓ | |
-| [AutoLaTeX (Perl)](https://www.ctan.org/pkg/autolatex) | Perl | 2022-02-11 | latex, pdflatex, xelatex, lualatex, bibtex, biber, makeindex, makeglossaries, dvips | ✓ | ✓ | ✓ | asta, asml, dia, dot, fig, ggb, gxl, odg, plot, svg, vsdx, xmi | c/c++, java, matlab, ml, perl, python, ruby, sql, svg layers | fig, plot, dia, svg, svg layers | ✓ | Gedit3, Gtk3, Sublime Text 3 (LaTeXTools plugin) |
+| [AutoLaTeX (Python)](https://www.arakhne.org/latex/autolatex) | Python | 2026-04-14 (active)  | latex, pdflatex, xelatex, lualatex, bibtex, biber, makeindex, makeglossaries, dvips | ✓ | ✓ | ✓ | asta, asml, asy, dia, dot, fig, gle, gxl, juth, odg, plot, svg, vdx, vsd, vsdx, xcf, xmi | c/c++, java, matlab, ml, perl, python, ruby, sql, svg layers | fig, plot, dia, svg, svg layers | ✓ | |
+| [AutoLaTeX (Perl)](https://github.com/gallandarakhneorg/autolatex/) | Perl | 2022-02-11 | latex, pdflatex, xelatex, lualatex, bibtex, biber, makeindex, makeglossaries, dvips | ✓ | ✓ | ✓ | asta, asml, asy, dia, dot, fig, ggb, gxl, juth, odg, plot, svg, vdx, vsd, vsdx, xmi | c/c++, java, matlab, ml, perl, python, ruby, sql, svg layers | fig, plot, dia, svg, svg layers | ✓ | Gedit3, Gtk3, Sublime Text 3 (LaTeXTools plugin) |
 | [arara](https://ctan.org/pkg/arara) | Java | 2025-06-29 | latex, pdflatex, xelatex, lualatex, bibtex, biber, makeindex, makeglossaries, dvips, dvipdfm, ... (user-defined) | X<sup>1</sup> | X<sup>1</sup> | ? | – | – | – | – | Vim (vimtex), VS Code (LaTeX Workshop), TeXstudio, TeXworks, Emacs (AUCTeX), Sublime Text, IntelliJ IDEA (TeXiFy IDEA) |
 | [latexmk](https://www.ctan.org/pkg/latexmk/) | Perl | 2015 | latex, dvips, dvipdf, xelatex, pdflatex, bibtex, makeindex | ✓ | ✓ | ✓ | – | – | – | – | Built‑in (TeXworks, TeXShop, etc.), VS Code, Vim, Emacs, TeXstudio, Overleaf, Sublime Text |
-| [Rubber](https://launchpad.net/rubber/) | Python | 2024-12-09 | pdflatex, etex, aleph, omega, vtex, bibtex, makeindex, metapost, dvips, dvipdfm, pdftex | ✓ | ✓ | ✓ | – | – | – | – | None dedicated; integrates with TeX Live, MiKTeX |
+| [Rubber](https://gitlab.com/latex-rubber/rubber/) | Python | 2024-12-09 | pdflatex, etex, aleph, omega, vtex, bibtex, makeindex, metapost, dvips, dvipdfm, pdftex | ✓ | ✓ | ✓ | – | – | – | – | None dedicated; integrates with TeX Live, MiKTeX |
 | [l3build](https://ctan.org/pkg/l3build) | Lua | 2025-05-08 | (La)TeX, pdfTeX, XeTeX, LuaTeX, etc. (primarily for building LaTeX packages) | ✓ | ✓ | – | – | – | – | – | None dedicated (for package developers) |
 | [llmk](https://ctan.org/pkg/llmk) | Lua | 2023-12-26 | latex, pdflatex, xelatex, lualatex, dvips, dvipdfm, bibtex, biber, makeindex | ✓ | ✓ | ✓ | – | – | – | – | None dedicated |
 | [latexrun](https://github.com/aclements/latexrun) | Python | 2024-11-08 | pdflatex, xelatex, lualatex, latex, tex, pdftex, biber, makeglossaries | ✓ | ✓ | – | – | – | – | – | None dedicated |
-| [texforge](https://github.com/texforge/texforge) | Rust | 2025 (active) | Tectonic engine (LaTeX) | ✓ | – | – | – | – | – | – | None dedicated |
 | [Tectonic](https://tectonic-typesetting.github.io/) | Rust | 2023-05-15 | Tectonic engine (self‑contained) | ✓ | – | – | – | – | – | – | None dedicated |
-| [clatex](https://github.com/mapk0t/clatex) | Bash | 2025 (active) | latex, pdflatex, bibtex, makeglossaries | ✓ | – | – | – | – | – | – | None dedicated |
 | [pandoc](https://pandoc.org/) | Haskell | 2026-03-17 | pdflatex, lualatex, xelatex, etc. (via --pdf-engine) | – | – | – | – | – | – | – | None dedicated |
 | [latex-action](https://github.com/xu-cheng/latex-action) | GitHub Action | 2026 (active) | latex, pdflatex, xelatex, lualatex, bibtex, biber, makeindex, etc. (Docker‑based) | ✓ | ✓ | – | – | – | – | – | GitHub Actions |
 | [go-make](https://www.ctan.org/pkg/go-make) | Perl | 1993 | latex, dvips, bibtex, makeindex | ✓ | ✓ | ✓ | – | – | – | – | – |
@@ -26,12 +24,7 @@ This document provides an up-to-date comparison of freely accessible and open-so
 | [mk](https://www.ctan.org/pkg/mk) | Ruby | 2012 | latex, xelatex, pdflatex, texi2dvi | ✓ | ✓ | ✓ | – | – | – | – | – |
 | [rake2latex](https://www.ctan.org/pkg/rake4latex) | Ruby | 2001 | pdflatex, xelatex, lualatex, bibtex, makeindex | ✓ | ✓ | – | – | – | – | – | – |
 | [ShLaTeX](https://www.ctan.org/pkg/shlatex) | Bash/C | 2003 | latex, pdflatex, dvips, ps2pdf, bibtex, makeindex | ✓ | ✓ | ✓ | – | – | – | – | – |
-| [texi2dvi](https://www.ctan.org/pkg/texi2dvi) | Sh | 2013 | latex, dvips, dvipdf, pdflatex, bibtex, makeindex | ✓ | ✓ | – | – | – | – | – | – |
-| [cluttex](https://github.com/tvondra/cluttex) | Bash | 2025-03-23 | latex, pdflatex, xelatex, lualatex, bibtex, biber, makeindex, makeglossaries | ✓ | ✓ | – | – | – | – | – | – |
 | [latex-runner](https://github.com/onlyswimmer/latex-runner) | Python | 2025-08-26 | latex, pdflatex, xelatex, lualatex | ✓ | – | – | – | – | – | – | Vim |
-| [texbld](https://github.com/satabin/texbld) | Python | 2022-06-19 | dockerized build system | ✓ | ✓ | – | – | – | – | – | – |
-| [latex-build](https://github.com/mrzool/latex-build) | Makefile | 2025-04-04 | latex, pdflatex, xelatex, lualatex, bibtex, biber, makeindex | ✓ | – | – | – | – | – | – | – |
-| [makelatex](https://github.com/Ragnaroek/makelatex) | Rust | 2023-06-16 | pdflatex | ✓ | – | – | – | – | – | – | – |
 
 The columns are:
 
