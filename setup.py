@@ -136,30 +136,30 @@ class PostBuildCommand(build_py):
 
 	@override
 	def run(self):
-		print("Updating the LaTeX sty file")
+		logging.info("Updating the LaTeX sty file")
 		PostBuildCommand.update_sty_file()
-		print("Updating the LaTeX Beamer sty file")
+		logging.info("Updating the LaTeX Beamer sty file")
 		PostBuildCommand.update_beamer_sty_file()
-		print("Updating the VERSION file")
+		logging.info("Updating the VERSION file")
 		self.update_version_file()
 		super().run()
-		print("Building final Markdown documentation")
+		logging.info("Building final Markdown documentation")
 		PostBuildCommand.md2md()
 		if self.pandoc:
-			print("Refreshing README")
+			logging.info("Refreshing README")
 			PostBuildCommand.md2readme()
 		else:
-			print("WARN: Skipping README updating because 'pandoc' cannot be found")
+			logging.warn("Skipping README updating because 'pandoc' cannot be found")
 		if self.pandoc:
-			print("Building ROFF man page")
+			logging.info("Building ROFF man page")
 			PostBuildCommand.md2man()
 		else:
-			print("WARN: Skipping ROFF man page creation because 'pandoc' cannot be found")
+			logging.warn("Skipping ROFF man page creation because 'pandoc' cannot be found")
 		if self.pandoc:
-			print("Building PDF documentation")
+			logging.info("Building PDF documentation")
 			PostBuildCommand.md2pdf()
 		else:
-			print("WARN: Skipping PDF creation because 'pandoc' cannot be found")
+			logging.warn("Skipping PDF creation because 'pandoc' cannot be found")
 		if self.isunix:
 			PostBuildCommand.create_development_launcher()
 
@@ -188,7 +188,7 @@ class PostBuildCommand(build_py):
 				out_man = os.path.join(CURRENT_DIR, 'build', 'man', 'man1', 'autolatex.1')
 			if not out_gz:
 				out_gz = out_man + '.gz' #usr/share/man/man1
-			print("\tcreating %s and %s" % (out_man, out_gz))
+			logging.info("\tcreating %s and %s" % (out_man, out_gz))
 			os.makedirs(os.path.dirname(out_man), exist_ok=True)
 			in_filtered = PostBuildCommand.replace_standard_variables_in_file(in_md)
 			try:
@@ -209,7 +209,7 @@ class PostBuildCommand(build_py):
 			else:
 				sys.exit(rc)
 		else:
-			print("WARNING: pandoc cannot be find in PATH. Skipping the generation of the ROFF man page")
+			logging.warn("pandoc cannot be find in PATH. Skipping the generation of the ROFF man page")
 
 	@staticmethod
 	def md2pdf(in_md : str = None, out_pdf : str = None):
@@ -224,7 +224,7 @@ class PostBuildCommand(build_py):
 				out_pdf_basename, out_pdf_ext = os.path.splitext(out_pdf)
 				out_odt = out_pdf_basename + '.odt'
 				os.makedirs(os.path.dirname(out_odt), exist_ok=True)
-				print("\tgenerating ODT in %s" % out_odt)
+				logging.info("\tgenerating ODT in %s" % out_odt)
 				in_filtered = PostBuildCommand.replace_standard_variables_in_file(in_md)
 				try:
 					rc = subprocess.call([program0, in_filtered,
@@ -248,9 +248,9 @@ class PostBuildCommand(build_py):
 				else:
 					sys.exit(rc)
 			else:
-				print("WARNING: libreoffice cannot be find in PATH. Skipping the generation of the PDF documentation")
+				logging.warn("libreoffice cannot be find in PATH. Skipping the generation of the PDF documentation")
 		else:
-			print("WARNING: pandoc cannot be find in PATH. Skipping the generation of the ODT/PDF documentation")
+			logging.warn("pandoc cannot be find in PATH. Skipping the generation of the ODT/PDF documentation")
 
 	@staticmethod
 	def md2readme(in_md : str = None, out_readme : str = None):
@@ -271,7 +271,7 @@ class PostBuildCommand(build_py):
 			finally:
 				os.unlink(in_filtered)
 		else:
-			print("WARNING: pandoc cannot be find in PATH. Skipping the refreshing of README")
+			logging.warn("pandoc cannot be find in PATH. Skipping the refreshing of README")
 
 	# noinspection DuplicatedCode
 	@staticmethod
@@ -280,7 +280,7 @@ class PostBuildCommand(build_py):
 			in_sty = os.path.join(CURRENT_DIR, 'src', 'autolatex2', 'tex', 'autolatex.sty')
 		if not out_sty:
 			out_sty = os.path.join(CURRENT_DIR, 'src', 'autolatex2', 'tex', 'autolatex.sty')
-		print("\treading %s" % in_sty)
+		logging.info("\treading %s" % in_sty)
 		with open(in_sty, 'rt') as f_in:
 			content = f_in.read()
 		content = re.sub('autolatex@package@ver\\{[^}]+}',
@@ -289,7 +289,7 @@ class PostBuildCommand(build_py):
 		content = re.sub('autolatexversion\\{[^}]+}',
 						 'autolatexversion{%s}' % str(PROGRAM_VERSION),
 						 content, re.DOTALL)
-		print("\twriting %s" % out_sty)
+		logging.info("\twriting %s" % out_sty)
 		with open(out_sty, 'wt') as f_out:
 			f_out.write(content)
 
@@ -300,13 +300,13 @@ class PostBuildCommand(build_py):
 			in_sty = os.path.join(CURRENT_DIR, 'src', 'autolatex2', 'tex', 'autolatex-beamer.sty')
 		if not out_sty:
 			out_sty = os.path.join(CURRENT_DIR, 'src', 'autolatex2', 'tex', 'autolatex-beamer.sty')
-		print("\treading %s" % in_sty)
+		logging.info("\treading %s" % in_sty)
 		with open(in_sty, 'rt') as f_in:
 			content = f_in.read()
 		content = re.sub('autolatexbeamer@package@ver\\{[^}]+}',
 						 'autolatexbeamer@package@ver{%s}' % PUB_DATE_SLASH,
 						 content, re.DOTALL)
-		print("\twriting %s" % out_sty)
+		logging.info("\twriting %s" % out_sty)
 		with open(out_sty, 'wt') as f_out:
 			f_out.write(content)
 
@@ -315,7 +315,7 @@ class PostBuildCommand(build_py):
 			in_version = os.path.join(CURRENT_DIR, 'src', 'autolatex2', 'VERSION')
 		if not out_version:
 			out_version = os.path.join(CURRENT_DIR, 'VERSION')
-		print("\tcopying %s to %s" % (in_version, out_version))
+		logging.info("\tcopying %s to %s" % (in_version, out_version))
 		self.copy_file(in_version, out_version, level=self.verbose)
 
 	@staticmethod
@@ -358,9 +358,9 @@ class PostInstallCommand(install):
 	def run(self):
 		super().run()
 		if self.unixman:
-			print("Installing Unix manual page")
+			logging.info("Installing Unix manual page")
 			self.install_man()
-		print("Installing regular documentation")
+		logging.info("Installing regular documentation")
 		self.install_docs()
 
 	def compute_install_path(self):
@@ -505,7 +505,7 @@ class CustomCleanCommand(Command):
 			# Check if pattern contains a wildcard
 			rec = '**' in pattern
 			if rec or '*' in pattern:
-				#print(f'\tcleaning: {pattern}')
+				#logging.info(f'\tcleaning: {pattern}')
 				for path in glob.glob(pattern, recursive=rec):
 					self._remove_path(path)
 			else:
@@ -517,15 +517,120 @@ class CustomCleanCommand(Command):
 		Safely remove a file or directory.
 		"""
 		try:
-			#print(f"Removing: {path}")
+			#logging.info(f"Removing: {path}")
 			if os.path.isfile(path) or os.path.islink(path):
 				os.unlink(path)
-				print(f"Removed file: {path}")
+				logging.info(f"Removed file: {path}")
 			elif os.path.isdir(path):
 				shutil.rmtree(path, ignore_errors=True)
-				print(f"Removed directory: {path}")
+				logging.info(f"Removed directory: {path}")
 		except Exception as e:
-			print(f"Error removing {path}: {e}")
+			logging.error(f"Error removing {path}: {e}")
+			sys.exit(255)
+
+
+class DebianCommand(Command):
+	"""
+	Build the Debian package.
+	"""
+	description = "build the Debian package distribution"
+
+	user_options = [
+		('sdist-dir=', None, "directory where the sdist archive is built"),
+		('build-dir=', None, "directory where the build is done"),
+		('packaging-dir=', None, "directory that contains the packaging files"),
+		('debian-config-dir=', None,
+		 "directory (relative to packaging-dir) that contains the Debian configuration files"),
+		('current-version=', None, "version number of the program"),
+		('sdist-archive=', None, "path to the sdist archive to use"),
+		('basename=', None, "base name of the package"),
+		('debian-compress-with=', None, "compression method to use for the Debian package"),
+		('debian-sign-with=', None, "key/identity used to sign the Debian package"),
+	]
+
+	def initialize_options(self):
+		self.sdist_dir = 'dist'
+		self.build_dir = 'build'
+		self.packaging_dir = 'packaging'
+		self.debian_config_dir = 'debian'
+		self.current_version = PROGRAM_VERSION
+		self.sdist_archive = None
+		self.basename = 'autolatex'
+		self.debian_compress_with = "gzip"
+		self.debian_sign_with = "galland@arakhne.org"
+
+	def finalize_options(self):
+		self.debian_dir = os.path.join(self.packaging_dir, self.debian_config_dir)
+
+	def __check_changelog(self):
+		changelog_file = os.path.join(self.debian_dir, 'changelog')
+		with open(changelog_file, 'r') as changelog:
+			content = changelog.read()
+		version = self.current_version
+		if not re.search(r'autolatex\s*\(' + re.escape(version) + r'\-[0-9]+arakhne[0-9]+\)', content,
+		                 re.S + re.DOTALL):
+			logging.error(f"No version {version} found in {changelog_file}")
+			sys.exit(255)
+		logging.info("Debian changelog has the current version.")
+
+	def __detect_sdist(self):
+		path = os.path.join(self.sdist_dir, f"{self.basename}-{self.current_version}.tar.gz")
+		if os.path.isfile(path):
+			logging.info(f"Found source distribution: {path}")
+			self.sdist_archive = path
+		else:
+			logging.error(f"No source distribution found in {path}. Run the 'sdist' command.")
+			sys.exit(255)
+
+	def __generate_debian_packages(self):
+		"""
+        Build the Debian packages using the scripts from Stephane Galland.
+        """
+		logging.info("Preparing Debian environment...")
+
+		shutil.rmtree(self.build_dir, ignore_errors=True)
+		target_root_folder = os.path.join(self.build_dir, self.basename)
+		target_folder = os.path.join(target_root_folder, self.debian_config_dir)
+		shutil.copytree(self.debian_dir, target_folder, dirs_exist_ok=True)
+		logging.info(f"Debian folder cloned to {target_folder}")
+
+		target_source_archive_path = os.path.join(target_root_folder, 'upstream')
+		os.makedirs(target_source_archive_path, exist_ok=True)
+		shutil.copy(self.sdist_archive, target_source_archive_path)
+		logging.info(f"Upstream archive copied in {target_source_archive_path}")
+
+		old_dir = os.getcwd()
+		try:
+			logging.info("Building the Debian packages...")
+			cmd = ['dpkg-buildpackage', '-rfakeroot', '-tc', '-Z' + self.debian_compress_with]
+			if self.debian_sign_with:
+				logging.info(f"A dialog box may be opened for querying the secret phrase for the signing account {self.debian_sign_with}")
+				cmd = cmd + ['-k' + self.debian_sign_with]
+			os.chdir(target_root_folder)
+			result = subprocess.run(cmd, capture_output=True, text=True, errors="replace")
+			if result.returncode != 0:
+				logging.error("Cannot build the Debian packages. Here is the log:", result.stdout if result.stdout else "", result.stderr if result.stderr else "")
+				sys.exit(255)
+			else:
+				logging.info("Debian packages were built.")
+		finally:
+			os.chdir(old_dir)
+
+	def run(self):
+		"""
+		Generate the debian packages.
+		"""
+		# Detect the source archives
+		sdist_archive = self.__detect_sdist()
+		# Detect the Debian command
+		dpkg_command = shutil.which('dpkg-buildpackage')
+		if not dpkg_command:
+			logging.error("Command dpkg-buildpackage not found in PATH")
+			sys.exit(255)
+		# Validate the Debian changelog
+		self.__check_changelog()
+		# Build the Debian packages
+		self.__generate_debian_packages()
 
 
 # Setup
@@ -535,6 +640,7 @@ setup(
 		'install': PostInstallCommand,
 		'sdist': CustomSourceDistributionCommand,
 		'clean': CustomCleanCommand,
+		'bdist_deb': DebianCommand,
 	},
 	name=PROGRAM_NAME,
 	version=PROGRAM_VERSION,
