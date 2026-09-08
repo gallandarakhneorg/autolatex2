@@ -127,4 +127,4 @@ AutoLaTeX follows the [PEP 8](https://peps.python.org/pep-0008/) style guide for
 
 ## License
 
-By contributing to AutoLaTeX, you agree that your contributions will be licensed under the [GNU General Public License v2.0](https://github.com/gallandarakhneorg/autolatex2/blob/master/COPYING) (or later version at the discretion of the maintainers) that covers the AutoLaTeX project.
+By contributing to AutoLaTeX, you agree that your contributions will be licensed under the [GNU Lesser General Public License v2.0](https://github.com/gallandarakhneorg/autolatex2/blob/master/COPYING) (or later version at the discretion of the maintainers) that covers the AutoLaTeX project.
