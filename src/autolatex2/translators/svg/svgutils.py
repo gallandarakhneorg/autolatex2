@@ -23,8 +23,6 @@ import os
 import xml.etree.ElementTree as Xml
 from typing import Callable
 
-from mistune.directives import include
-
 from autolatex2.tex.beamer import Beamer
 from autolatex2.utils.runner import Runner, ScriptOutput
 import autolatex2.utils.utilfunctions as genutils
