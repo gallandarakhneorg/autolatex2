@@ -24,6 +24,7 @@ import re
 import fnmatch
 from argparse import Namespace
 from typing import override
+from pathlib import Path
 
 from autolatex2.cli.abstract_actions import AbstractMakerAction
 import autolatex2.utils.utilfunctions as genutils
@@ -91,6 +92,10 @@ class MakerAction(AbstractMakerAction):
 		'.back',
 		'.backup',
 		'.bak',
+	]
+
+	EXCLUDED_FOLDERS : list[str] = [
+		'.git',
 	]
 
 	def __init__(self):
@@ -180,20 +185,22 @@ class MakerAction(AbstractMakerAction):
 				root_dir = os.path.dirname(root_file)
 				if cli_arguments.norecursive:
 					root = os.path.dirname(root_file)
-					for filename in os.listdir(root):
-						abs_filename = os.path.normpath(os.path.join(root, filename))
-						if self._is_deletable_in_root_folder_only(root, root_file, abs_filename)\
-								or self._is_deletable_from_constants(abs_filename)\
-								or self._is_deletable_shell(abs_filename, filename, abs_clean_files, bn_clean_files):
-							self._delete_file(abs_filename, cli_arguments.simulate)
-				else:
-					for root, dirs, files in os.walk(os.path.dirname(root_file)):
-						for filename in files:
-							abs_filename = os.path.normpath(os.path.join(root,  filename))
-							if (root == root_dir and self._is_deletable_in_root_folder_only(root, root_file, abs_filename))\
+					if not self._is_in_ignorable_folder(root):
+						for filename in os.listdir(root):
+							abs_filename = os.path.normpath(os.path.join(root, filename))
+							if self._is_deletable_in_root_folder_only(root, root_file, abs_filename)\
 									or self._is_deletable_from_constants(abs_filename)\
 									or self._is_deletable_shell(abs_filename, filename, abs_clean_files, bn_clean_files):
 								self._delete_file(abs_filename, cli_arguments.simulate)
+				else:
+					for root, dirs, files in os.walk(os.path.dirname(root_file)):
+						if not self._is_in_ignorable_folder(root):
+							for filename in files:
+								abs_filename = os.path.normpath(os.path.join(root,  filename))
+								if (root == root_dir and self._is_deletable_in_root_folder_only(root, root_file, abs_filename))\
+										or self._is_deletable_from_constants(abs_filename)\
+										or self._is_deletable_shell(abs_filename, filename, abs_clean_files, bn_clean_files):
+									self._delete_file(abs_filename, cli_arguments.simulate)
 		finally:
 			os.chdir(old_dir)
 		return True
@@ -206,6 +213,19 @@ class MakerAction(AbstractMakerAction):
 		fnl = filename.lower() if os.name == 'nt' else filename
 		for ext in MakerAction.ANYWHERE_CLEANABLE_FILE_EXTENSIONS:
 			if fnl.endswith(ext):
+				return True
+		return False
+
+
+	# noinspection PyMethodMayBeStatic
+	def _is_in_ignorable_folder(self, filename : str) -> bool:
+		"""
+		Replies if the given filename is located inside one of the ignorable folders.
+		"""
+		fnl = filename.lower() if os.name == 'nt' else filename
+		path = Path(fnl)
+		for ignorable_folder in MakerAction.EXCLUDED_FOLDERS:
+			if ignorable_folder in path.parts:
 				return True
 		return False
 
@@ -306,20 +326,23 @@ class MakerAction(AbstractMakerAction):
 			root_dir = os.path.dirname(root_file)
 			if cli_arguments.norecursive:
 				root = os.path.dirname(root_file)
-				for filename in os.listdir(root):
-					abs_filename = os.path.normpath(os.path.join(root, filename))
-					if self._is_deletable_anywhere(abs_filename)\
-							or self._is_deletable_shell(abs_filename, filename, abs_clean_files, bn_clean_files):
-						self._delete_file(abs_filename, cli_arguments.simulate)
-			else:
-				for root, dirs, files in os.walk(os.path.dirname(root_file)):
-					for filename in files:
-						abs_filename = os.path.normpath(os.path.join(root,  filename))
-						if root == root_dir and self._is_deletable_anywhere(abs_filename)\
+				if not self._is_in_ignorable_folder(root):
+					for filename in os.listdir(root):
+						abs_filename = os.path.normpath(os.path.join(root, filename))
+						if self._is_deletable_anywhere(abs_filename)\
 								or self._is_deletable_shell(abs_filename, filename, abs_clean_files, bn_clean_files):
 							self._delete_file(abs_filename, cli_arguments.simulate)
+			else:
+				for root, dirs, files in os.walk(os.path.dirname(root_file)):
+					if not self._is_in_ignorable_folder(root):
+						for filename in files:
+							abs_filename = os.path.normpath(os.path.join(root,  filename))
+							if root == root_dir and self._is_deletable_anywhere(abs_filename)\
+									or self._is_deletable_shell(abs_filename, filename, abs_clean_files, bn_clean_files):
+								self._delete_file(abs_filename, cli_arguments.simulate)
 		for generated_image in self._get_generated_images():
-			self._delete_file(generated_image, cli_arguments.simulate)
+			if not self._is_in_ignorable_folder(generated_image):
+				self._delete_file(generated_image, cli_arguments.simulate)
 		return True
 
 
@@ -330,7 +353,7 @@ class MakerAction(AbstractMakerAction):
 		:type cli_arguments: argparse object
 		"""
 		if cli_arguments.simulate:
-			msg = TT("%d file were selected as deletion candidates", "%d files were selected as deletion candidates", self.__nb_deletions)
+			msg = TT("%d file were selected as deletion candidates", "%d files were selected as deletion candidates", self.__nb_deletions) % self.__nb_deletions
 		else:
 			msg = TT("%d file was deleted", "%d files were deleted", self.__nb_deletions) % self.__nb_deletions
 		logging.info(msg)

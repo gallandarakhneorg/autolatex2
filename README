@@ -575,221 +575,221 @@ by AutoLaTeX if invoked by another included translator.
 The provided translators are (only pdf outputs are considered below, ps
 outputs are also possible):
 
--   Astah/Jude (asta) to Portable Document Format (pdf)
-    -   Name: astah2pdf
-    -   Use external converter: astah-pro, astah-uml, astah-com
-    -   Use translator: svg2pdf
-    -   Input format: .asta .jude .juth
-    -   Output format: .pdf
--   Astah/Jude (asta) to Portable Network Graphic (png)
-    -   Name: astah2png
-    -   Use external converter: astah-pro, astah-uml, astah-com
-    -   Input format: .asta .jude .juth
-    -   Output format: .png
--   Astah SysML (asml) to Portable Document Format (pdf)
-    -   Name: asml2pdf
-    -   Use external converter: astah-sysml
-    -   Use translator: svg2pdf
-    -   Input format: .asml
-    -   Output format: .pdf
--   Asymptote (asy) to Portable Document Format (pdf)
-    -   Name: asy2pdf
-    -   Use external converter: asy
-    -   Use translator: eps2pdf
-    -   Input format: .asy
-    -   Output format: .pdf
--   C/C++ Source Code (.cpp, .c, .hpp, .h) to TeX Source Code (tex):
-    TeXify variant
-    -   Name: cpp2tex_texify
-    -   Use external converter: texifyc++
-    -   Input format: .cpp, .c, .hpp, .h, .c++, .h++
-    -   Output format: .tex
--   Compressed Bitmap to Uncompressed Bitmap
-    Based on zcat. This translator assumes input files are compressed
-    with the ‘.gz’ extension. It allows storing compressed figures in
-    the project as raw material for the LaTeX compiler. The bitmaps are
-    decompressed into a file with the same name, excluding the ‘.gz’
-    extension.
-    -   Name: imggz2img
-    -   Use external converter: zcat
-    -   Input format: XXX.gz
-    -   Output format: XXX
--   Diagram Editor (dia) to Portable Document Format (pdf)
-    -   Name: dia2pdf
-    -   Use external converter: dia
-    -   Use translator: eps2pdf
-    -   Input format: .dia
-    -   Output format: .pdf
--   Diagram Editor (dia) to TeX embedded in Portable Document Format
-    (pdf+tex)
-    -   Name: dia2pdf+tex
-    -   Use external converter: dia
-    -   Input format: .dia_tex .diat .dia+tex .diatex .tex.dia +tex.dia
-    -   Output formats: .pdf, .pdftex_t
--   Dot Graphviz (dot) to Portable Document Format (pdf)
-    -   Name: dot2pdf
-    -   Use external converter: dot
-    -   Input format: .dot
-    -   Output format: .pdf
--   Dot Graphviz (dot) to Portable Network Graphic (png)
-    -   Name: dot2png
-    -   Use external converter: dot
-    -   Input format: .dot
-    -   Output format: .png
--   Dot Graphviz (dot) to TeX (tex)
-    -   Name: dot2tex
-    -   Use external converter: dot
-    -   Input format: .dot
-    -   Output format: .tex
--   Encapsulated PostScript (eps) to Portable Document Format (pdf)
-    -   Name: eps2pdf_epstopdf
-    -   Use external converter: epstopdf
-    -   Input format: .eps
-    -   Output format: .pdf
--   XFig document (fig) to Portable Document Format (pdf)
-    -   Name: fig2pdf
-    -   Use external converter: fig2dev
-    -   Input format: .fig
-    -   Output format: .pdf
--   XFig document (fig) to TeX embedded in Portable Document Format
-    (pdf+tex)
-    -   Name: fig2pdf+tex
-    -   Use external converter: fig2dev
-    -   Input format: .figt .fig_tex .figtex .fig+tex .tex.fig +tex.fig
-    -   Output formats: .pdf, .pdftex_t
--   Graph eXchange Language (gxl) to Portable Document Format (pdf)
-    -   Name: gxl2pdf
-    -   Use external converter: gxl2dot
-    -   Use translator: dot2pdf
-    -   Input format: .gxl
-    -   Output format: .pdf
--   Graph eXchange Language (gxl) to Portable Network Graphic (png)
-    -   Name: gxl2png
-    -   Use external converter: gxl2dot
-    -   Use translator: dot2png
-    -   Input format: .gxl
-    -   Output format: .png
--   Graphics Layout Engine (gle) to Portable Document Format (pdf)
-    -   Name: gle2pdf
-    -   Use external converter: gle
-    -   Input format: .gle
-    -   Output format: .pdf
--   Graphics Layout Engine (gle) to Portable Network Graphic (png)
-    -   Name: gle2png
-    -   Use external converter: gle
-    -   Input format: .gle
-    -   Output format: .png
--   Java Source Code (java) to TeX Source Code (tex): TeXify variant
-    -   Name: java2tex_texify
-    -   Use external converter: texifyjava
-    -   Input format: .java
-    -   Output format: .tex
--   Lisp Script (lisp) to TeX Source Code (tex): TeXify variant
-    -   Name: lisp2tex_texify
-    -   Use external converter: texifyLisp
-    -   Input format: .lisp
-    -   Output format: .tex
--   MatLab Script (m) to TeX Source Code (tex): TeXify variant
-    -   Name: matlab2tex_texify
-    -   Use external converter: texifymatlab
-    -   Input format: .m
-    -   Output format: .tex
--   ML Script (ml) to TeX Source Code (tex): TeXify variant
-    -   Name: ml2tex_texify
-    -   Use external converter: texifyml
-    -   Input format: .ml
-    -   Output format: .tex
--   Perl Script (perl) to TeX Source Code (tex): TeXify variant
-    -   Name: perl2tex_texify
-    -   Use external converter: texifyperl
-    -   Input format: .perl .pl
-    -   Output format: .tex
--   Gnuplot (plot) to Portable Document Format (pdf)
-    -   Name: plot2pdf
-    -   Use external converter: gnuplot
-    -   Use translator: eps2pdf
-    -   Input format: .plot .gnu
-    -   Output format: .pdf
--   Gnuplot (plot) to TeX embedded in Portable Document Format (pdf+tex)
-    -   Name: plot2pdf+tex
-    -   Use external converter: gnuplot
-    -   Use translator: eps2pdf
-    -   Input format:
-        .plott .plot_tex .plottex .plot+tex .tex.plot +tex.plot .gnut .gnu_tex .gnutex .gnu+tex .tex.gnu +tex.gnu
-    -   Output formats: .pdf, .pdftex_t
--   Python Source Code (py) to TeX Source Code (tex): TeXify variant
-    -   Name: python2tex_texify
-    -   Use external converter: texifyPython
-    -   Input format: .py
-    -   Output format: .tex
--   Ruby Source Code (rb) to TeX Source Code (tex): TeXify variant
-    -   Name: ruby2tex_texify
-    -   Use external converter: texifyRuby
-    -   Input format: .rb
-    -   Output format: .tex
--   SQL Script (sql) to TeX Source Code (tex): TeXify variant
-    -   Name: sql2tex_texify
-    -   Use external converter: texifySQL
-    -   Input format: .sql
-    -   Output format: .tex
--   Scalable Vector Graphic (svg) to Portable Document Format (pdf):
-    Inkscape variant
-    -   Name: svg2pdf_inkscape
-    -   Use external converter: inkscape
-    -   Input format: .svg
-    -   Output format: .pdf
--   Scalable Vector Graphic (svg) to TeX embedded in Portable Document
-    Format (pdf+tex)
-    -   Name: svg2pdf+tex_inkscape
-    -   Use external converter: inkscape
-    -   Input format: .svgt .svg_t .svgtex .svg+tex .tex.svg +tex.svg
-    -   Output formats: .pdf, .pdftex_t
--   Scalable Vector Graphic (svg) to Portable Network Graphic (png):
-    Inkscape variant
-    -   Name: svg2png_inkscape
-    -   Use external converter: inkscape
-    -   Input format: .svg
-    -   Output format: .png
--   Scalable Vector Graphic with layers (svg) to Beamer Overlays
-    -   Name: svg2pdf+layers_inkscape
-    -   Use external converter: inkscape
-    -   Input format:
-        .svgl .svg_l .svglayers .svg+layers .layers.svg +layers.svg
-    -   Output formats: .pdf, .pdftex_t
--   Scalable Vector Graphic with layers (svg) to TeX embedded in Beamer
-    Overlays
-    -   Name: svg2pdf+layers+tex_inkscape
-    -   Use external converter: inkscape
-    -   Input format:
-        .svglt .svg_lt .svglayerstex .svgtexlayers .svg+layers+tex .svg+tex+layers .layers.tex.svg .tex.layers.svg +layers+tex.svg +tex+layers.svg
-    -   Output formats: .pdf, .pdftex_t
--   PGF/TikZ (tikz) to Portable Document Format (pdf)
-    -   Name: tikz2pdf
-    -   Use external converter: pdflatex
-    -   Input format: .tikz
-    -   Output format: .pdf
--   Gimp (xcf) to Portable Document Format (pdf)
-    -   Name: xcf2pdf
-    -   Use external converter: convert
-    -   Input format: .xcf
-    -   Output format: .pdf
--   Gimp (xcf) to Portable Network Graphic (png)
-    -   Name: xcf2png
-    -   Use external converter: convert
-    -   Input format: .xcf
-    -   Output format: .png
--   UML Metadata Interchange (xmi) to Portable Document Format (pdf):
-    Umbrello variant
-    -   Name: xmi2pdf_umbrello
-    -   Use external converter: umbrello
-    -   Use translator: eps2pdf
-    -   Input format: .xmi
-    -   Output format: .pdf
--   Visio Binary Draw (vsd) to Portable Document Format (pdf)
-    -   Name: vsd2pdf
-    -   Use external converter: inkscape
-    -   Input format: .vsd .vdx .vsdx
-    -   Output format: .pdf
+- Astah/Jude (asta) to Portable Document Format (pdf)
+  - Name: astah2pdf
+  - Use external converter: astah-pro, astah-uml, astah-com
+  - Use translator: svg2pdf
+  - Input format: .asta .jude .juth
+  - Output format: .pdf
+- Astah/Jude (asta) to Portable Network Graphic (png)
+  - Name: astah2png
+  - Use external converter: astah-pro, astah-uml, astah-com
+  - Input format: .asta .jude .juth
+  - Output format: .png
+- Astah SysML (asml) to Portable Document Format (pdf)
+  - Name: asml2pdf
+  - Use external converter: astah-sysml
+  - Use translator: svg2pdf
+  - Input format: .asml
+  - Output format: .pdf
+- Asymptote (asy) to Portable Document Format (pdf)
+  - Name: asy2pdf
+  - Use external converter: asy
+  - Use translator: eps2pdf
+  - Input format: .asy
+  - Output format: .pdf
+- C/C++ Source Code (.cpp, .c, .hpp, .h) to TeX Source Code (tex):
+  TeXify variant
+  - Name: cpp2tex_texify
+  - Use external converter: texifyc++
+  - Input format: .cpp, .c, .hpp, .h, .c++, .h++
+  - Output format: .tex
+- Compressed Bitmap to Uncompressed Bitmap
+  Based on zcat. This translator assumes input files are compressed with
+  the ‘.gz’ extension. It allows storing compressed figures in the
+  project as raw material for the LaTeX compiler. The bitmaps are
+  decompressed into a file with the same name, excluding the ‘.gz’
+  extension.
+  - Name: imggz2img
+  - Use external converter: zcat
+  - Input format: XXX.gz
+  - Output format: XXX
+- Diagram Editor (dia) to Portable Document Format (pdf)
+  - Name: dia2pdf
+  - Use external converter: dia
+  - Use translator: eps2pdf
+  - Input format: .dia
+  - Output format: .pdf
+- Diagram Editor (dia) to TeX embedded in Portable Document Format
+  (pdf+tex)
+  - Name: dia2pdf+tex
+  - Use external converter: dia
+  - Input format: .dia_tex .diat .dia+tex .diatex .tex.dia +tex.dia
+  - Output formats: .pdf, .pdftex_t
+- Dot Graphviz (dot) to Portable Document Format (pdf)
+  - Name: dot2pdf
+  - Use external converter: dot
+  - Input format: .dot
+  - Output format: .pdf
+- Dot Graphviz (dot) to Portable Network Graphic (png)
+  - Name: dot2png
+  - Use external converter: dot
+  - Input format: .dot
+  - Output format: .png
+- Dot Graphviz (dot) to TeX (tex)
+  - Name: dot2tex
+  - Use external converter: dot
+  - Input format: .dot
+  - Output format: .tex
+- Encapsulated PostScript (eps) to Portable Document Format (pdf)
+  - Name: eps2pdf_epstopdf
+  - Use external converter: epstopdf
+  - Input format: .eps
+  - Output format: .pdf
+- XFig document (fig) to Portable Document Format (pdf)
+  - Name: fig2pdf
+  - Use external converter: fig2dev
+  - Input format: .fig
+  - Output format: .pdf
+- XFig document (fig) to TeX embedded in Portable Document Format
+  (pdf+tex)
+  - Name: fig2pdf+tex
+  - Use external converter: fig2dev
+  - Input format: .figt .fig_tex .figtex .fig+tex .tex.fig +tex.fig
+  - Output formats: .pdf, .pdftex_t
+- Graph eXchange Language (gxl) to Portable Document Format (pdf)
+  - Name: gxl2pdf
+  - Use external converter: gxl2dot
+  - Use translator: dot2pdf
+  - Input format: .gxl
+  - Output format: .pdf
+- Graph eXchange Language (gxl) to Portable Network Graphic (png)
+  - Name: gxl2png
+  - Use external converter: gxl2dot
+  - Use translator: dot2png
+  - Input format: .gxl
+  - Output format: .png
+- Graphics Layout Engine (gle) to Portable Document Format (pdf)
+  - Name: gle2pdf
+  - Use external converter: gle
+  - Input format: .gle
+  - Output format: .pdf
+- Graphics Layout Engine (gle) to Portable Network Graphic (png)
+  - Name: gle2png
+  - Use external converter: gle
+  - Input format: .gle
+  - Output format: .png
+- Java Source Code (java) to TeX Source Code (tex): TeXify variant
+  - Name: java2tex_texify
+  - Use external converter: texifyjava
+  - Input format: .java
+  - Output format: .tex
+- Lisp Script (lisp) to TeX Source Code (tex): TeXify variant
+  - Name: lisp2tex_texify
+  - Use external converter: texifyLisp
+  - Input format: .lisp
+  - Output format: .tex
+- MatLab Script (m) to TeX Source Code (tex): TeXify variant
+  - Name: matlab2tex_texify
+  - Use external converter: texifymatlab
+  - Input format: .m
+  - Output format: .tex
+- ML Script (ml) to TeX Source Code (tex): TeXify variant
+  - Name: ml2tex_texify
+  - Use external converter: texifyml
+  - Input format: .ml
+  - Output format: .tex
+- Perl Script (perl) to TeX Source Code (tex): TeXify variant
+  - Name: perl2tex_texify
+  - Use external converter: texifyperl
+  - Input format: .perl .pl
+  - Output format: .tex
+- Gnuplot (plot) to Portable Document Format (pdf)
+  - Name: plot2pdf
+  - Use external converter: gnuplot
+  - Use translator: eps2pdf
+  - Input format: .plot .gnu
+  - Output format: .pdf
+- Gnuplot (plot) to TeX embedded in Portable Document Format (pdf+tex)
+  - Name: plot2pdf+tex
+  - Use external converter: gnuplot
+  - Use translator: eps2pdf
+  - Input format:
+    .plott .plot_tex .plottex .plot+tex .tex.plot +tex.plot .gnut .gnu_tex .gnutex .gnu+tex .tex.gnu +tex.gnu
+  - Output formats: .pdf, .pdftex_t
+- Python Source Code (py) to TeX Source Code (tex): TeXify variant
+  - Name: python2tex_texify
+  - Use external converter: texifyPython
+  - Input format: .py
+  - Output format: .tex
+- Ruby Source Code (rb) to TeX Source Code (tex): TeXify variant
+  - Name: ruby2tex_texify
+  - Use external converter: texifyRuby
+  - Input format: .rb
+  - Output format: .tex
+- SQL Script (sql) to TeX Source Code (tex): TeXify variant
+  - Name: sql2tex_texify
+  - Use external converter: texifySQL
+  - Input format: .sql
+  - Output format: .tex
+- Scalable Vector Graphic (svg) to Portable Document Format (pdf):
+  Inkscape variant
+  - Name: svg2pdf_inkscape
+  - Use external converter: inkscape
+  - Input format: .svg
+  - Output format: .pdf
+- Scalable Vector Graphic (svg) to TeX embedded in Portable Document
+  Format (pdf+tex)
+  - Name: svg2pdf+tex_inkscape
+  - Use external converter: inkscape
+  - Input format: .svgt .svg_t .svgtex .svg+tex .tex.svg +tex.svg
+  - Output formats: .pdf, .pdftex_t
+- Scalable Vector Graphic (svg) to Portable Network Graphic (png):
+  Inkscape variant
+  - Name: svg2png_inkscape
+  - Use external converter: inkscape
+  - Input format: .svg
+  - Output format: .png
+- Scalable Vector Graphic with layers (svg) to Beamer Overlays
+  - Name: svg2pdf+layers_inkscape
+  - Use external converter: inkscape
+  - Input format:
+    .svgl .svg_l .svglayers .svg+layers .layers.svg +layers.svg
+  - Output formats: .pdf, .pdftex_t
+- Scalable Vector Graphic with layers (svg) to TeX embedded in Beamer
+  Overlays
+  - Name: svg2pdf+layers+tex_inkscape
+  - Use external converter: inkscape
+  - Input format:
+    .svglt .svg_lt .svglayerstex .svgtexlayers .svg+layers+tex .svg+tex+layers .layers.tex.svg .tex.layers.svg +layers+tex.svg +tex+layers.svg
+  - Output formats: .pdf, .pdftex_t
+- PGF/TikZ (tikz) to Portable Document Format (pdf)
+  - Name: tikz2pdf
+  - Use external converter: pdflatex
+  - Input format: .tikz
+  - Output format: .pdf
+- Gimp (xcf) to Portable Document Format (pdf)
+  - Name: xcf2pdf
+  - Use external converter: convert
+  - Input format: .xcf
+  - Output format: .pdf
+- Gimp (xcf) to Portable Network Graphic (png)
+  - Name: xcf2png
+  - Use external converter: convert
+  - Input format: .xcf
+  - Output format: .png
+- UML Metadata Interchange (xmi) to Portable Document Format (pdf):
+  Umbrello variant
+  - Name: xmi2pdf_umbrello
+  - Use external converter: umbrello
+  - Use translator: eps2pdf
+  - Input format: .xmi
+  - Output format: .pdf
+- Visio Binary Draw (vsd) to Portable Document Format (pdf)
+  - Name: vsd2pdf
+  - Use external converter: inkscape
+  - Input format: .vsd .vdx .vsdx
+  - Output format: .pdf
 
 ANIMATED FIGURES IN AUTOLATEX
 
@@ -1027,22 +1027,22 @@ Location of the Configuration Files
 
 AutoLaTeX configuration files can be located in several places:
 
--   System Configuration (for all users): In the directory where
-    AutoLaTeX is installed (typically
-    /usr/lib/python3/dist-packages/autolatex2 on Unix systems).
--   User Configuration: Two cases apply: either the configuration
-    directory ($HOME/.autolatex on Unix or
-    C:\Documents and Settings\<user>\Local Settings\Application Data\autolatex
-    on Windows) exists, or it does not.
-    In the first case, the configuration file is stored in the directory
-    and named autolatex.conf.
-    In the second case, the configuration file is in the user directory
-    and named $HOME/.autolatex on Unix, or
-    C:\Documents and Settings\<user>\Local Settings\Application Data\autolatex.conf
-    on Windows.
--   Project Configuration: The configuration file is in the same
-    directory as the main TeX file of the document. It is named
-    .autolatex_project.cfg on Unix and autolatex_project.cfg on Windows.
+- System Configuration (for all users): In the directory where AutoLaTeX
+  is installed (typically /usr/lib/python3/dist-packages/autolatex2 on
+  Unix systems).
+- User Configuration: Two cases apply: either the configuration
+  directory ($HOME/.autolatex on Unix or
+  C:\Documents and Settings\<user>\Local Settings\Application Data\autolatex
+  on Windows) exists, or it does not.
+  In the first case, the configuration file is stored in the directory
+  and named autolatex.conf.
+  In the second case, the configuration file is in the user directory
+  and named $HOME/.autolatex on Unix, or
+  C:\Documents and Settings\<user>\Local Settings\Application Data\autolatex.conf
+  on Windows.
+- Project Configuration: The configuration file is in the same directory
+  as the main TeX file of the document. It is named
+  .autolatex_project.cfg on Unix and autolatex_project.cfg on Windows.
 
 Syntax of the Configuration Files
 
@@ -1063,119 +1063,116 @@ be translator configurations.
 This section configures the generation process used by AutoLaTeX.
 Recognized directives:
 
--   biber_cmd: Specifies the Biber tool command line. Accepted value:
-    any command line.
--   biber_flags: Specifies options to pass to the Biber tool. Accepted
-    value: any command line.
--   bibtex_cmd: Specifies the BibTeX tool command line. Accepted value:
-    any command line.
--   bibtex_flags: Specifies options to pass to the BibTeX tool. Accepted
-    value: any command line.
--   dvi2ps_cmd: Specifies the dvips tool command line. Accepted value:
-    any command line.
--   dvi2ps_flags: Specifies options to pass to the dvips tool. Accepted
-    value: any command line.
--   generate images: Indicates whether AutoLaTeX automatically generates
-    figures. Accepted values: yes or no.
--   generation type: Indicates the type of generation. Accepted values:
-    -   pdf – generate a PDF document
-    -   dvi – generate a DVI or XDV document
-    -   ps – generate a PS document
--   image directory: Specifies directories where AutoLaTeX finds
-    pictures to be processed by translators. Paths are separated by the
-    path-separator character (‘:’ on Unix, ‘;’ on Windows).
--   include extra macros: Specifies if the definition of extra TeX
-    macros (not from TeX or LaTeX standards) must be included and
-    supported by AutoLaTeX.
--   latex_cmd: Specifies the LaTeX tool command line. Accepted value:
-    any command line.
--   latex_flags: Specifies options to pass to the LaTeX tool. Accepted
-    value: any command line.
--   main file: Specifies the basename of the main TeX file to compile.
-    This option is only available in the project’s configuration file.
-    See the section on extra macros for the details of the supported
-    macros.
--   makeglossaries_cmd: Specifies the MakeGlossaries tool command line.
-    Accepted value: any command line.
--   makeglossaries_flags: Specifies options to pass to the
-    MakeGlossaries tool. Accepted value: any command line.
--   makeindex style: Specifies the style to be used by MakeIndex. This
-    is a comma-separated list of values in order of preference. Values
-    include:
-    -   <filename> – if a filename is specified, AutoLaTeX assumes it is
-        the .ist file;
+- biber_cmd: Specifies the Biber tool command line. Accepted value: any
+  command line.
+- biber_flags: Specifies options to pass to the Biber tool. Accepted
+  value: any command line.
+- bibtex_cmd: Specifies the BibTeX tool command line. Accepted value:
+  any command line.
+- bibtex_flags: Specifies options to pass to the BibTeX tool. Accepted
+  value: any command line.
+- dvi2ps_cmd: Specifies the dvips tool command line. Accepted value: any
+  command line.
+- dvi2ps_flags: Specifies options to pass to the dvips tool. Accepted
+  value: any command line.
+- generate images: Indicates whether AutoLaTeX automatically generates
+  figures. Accepted values: yes or no.
+- generation type: Indicates the type of generation. Accepted values:
+  - pdf – generate a PDF document
+  - dvi – generate a DVI or XDV document
+  - ps – generate a PS document
+- image directory: Specifies directories where AutoLaTeX finds pictures
+  to be processed by translators. Paths are separated by the
+  path-separator character (‘:’ on Unix, ‘;’ on Windows).
+- include extra macros: Specifies if the definition of extra TeX macros
+  (not from TeX or LaTeX standards) must be included and supported by
+  AutoLaTeX.
+- latex_cmd: Specifies the LaTeX tool command line. Accepted value: any
+  command line.
+- latex_flags: Specifies options to pass to the LaTeX tool. Accepted
+  value: any command line.
+- main file: Specifies the basename of the main TeX file to compile.
+  This option is only available in the project’s configuration file. See
+  the section on extra macros for the details of the supported macros.
+- makeglossaries_cmd: Specifies the MakeGlossaries tool command line.
+  Accepted value: any command line.
+- makeglossaries_flags: Specifies options to pass to the MakeGlossaries
+  tool. Accepted value: any command line.
+- makeindex style: Specifies the style to be used by MakeIndex. This is
+  a comma-separated list of values in order of preference. Values
+  include:
+  - <filename> – if a filename is specified, AutoLaTeX assumes it is the
+    .ist file;
 
-    -   @system – AutoLaTeX uses the system default .ist file (from the
-        AutoLaTeX distribution);
+  - @system – AutoLaTeX uses the system default .ist file (from the
+    AutoLaTeX distribution);
 
-    -   @detect – AutoLaTeX attempts to find a .ist file in the
-        project’s directory. If none is found, no style is passed to
-        MakeIndex;
+  - @detect – AutoLaTeX attempts to find a .ist file in the project’s
+    directory. If none is found, no style is passed to MakeIndex;
 
-    -   @none – AutoLaTeX assumes no .ist file should be passed to
-        MakeIndex;
+  - @none – AutoLaTeX assumes no .ist file should be passed to
+    MakeIndex;
 
-    -   <empty> – AutoLaTeX assumes no .ist file should be passed to
-        MakeIndex.
+  - <empty> – AutoLaTeX assumes no .ist file should be passed to
+    MakeIndex.
 
-        If the list contains multiple values, AutoLaTeX applies the
-        corresponding behaviors in sequence.
--   makeindex_cmd: Specifies the MakeIndex tool command line. Accepted
-    value: any command line.
--   makeindex_flags: Specifies options to pass to the MakeIndex tool.
-    Accepted value: any command line.
--   synctex: Indicates whether the output document should be produced
-    with SyncTeX support.
--   tex compiler: Indicates the TeX compiler to use. Accepted values:
-    -   latex – use latex
-    -   pdflatex – use pdflatex
-    -   xelatex – use xelatex
-    -   lualatex – use lualatex
--   translator include path: Specifies additional directories from which
-    translator scripts can be loaded. This is a list of paths separated
-    by commas or the operating system’s path separator (‘:’ on Unix, ‘;’
-    on Windows). If a path contains a comma, enclose it in quotes.
+    If the list contains multiple values, AutoLaTeX applies the
+    corresponding behaviors in sequence.
+- makeindex_cmd: Specifies the MakeIndex tool command line. Accepted
+  value: any command line.
+- makeindex_flags: Specifies options to pass to the MakeIndex tool.
+  Accepted value: any command line.
+- synctex: Indicates whether the output document should be produced with
+  SyncTeX support.
+- tex compiler: Indicates the TeX compiler to use. Accepted values:
+  - latex – use latex
+  - pdflatex – use pdflatex
+  - xelatex – use xelatex
+  - lualatex – use lualatex
+- translator include path: Specifies additional directories from which
+  translator scripts can be loaded. This is a list of paths separated by
+  commas or the operating system’s path separator (‘:’ on Unix, ‘;’ on
+  Windows). If a path contains a comma, enclose it in quotes.
 
 [Clean] section
 
 This section configures the cleaning features of AutoLaTeX (targets
 clean and cleanall). Recognized directives:
 
--   files to clean: A list of files to remove when the ‘clean’ target is
-    invoked. Shell wildcards are allowed.
--   files to desintegrate: A list of files to remove when the ‘cleanall’
-    target is invoked. Shell wildcards are allowed.
+- files to clean: A list of files to remove when the ‘clean’ target is
+  invoked. Shell wildcards are allowed.
+- files to desintegrate: A list of files to remove when the ‘cleanall’
+  target is invoked. Shell wildcards are allowed.
 
 [Scm] section
 
 This section configures the SCM support of AutoLaTeX (CVS, SVN, or
 others). Recognized directives:
 
--   scm commit: Specifies the command line to use when committing
-    changes.
--   scm update: Specifies the command line to use when updating the
-    local copy.
+- scm commit: Specifies the command line to use when committing changes.
+- scm update: Specifies the command line to use when updating the local
+  copy.
 
 [Viewer] section
 
 This section configures the viewer used by AutoLaTeX. Recognized
 directives:
 
--   view: Indicates whether AutoLaTeX should launch a viewer after LaTeX
-    compilation. Accepted values: yes or no.
--   viewer: The path or command line of the viewer to launch. Accepted
-    value: any command line.
+- view: Indicates whether AutoLaTeX should launch a viewer after LaTeX
+  compilation. Accepted values: yes or no.
+- viewer: The path or command line of the viewer to launch. Accepted
+  value: any command line.
 
 Translator section
 
 A translator section shares the name of the translator it configures.
 Recognized directives:
 
--   files to convert: A list of files to be converted by this
-    translator. Files are separated by the operating system’s path
-    separator (‘:’ on Unix, ‘;’ on Windows).
--   include module: Indicates whether the translator should be loaded by
-    default. Accepted values: yes or no.
+- files to convert: A list of files to be converted by this translator.
+  Files are separated by the operating system’s path separator (‘:’ on
+  Unix, ‘;’ on Windows).
+- include module: Indicates whether the translator should be loaded by
+  default. Accepted values: yes or no.
 
 EXTRA TEX AND LATEX MACROS
 
@@ -1184,75 +1181,71 @@ in AutoLaTeX. These macros are not part of the standard TeX
 distributions. They are usually part of TeX templates provided by the
 authors of AutoLaTeX.
 
--   \animatedfigureslide[options]{title}{path}: See above. Provided by
-    AutoLaTeX.
--   \begin{bibliographysection}\end{bibliographysection}: equivalent to
-    \begin{bibunit}\end{bibunit} with a bibliography slide added at the
-    end of the section with \bibliographyslide. Provided by the
-    TeX-templates from
-    https://github.com/gallandarakhneorg/tex-templates.
--   \bibliographyslide: a Beamer slide with a Bibunits bibliography.
-    Provided by the TeX-templates from
-    https://github.com/gallandarakhneorg/tex-templates.
--   \figureslide[options]{title}{path}: a Beamer slide that contains a
-    single figure. Provided by the TeX-templates from
-    https://github.com/gallandarakhneorg/tex-templates.
--   \includeanimatedfigure[options]{path}: See above. Provided by
-    AutoLaTeX.
--   \includeanimatedfigurewtex[options]{path}: See above. Provided by
-    AutoLaTeX.
--   \includefigurewtex[options]{path}: See above. Provided by AutoLaTeX.
--   \includegraphicswtex[options]{path}: See above. Provided by
-    AutoLaTeX.
--   \libraryslide[options]{picture}{title}{authors}{how published}{isbn}:
-    a Beamer slide that shows a description of a book. Provided by the
-    TeX-templates from
-    https://github.com/gallandarakhneorg/tex-templates.
--   \mfigure[position]{include graphics options}{filename}{caption}{label}[source text]:
-    Include a floating figure with the given arguments. Provided by the
-    tex-upmethodology from
-    https://github.com/gallandarakhneorg/tex-upmethodology.
--   \mfigure*[position]{include graphics options}{filename}{caption}{label}[source text]:
-    Include a floating figure with the given arguments. Provided by the
-    tex-upmethodology from
-    https://github.com/gallandarakhneorg/tex-upmethodology.
--   \msubfigure{filename}{caption}: Include a subfigure with the given
-    arguments in a floating figure. Provided by the tex-upmethodology
-    from https://github.com/gallandarakhneorg/tex-upmethodology.
--   \msubfigure*{filename}{caption}: Include a subfigure with the given
-    arguments in a floating figure. Provided by the tex-upmethodology
-    from https://github.com/gallandarakhneorg/tex-upmethodology.
--   \mfigurewtex[position]{include graphics options}{filename}{caption}{label}:
-    Include a floating figure embedding TeX macros and with the given
-    arguments. The concept of figure with embedded TeX is based on the
-    AutoLaTeX translators “+tex” as defined above. Provided by the
-    tex-upmethodology from
-    https://github.com/gallandarakhneorg/tex-upmethodology.
--   \mfigurewtex*[position]{include graphics options}{filename}{caption}{label}:
-    Include a floating figure embedding TeX macros and with the given
-    arguments. The concept of figure with embedded TeX is based on the
-    AutoLaTeX translators “+tex” as defined above. Provided by the
-    tex-upmethodology from
-    https://github.com/gallandarakhneorg/tex-upmethodology.
--   \partnerlogo{path}: specification of a logo for an associated
-    partner in Beamer template. Provided by the TeX-templates from
-    https://github.com/gallandarakhneorg/tex-templates.
--   \resolvedfilename: result of the resolution of a picture name. See
-    \resolvepicturename below. Provided by the TeX-templates from
-    https://github.com/gallandarakhneorg/tex-templates.
--   \resolvepicturename{name}: search for a picture with the given
-    basename inside one of the figure’s paths and with one of the
-    supported image filename extensions. The found filename for the
-    picture is stored in the macro \resolvedfilename. Provided by the
-    TeX-templates from
-    https://github.com/gallandarakhneorg/tex-templates.
--   \sidecite{bibtex identifiers}: in a Beamer template, add a note on
-    the side of the slide that is equivalent to
-    \cite{bibtex identifiers}. Provided by the TeX-templates from
-    https://github.com/gallandarakhneorg/tex-templates.
--   \sidenote{text}: in a Beamer template, add a text on the side of the
-    slide. Provided by the TeX-templates from
-    https://github.com/gallandarakhneorg/tex-templates.
+- \animatedfigureslide[options]{title}{path}: See above. Provided by
+  AutoLaTeX.
+- \begin{bibliographysection}\end{bibliographysection}: equivalent to
+  \begin{bibunit}\end{bibunit} with a bibliography slide added at the
+  end of the section with \bibliographyslide. Provided by the
+  TeX-templates from https://github.com/gallandarakhneorg/tex-templates.
+- \bibliographyslide: a Beamer slide with a Bibunits bibliography.
+  Provided by the TeX-templates from
+  https://github.com/gallandarakhneorg/tex-templates.
+- \figureslide[options]{title}{path}: a Beamer slide that contains a
+  single figure. Provided by the TeX-templates from
+  https://github.com/gallandarakhneorg/tex-templates.
+- \includeanimatedfigure[options]{path}: See above. Provided by
+  AutoLaTeX.
+- \includeanimatedfigurewtex[options]{path}: See above. Provided by
+  AutoLaTeX.
+- \includefigurewtex[options]{path}: See above. Provided by AutoLaTeX.
+- \includegraphicswtex[options]{path}: See above. Provided by AutoLaTeX.
+- \libraryslide[options]{picture}{title}{authors}{how published}{isbn}:
+  a Beamer slide that shows a description of a book. Provided by the
+  TeX-templates from https://github.com/gallandarakhneorg/tex-templates.
+- \mfigure[position]{include graphics options}{filename}{caption}{label}[source text]:
+  Include a floating figure with the given arguments. Provided by the
+  tex-upmethodology from
+  https://github.com/gallandarakhneorg/tex-upmethodology.
+- \mfigure*[position]{include graphics options}{filename}{caption}{label}[source text]:
+  Include a floating figure with the given arguments. Provided by the
+  tex-upmethodology from
+  https://github.com/gallandarakhneorg/tex-upmethodology.
+- \msubfigure{filename}{caption}: Include a subfigure with the given
+  arguments in a floating figure. Provided by the tex-upmethodology from
+  https://github.com/gallandarakhneorg/tex-upmethodology.
+- \msubfigure*{filename}{caption}: Include a subfigure with the given
+  arguments in a floating figure. Provided by the tex-upmethodology from
+  https://github.com/gallandarakhneorg/tex-upmethodology.
+- \mfigurewtex[position]{include graphics options}{filename}{caption}{label}:
+  Include a floating figure embedding TeX macros and with the given
+  arguments. The concept of figure with embedded TeX is based on the
+  AutoLaTeX translators “+tex” as defined above. Provided by the
+  tex-upmethodology from
+  https://github.com/gallandarakhneorg/tex-upmethodology.
+- \mfigurewtex*[position]{include graphics options}{filename}{caption}{label}:
+  Include a floating figure embedding TeX macros and with the given
+  arguments. The concept of figure with embedded TeX is based on the
+  AutoLaTeX translators “+tex” as defined above. Provided by the
+  tex-upmethodology from
+  https://github.com/gallandarakhneorg/tex-upmethodology.
+- \partnerlogo{path}: specification of a logo for an associated partner
+  in Beamer template. Provided by the TeX-templates from
+  https://github.com/gallandarakhneorg/tex-templates.
+- \resolvedfilename: result of the resolution of a picture name. See
+  \resolvepicturename below. Provided by the TeX-templates from
+  https://github.com/gallandarakhneorg/tex-templates.
+- \resolvepicturename{name}: search for a picture with the given
+  basename inside one of the figure’s paths and with one of the
+  supported image filename extensions. The found filename for the
+  picture is stored in the macro \resolvedfilename. Provided by the
+  TeX-templates from https://github.com/gallandarakhneorg/tex-templates.
+- \sidecite{bibtex identifiers}: in a Beamer template, add a note on the
+  side of the slide that is equivalent to \cite{bibtex identifiers}.
+  Provided by the TeX-templates from
+  https://github.com/gallandarakhneorg/tex-templates.
+- \sidenote{text}: in a Beamer template, add a text on the side of the
+  slide. Provided by the TeX-templates from
+  https://github.com/gallandarakhneorg/tex-templates.
 
 BUG REPORT AND FEEDBACK
 
@@ -1275,10 +1268,10 @@ and several Python packages, which are installed by the setup.py script.
 
 To use AutoLaTeX, you will require:
 
--   LaTeX. AutoLaTeX was developed using the TeX Live distribution.
--   Python 3.12 or higher.
--   Several Python packages, typically included in your Python
-    distribution.
+- LaTeX. AutoLaTeX was developed using the TeX Live distribution.
+- Python 3.12 or higher.
+- Several Python packages, typically included in your Python
+  distribution.
 
 INSTALLATION
 
@@ -1324,8 +1317,8 @@ included in the file GNU Free Documentation License.txt.
 
 DOCUMENTED VERSION OF AUTOLATEX
 
-This documentation is related to the version 51.2 of AutoLaTeX that was
-generated 2026-09-08.
+This documentation is related to the version 51.3 of AutoLaTeX that was
+generated 2026-10-19.
 
 SEE ALSO
 
